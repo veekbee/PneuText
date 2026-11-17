@@ -10,7 +10,8 @@
   --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
   --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
   /* Width given to one character of the measure. Blank mode uses the same number. */
-  --char: 0.5em;
+  --char: 0.48em;
+  --bar: #b9b2a4;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,6 +23,7 @@
     --edge: #3b3833;
     --accent: #d3a27c;
     --target: #5a4a1c;
+    --bar: #57524a;
   }
 }
 
@@ -114,11 +116,38 @@ a {
 
 /* ---- Navigation -------------------------------------------------------- */
 
+.mode-switch {
+  display: flex;
+  margin-left: auto;
+}
+
+.mode-switch button {
+  padding: 0.2rem 0.7rem;
+  border: 1px solid var(--edge);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+}
+
+.mode-switch button:first-child {
+  border-radius: 4px 0 0 4px;
+}
+
+.mode-switch button:last-child {
+  border-left: 0;
+  border-radius: 0 4px 4px 0;
+}
+
+.mode-switch button[aria-pressed="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
 .page-nav {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-left: auto;
   white-space: nowrap;
 }
 
@@ -202,21 +231,66 @@ a {
   white-space: nowrap;
 }
 
-/* Print is justified: a full line is stretched to the measure. */
-.line.full {
+/* Print is justified: a full line is stretched to the measure. A paragraph's last line
+   is set to the width its length calls for, which is exactly where blank mode draws its
+   bar, so the two modes share one geometry. */
+.line.full,
+.line.last {
   text-align: justify;
   text-align-last: justify;
 }
 
-.line.indent {
-  padding-left: 1.5em;
+.line.last {
+  width: calc(var(--length) * var(--char));
+  max-width: 100%;
 }
 
-.line.synopsis {
-  font-size: 0.86em;
-  height: 1.744em; /* keeps the line pitch of the body text */
-  line-height: 1.744;
+.line.last.indent {
+  width: calc((var(--length) + var(--indent)) * var(--char));
 }
+
+.line.indent {
+  padding-left: calc(var(--indent) * var(--char));
+}
+
+/* Blank mode: the same rows, each an empty bar. The bar is placed by the page-shape
+   rules, so the row itself carries no indent. Bars are solid: no word boundaries. */
+.line.blank {
+  width: auto;
+  padding-left: 0;
+}
+
+.line.last.indent.blank {
+  width: auto;
+}
+
+.bar,
+.bar-highlight {
+  position: absolute;
+  top: 50%;
+  height: 0.62em;
+  transform: translateY(-50%);
+}
+
+.bar {
+  background: var(--bar);
+}
+
+/* Overlapping highlights stack as offset bands within the bar's height. */
+.bar-highlight {
+  --slice: calc(0.62em / max(var(--bands), 1));
+  top: calc(50% - 0.31em + var(--band) * var(--slice));
+  height: var(--slice);
+  transform: none;
+  background: var(--accent);
+}
+
+.furniture.chapter-number .placeholder {
+  width: 1.6em;
+  height: 0.62em;
+  background: var(--bar);
+}
+
 
 .line.is-target {
   background: var(--target);

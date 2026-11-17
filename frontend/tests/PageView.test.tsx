@@ -2,7 +2,7 @@ import { cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { PageView } from "../src/page/PageView";
-import { line } from "./helpers";
+import { line, shapeLine } from "./helpers";
 
 afterEach(cleanup);
 
@@ -17,7 +17,9 @@ function renderPage(targetLine: number | null = null) {
     line("carried over and <b>not markup</b>", { line_no: 4, ends_paragraph: true }),
     line("fifth", { line_no: 5, starts_paragraph: true, ends_paragraph: true }),
   ];
-  return render(<PageView page={45} measure={30} lines={lines} targetLine={targetLine} />);
+  return render(
+    <PageView mode="text" page={45} measure={30} lines={lines} targetLine={targetLine} />,
+  );
 }
 
 describe("PageView", () => {
@@ -86,5 +88,63 @@ describe("PageView", () => {
     const page = getByLabelText("Page 45");
     expect(page.style.getPropertyValue("--measure")).toBe("30");
     expect(container.querySelector(".page-number")?.textContent).toBe("45");
+  });
+});
+
+function renderBlank(targetLine: number | null = null) {
+  const lines = [
+    shapeLine(0, { kind: "chapter_number", line_no: null }),
+    shapeLine(0, { kind: "rule", line_no: null }),
+    shapeLine(40, { line_no: 1, starts_paragraph: true }),
+    shapeLine(25, {
+      line_no: 2,
+      ends_paragraph: true,
+      highlights: [
+        { annotation_id: 7, type_id: 2, start: 0, end: 10 },
+        { annotation_id: 8, type_id: 3, start: 5, end: 25 },
+      ],
+    }),
+  ];
+  return render(<PageView mode="blank" page={45} measure={50} lines={lines} targetLine={targetLine} />);
+}
+
+describe("PageView in blank mode", () => {
+  it("draws the same rows with the same addresses, and no words at all", () => {
+    const { container } = renderBlank();
+    const rows = [...container.querySelectorAll(".line")];
+    expect(rows.map((row) => row.id)).toEqual(["l1", "l2"]);
+    expect(container.querySelector(".page-body")?.textContent).toBe("");
+    expect(container.querySelector("[data-segment-id]")).toBeNull();
+  });
+
+  it("places each bar by the page-shape rules", () => {
+    const { container } = renderBlank();
+    const [first, last] = [...container.querySelectorAll<HTMLElement>(".bar")];
+    expect([first?.style.left, first?.style.width]).toEqual(["6%", "94%"]);
+    expect([last?.style.left, last?.style.width]).toEqual(["0%", "50%"]);
+  });
+
+  it("stacks overlapping highlights as bands on the bar", () => {
+    const { container } = renderBlank();
+    const marks = [...container.querySelectorAll<HTMLElement>(".bar-highlight")];
+    expect(marks.map((mark) => mark.dataset.annotationId)).toEqual(["7", "8"]);
+    expect(marks.map((mark) => mark.style.getPropertyValue("--band"))).toEqual(["0", "1"]);
+    expect(marks.map((mark) => mark.style.getPropertyValue("--bands"))).toEqual(["2", "2"]);
+    expect(marks.map((mark) => [mark.style.left, mark.style.width])).toEqual([
+      ["0%", "20%"],
+      ["10%", "40%"],
+    ]);
+  });
+
+  it("draws the chapter number as a placeholder, not a numeral", () => {
+    const { container } = renderBlank();
+    expect(container.querySelector(".chapter-number")?.textContent).toBe("");
+    expect(container.querySelector(".chapter-number .placeholder")).not.toBeNull();
+  });
+
+  it("marks the target line and says which mode it is in", () => {
+    const { container, getByLabelText } = renderBlank(2);
+    expect([...container.querySelectorAll(".is-target")].map((row) => row.id)).toEqual(["l2"]);
+    expect(getByLabelText("Page 45").dataset.mode).toBe("blank");
   });
 });

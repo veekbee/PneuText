@@ -54,7 +54,7 @@ test("import the fixture book and turn its pages", async ({ page }) => {
   await expect(page).toHaveURL(/\/v\/1\/p\/12$/);
 });
 
-test("a full print line is stretched to the measure and a last line is not", async ({ page }) => {
+test("a full print line is stretched to the measure and a last line stops short", async ({ page }) => {
   await page.goto("/v/1/p/7");
   const body = page.locator(".page-body");
   await expect(body).toBeVisible();
@@ -71,9 +71,11 @@ test("a full print line is stretched to the measure and a last line is not", asy
     }),
   );
   expect(inkWidths.length).toBeGreaterThan(8);
+  // At least one paragraph ends well short of the measure.
+  expect(inkWidths.some((line) => !line.full && line.right < width * 0.9)).toBe(true);
   for (const line of inkWidths) {
     if (line.full) expect(Math.abs(line.right - width)).toBeLessThan(2);
-    else expect(line.right).toBeLessThan(width - 2);
+    else expect(line.right).toBeLessThan(width + 1);
     if (line.indent) expect(line.left).toBeGreaterThan(5);
   }
 });

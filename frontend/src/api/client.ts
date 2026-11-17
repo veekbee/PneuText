@@ -9,6 +9,8 @@ export type Version = Schemas["VersionOut"];
 export type Division = Schemas["DivisionOut"];
 export type PageText = Schemas["PageTextOut"];
 export type TextLine = Schemas["TextLineOut"];
+export type PageShape = Schemas["PageShapeOut"];
+export type ShapeLine = Schemas["ShapeLineOut"];
 export type CorpusImportInput = Schemas["CorpusImportIn"];
 export type CorpusImportPreview = Schemas["CorpusImportPreviewOut"];
 export type CorpusImportResult = Schemas["CorpusImportOut"];
@@ -64,6 +66,8 @@ export const api = {
   getVersion: (versionId: number) => request<Version>(`/api/versions/${versionId}`),
   getPageText: (versionId: number, page: number) =>
     request<PageText>(`/api/versions/${versionId}/pages/${page}/text`),
+  getPageShape: (versionId: number, page: number) =>
+    request<PageShape>(`/api/versions/${versionId}/pages/${page}/shape`),
   previewCorpusImport: (input: CorpusImportInput) =>
     post<CorpusImportPreview>("/api/imports/corpus/preview", input),
   importCorpus: (input: CorpusImportInput) =>

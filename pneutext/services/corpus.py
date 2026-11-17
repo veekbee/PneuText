@@ -8,8 +8,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from pneutext.core import shape
-from pneutext.core.corpus import CorpusSummary, ImportProblem
+from pneutext.core.corpus import TEXT_KINDS, CorpusSummary, ImportProblem
 from pneutext.core.errors import Conflict, InvalidInput, NotFound
+from pneutext.core.shape import ShapeLine
 from pneutext.importers import paged_corpus
 from pneutext.importers.paged_corpus import CorpusFormat
 from pneutext.store import corpus as corpus_store
@@ -56,6 +57,19 @@ class PageText:
     next_page: int | None
     division: DivisionRow | None
     lines: list[LineTextRow]
+
+
+@dataclass(frozen=True)
+class PageShape:
+    """The shape projection of a page: line geometry and highlight positions, no text."""
+
+    version_id: int
+    edit_seq: int
+    page: int
+    prev_page: int | None
+    next_page: int | None
+    division: DivisionRow | None
+    lines: list[ShapeLine]
 
 
 def _validated(request: CorpusImportRequest) -> CorpusImportRequest:
@@ -156,4 +170,35 @@ def get_page_text(library: Library, version_id: int, page: int) -> PageText:
             next_page=next_page,
             division=corpus_store.division_at_page(conn, version.id, version.pagination_id, page),
             lines=lines,
+        )
+
+
+def get_page_shape(library: Library, version_id: int, page: int) -> PageShape:
+    """The shape projection of one page. Reads line geometry only; never segment text."""
+    with db.transaction(library.db_path) as conn:
+        version = _require_version(conn, version_id)
+        rows = corpus_store.page_line_shapes(conn, version.pagination_id, page)
+        if not rows:
+            raise NotFound(f"This text has no page {page}.")
+        prev_page, next_page = corpus_store.neighbouring_pages(conn, version.pagination_id, page)
+        return PageShape(
+            version_id=version.id,
+            edit_seq=version.edit_seq,
+            page=page,
+            prev_page=prev_page,
+            next_page=next_page,
+            division=corpus_store.division_at_page(conn, version.id, version.pagination_id, page),
+            lines=[
+                ShapeLine(
+                    id=row.id,
+                    kind=row.kind,
+                    page=row.page,
+                    line_no=row.line_no,
+                    starts_paragraph=row.starts_paragraph,
+                    ends_paragraph=row.ends_paragraph,
+                    # Furniture is a fixed placeholder: its label's length is not shape.
+                    length=row.length if row.kind in TEXT_KINDS else 0,
+                )
+                for row in rows
+            ],
         )

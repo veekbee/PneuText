@@ -1,0 +1,193 @@
+{
+  "about": "Page-shape cases shared by the Python (export) and TypeScript (app) implementations. Each case lays out its lines at the given measure and must produce exactly `expected`. x0/x1 are fractions of the measure; the indent is 3 characters.",
+  "cases": [
+    {
+      "name": "a line inside a paragraph runs the full measure, whatever its length",
+      "measure": 50,
+      "lines": [
+        {"kind": "paragraph", "line_no": 2, "starts_paragraph": false, "ends_paragraph": false, "length": 41, "highlights": []}
+      ],
+      "expected": [
+        {"kind": "paragraph", "line_no": 2, "x0": 0, "x1": 1, "bands": 0, "highlights": []}
+      ]
+    },
+    {
+      "name": "a paragraph's first line is indented and still ends at the measure",
+      "measure": 50,
+      "lines": [
+        {"kind": "paragraph", "line_no": 1, "starts_paragraph": true, "ends_paragraph": false, "length": 44, "highlights": []}
+      ],
+      "expected": [
+        {"kind": "paragraph", "line_no": 1, "x0": 0.06, "x1": 1, "bands": 0, "highlights": []}
+      ]
+    },
+    {
+      "name": "a paragraph's last line is drawn at length / measure",
+      "measure": 50,
+      "lines": [
+        {"kind": "paragraph", "line_no": 3, "starts_paragraph": false, "ends_paragraph": true, "length": 25, "highlights": []}
+      ],
+      "expected": [
+        {"kind": "paragraph", "line_no": 3, "x0": 0, "x1": 0.5, "bands": 0, "highlights": []}
+      ]
+    },
+    {
+      "name": "a one-line paragraph is indented and as long as its text",
+      "measure": 50,
+      "lines": [
+        {"kind": "paragraph", "line_no": 4, "starts_paragraph": true, "ends_paragraph": true, "length": 25, "highlights": []}
+      ],
+      "expected": [
+        {"kind": "paragraph", "line_no": 4, "x0": 0.06, "x1": 0.56, "bands": 0, "highlights": []}
+      ]
+    },
+    {
+      "name": "a last line longer than the measure stops at the measure",
+      "measure": 50,
+      "lines": [
+        {"kind": "paragraph", "line_no": 5, "starts_paragraph": true, "ends_paragraph": true, "length": 60, "highlights": []}
+      ],
+      "expected": [
+        {"kind": "paragraph", "line_no": 5, "x0": 0.06, "x1": 1, "bands": 0, "highlights": []}
+      ]
+    },
+    {
+      "name": "widths are rounded to four places, half up",
+      "measure": 56,
+      "lines": [
+        {"kind": "paragraph", "line_no": 6, "starts_paragraph": false, "ends_paragraph": true, "length": 37, "highlights": []},
+        {"kind": "paragraph", "line_no": 7, "starts_paragraph": true, "ends_paragraph": true, "length": 7, "highlights": []}
+      ],
+      "expected": [
+        {"kind": "paragraph", "line_no": 6, "x0": 0, "x1": 0.6607, "bands": 0, "highlights": []},
+        {"kind": "paragraph", "line_no": 7, "x0": 0.0536, "x1": 0.1786, "bands": 0, "highlights": []}
+      ]
+    },
+    {
+      "name": "a synopsis line follows the same rules but is never indented",
+      "measure": 50,
+      "lines": [
+        {"kind": "synopsis", "line_no": 1, "starts_paragraph": true, "ends_paragraph": false, "length": 48, "highlights": []},
+        {"kind": "synopsis", "line_no": 2, "starts_paragraph": false, "ends_paragraph": true, "length": 20, "highlights": []}
+      ],
+      "expected": [
+        {"kind": "synopsis", "line_no": 1, "x0": 0, "x1": 1, "bands": 0, "highlights": []},
+        {"kind": "synopsis", "line_no": 2, "x0": 0, "x1": 0.4, "bands": 0, "highlights": []}
+      ]
+    },
+    {
+      "name": "furniture is a fixed placeholder across the measure, with no length of its own",
+      "measure": 50,
+      "lines": [
+        {"kind": "chapter_number", "line_no": null, "starts_paragraph": true, "ends_paragraph": true, "length": 0, "highlights": []},
+        {"kind": "ornament", "line_no": null, "starts_paragraph": true, "ends_paragraph": true, "length": 0, "highlights": []},
+        {"kind": "rule", "line_no": null, "starts_paragraph": true, "ends_paragraph": true, "length": 0, "highlights": []}
+      ],
+      "expected": [
+        {"kind": "chapter_number", "line_no": null, "x0": 0, "x1": 1, "bands": 0, "highlights": []},
+        {"kind": "ornament", "line_no": null, "x0": 0, "x1": 1, "bands": 0, "highlights": []},
+        {"kind": "rule", "line_no": null, "x0": 0, "x1": 1, "bands": 0, "highlights": []}
+      ]
+    },
+    {
+      "name": "a highlight covers start/length to end/length of a full line's bar",
+      "measure": 50,
+      "lines": [
+        {"kind": "paragraph", "line_no": 1, "starts_paragraph": false, "ends_paragraph": false, "length": 40,
+         "highlights": [{"annotation_id": 1, "type_id": 2, "start": 10, "end": 20}]}
+      ],
+      "expected": [
+        {"kind": "paragraph", "line_no": 1, "x0": 0, "x1": 1, "bands": 1,
+         "highlights": [{"annotation_id": 1, "type_id": 2, "x0": 0.25, "x1": 0.5, "band": 0}]}
+      ]
+    },
+    {
+      "name": "on an indented line the highlight is placed within the shortened bar",
+      "measure": 50,
+      "lines": [
+        {"kind": "paragraph", "line_no": 1, "starts_paragraph": true, "ends_paragraph": false, "length": 40,
+         "highlights": [{"annotation_id": 1, "type_id": 2, "start": 10, "end": 20}]}
+      ],
+      "expected": [
+        {"kind": "paragraph", "line_no": 1, "x0": 0.06, "x1": 1, "bands": 1,
+         "highlights": [{"annotation_id": 1, "type_id": 2, "x0": 0.295, "x1": 0.53, "band": 0}]}
+      ]
+    },
+    {
+      "name": "on a last line the highlight is placed within the short bar",
+      "measure": 50,
+      "lines": [
+        {"kind": "paragraph", "line_no": 9, "starts_paragraph": false, "ends_paragraph": true, "length": 25,
+         "highlights": [{"annotation_id": 7, "type_id": 1, "start": 5, "end": 10}]}
+      ],
+      "expected": [
+        {"kind": "paragraph", "line_no": 9, "x0": 0, "x1": 0.5, "bands": 1,
+         "highlights": [{"annotation_id": 7, "type_id": 1, "x0": 0.1, "x1": 0.2, "band": 0}]}
+      ]
+    },
+    {
+      "name": "partly overlapping highlights stack as bands; one that starts where another ends shares its band",
+      "measure": 40,
+      "lines": [
+        {"kind": "paragraph", "line_no": 1, "starts_paragraph": false, "ends_paragraph": false, "length": 40,
+         "highlights": [
+           {"annotation_id": 3, "type_id": 1, "start": 20, "end": 40},
+           {"annotation_id": 2, "type_id": 2, "start": 10, "end": 30},
+           {"annotation_id": 1, "type_id": 1, "start": 0, "end": 20}
+         ]}
+      ],
+      "expected": [
+        {"kind": "paragraph", "line_no": 1, "x0": 0, "x1": 1, "bands": 2,
+         "highlights": [
+           {"annotation_id": 1, "type_id": 1, "x0": 0, "x1": 0.5, "band": 0},
+           {"annotation_id": 2, "type_id": 2, "x0": 0.25, "x1": 0.75, "band": 1},
+           {"annotation_id": 3, "type_id": 1, "x0": 0.5, "x1": 1, "band": 0}
+         ]}
+      ]
+    },
+    {
+      "name": "a nested highlight sits in the next band; the longer one comes first",
+      "measure": 40,
+      "lines": [
+        {"kind": "paragraph", "line_no": 1, "starts_paragraph": false, "ends_paragraph": false, "length": 40,
+         "highlights": [
+           {"annotation_id": 5, "type_id": 1, "start": 10, "end": 20},
+           {"annotation_id": 9, "type_id": 2, "start": 0, "end": 40},
+           {"annotation_id": 4, "type_id": 3, "start": 10, "end": 20}
+         ]}
+      ],
+      "expected": [
+        {"kind": "paragraph", "line_no": 1, "x0": 0, "x1": 1, "bands": 3,
+         "highlights": [
+           {"annotation_id": 9, "type_id": 2, "x0": 0, "x1": 1, "band": 0},
+           {"annotation_id": 4, "type_id": 3, "x0": 0.25, "x1": 0.5, "band": 1},
+           {"annotation_id": 5, "type_id": 1, "x0": 0.25, "x1": 0.5, "band": 2}
+         ]}
+      ]
+    },
+    {
+      "name": "highlight offsets outside the line are clamped to it",
+      "measure": 40,
+      "lines": [
+        {"kind": "paragraph", "line_no": 1, "starts_paragraph": false, "ends_paragraph": false, "length": 20,
+         "highlights": [{"annotation_id": 1, "type_id": 1, "start": -5, "end": 99}]}
+      ],
+      "expected": [
+        {"kind": "paragraph", "line_no": 1, "x0": 0, "x1": 1, "bands": 1,
+         "highlights": [{"annotation_id": 1, "type_id": 1, "x0": 0, "x1": 1, "band": 0}]}
+      ]
+    },
+    {
+      "name": "an empty text and an empty line do not divide by zero",
+      "measure": 0,
+      "lines": [
+        {"kind": "paragraph", "line_no": 1, "starts_paragraph": false, "ends_paragraph": true, "length": 0,
+         "highlights": [{"annotation_id": 1, "type_id": 1, "start": 0, "end": 0}]}
+      ],
+      "expected": [
+        {"kind": "paragraph", "line_no": 1, "x0": 0, "x1": 0, "bands": 1,
+         "highlights": [{"annotation_id": 1, "type_id": 1, "x0": 0, "x1": 0, "band": 0}]}
+      ]
+    }
+  ]
+}

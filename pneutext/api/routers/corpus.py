@@ -12,7 +12,10 @@ from pneutext.api.schemas import (
     CorpusSummaryOut,
     DivisionOut,
     ImportProblemOut,
+    PageShapeOut,
     PageTextOut,
+    ShapeHighlightOut,
+    ShapeLineOut,
     TextLineOut,
     VersionOut,
     VersionSummaryOut,
@@ -91,6 +94,33 @@ def get_page_text(version_id: int, page: int, library: LibraryDep) -> PageTextOu
         next_page=result.next_page,
         division=None if result.division is None else _division(result.division),
         lines=[TextLineOut(**asdict(line.shape), text=line.text) for line in result.lines],
+    )
+
+
+@router.get("/versions/{version_id}/pages/{page}/shape", operation_id="getPageShape")
+def get_page_shape(version_id: int, page: int, library: LibraryDep) -> PageShapeOut:
+    """The shape projection of a page: line lengths and highlight positions, no text."""
+    result = corpus_service.get_page_shape(library, version_id, page)
+    return PageShapeOut(
+        version_id=result.version_id,
+        edit_seq=result.edit_seq,
+        page=result.page,
+        prev_page=result.prev_page,
+        next_page=result.next_page,
+        division=None if result.division is None else _division(result.division),
+        lines=[
+            ShapeLineOut(
+                id=line.id,
+                kind=line.kind,
+                page=line.page,
+                line_no=line.line_no,
+                starts_paragraph=line.starts_paragraph,
+                ends_paragraph=line.ends_paragraph,
+                length=line.length,
+                highlights=[ShapeHighlightOut(**asdict(h)) for h in line.highlights],
+            )
+            for line in result.lines
+        ],
     )
 
 

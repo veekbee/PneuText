@@ -18,11 +18,33 @@ export function useVersion(versionId: number) {
 }
 
 // Page caches are keyed by the version's edit_seq, so nothing outlives an edit to the text.
-export function usePageText(versionId: number, editSeq: number | undefined, page: number) {
+export function usePageText(
+  versionId: number,
+  editSeq: number | undefined,
+  page: number,
+  enabled: boolean,
+) {
   return useQuery({
     queryKey: ["page-text", versionId, editSeq, page],
     queryFn: () => api.getPageText(versionId, page),
-    enabled: editSeq !== undefined,
+    enabled: enabled && editSeq !== undefined,
+    placeholderData: keepPreviousData,
+    staleTime: Infinity,
+    retry: false,
+  });
+}
+
+// The shape projection: all that blank mode asks the server for.
+export function usePageShape(
+  versionId: number,
+  editSeq: number | undefined,
+  page: number,
+  enabled: boolean,
+) {
+  return useQuery({
+    queryKey: ["page-shape", versionId, editSeq, page],
+    queryFn: () => api.getPageShape(versionId, page),
+    enabled: enabled && editSeq !== undefined,
     placeholderData: keepPreviousData,
     staleTime: Infinity,
     retry: false,

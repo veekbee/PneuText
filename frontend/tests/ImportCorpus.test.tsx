@@ -1,9 +1,10 @@
 import { cleanup, fireEvent, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { App } from "../src/App";
-import { mockApi, pageOf, renderWithQuery, setUrl, VERSION } from "./helpers";
+import { forgetPrefs, mockApi, pageOf, renderWithQuery, setUrl, VERSION } from "./helpers";
 
+beforeEach(forgetPrefs);
 afterEach(cleanup);
 
 const SUMMARY = { pages: 3, lines: 40, paragraphs: 6, chapters: 2, first_page: 7, last_page: 9 };

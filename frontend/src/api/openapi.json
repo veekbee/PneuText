@@ -293,6 +293,73 @@
         "title": "LibraryOut",
         "type": "object"
       },
+      "PageShapeOut": {
+        "description": "The shape projection: all that blank mode and publishable exports may see.",
+        "properties": {
+          "division": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DivisionOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "edit_seq": {
+            "title": "Edit Seq",
+            "type": "integer"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/ShapeLineOut"
+            },
+            "title": "Lines",
+            "type": "array"
+          },
+          "next_page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Page"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "prev_page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prev Page"
+          },
+          "version_id": {
+            "title": "Version Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version_id",
+          "edit_seq",
+          "page",
+          "prev_page",
+          "next_page",
+          "division",
+          "lines"
+        ],
+        "title": "PageShapeOut",
+        "type": "object"
+      },
       "PageTextOut": {
         "properties": {
           "division": {
@@ -357,6 +424,102 @@
           "lines"
         ],
         "title": "PageTextOut",
+        "type": "object"
+      },
+      "ShapeHighlightOut": {
+        "description": "Where a note's span crosses a line: offsets within the line, in code points.",
+        "properties": {
+          "annotation_id": {
+            "title": "Annotation Id",
+            "type": "integer"
+          },
+          "end": {
+            "title": "End",
+            "type": "integer"
+          },
+          "start": {
+            "title": "Start",
+            "type": "integer"
+          },
+          "type_id": {
+            "title": "Type Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "annotation_id",
+          "type_id",
+          "start",
+          "end"
+        ],
+        "title": "ShapeHighlightOut",
+        "type": "object"
+      },
+      "ShapeLineOut": {
+        "description": "One print line without its words. This model must never gain a text field.",
+        "properties": {
+          "ends_paragraph": {
+            "title": "Ends Paragraph",
+            "type": "boolean"
+          },
+          "highlights": {
+            "items": {
+              "$ref": "#/components/schemas/ShapeHighlightOut"
+            },
+            "title": "Highlights",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "paragraph",
+              "synopsis",
+              "chapter_number",
+              "ornament",
+              "rule"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "length": {
+            "description": "Length in code points; 0 for page furniture.",
+            "title": "Length",
+            "type": "integer"
+          },
+          "line_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line No"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "starts_paragraph": {
+            "title": "Starts Paragraph",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "page",
+          "line_no",
+          "starts_paragraph",
+          "ends_paragraph",
+          "length",
+          "highlights"
+        ],
+        "title": "ShapeLineOut",
         "type": "object"
       },
       "TextLineOut": {
@@ -820,6 +983,58 @@
           }
         },
         "summary": "Get Version",
+        "tags": [
+          "corpus"
+        ]
+      }
+    },
+    "/api/versions/{version_id}/pages/{page}/shape": {
+      "get": {
+        "description": "The shape projection of a page: line lengths and highlight positions, no text.",
+        "operationId": "getPageShape",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "page",
+            "required": true,
+            "schema": {
+              "title": "Page",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageShapeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Page Shape",
         "tags": [
           "corpus"
         ]

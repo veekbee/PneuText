@@ -92,6 +92,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/versions/{version_id}/pages/{page}/shape": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Page Shape
+         * @description The shape projection of a page: line lengths and highlight positions, no text.
+         */
+        get: operations["getPageShape"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/versions/{version_id}/pages/{page}/text": {
         parameters: {
             query?: never;
@@ -228,6 +248,25 @@ export interface components {
             /** Schema Version */
             schema_version: number;
         };
+        /**
+         * PageShapeOut
+         * @description The shape projection: all that blank mode and publishable exports may see.
+         */
+        PageShapeOut: {
+            division: components["schemas"]["DivisionOut"] | null;
+            /** Edit Seq */
+            edit_seq: number;
+            /** Lines */
+            lines: components["schemas"]["ShapeLineOut"][];
+            /** Next Page */
+            next_page: number | null;
+            /** Page */
+            page: number;
+            /** Prev Page */
+            prev_page: number | null;
+            /** Version Id */
+            version_id: number;
+        };
         /** PageTextOut */
         PageTextOut: {
             division: components["schemas"]["DivisionOut"] | null;
@@ -243,6 +282,48 @@ export interface components {
             prev_page: number | null;
             /** Version Id */
             version_id: number;
+        };
+        /**
+         * ShapeHighlightOut
+         * @description Where a note's span crosses a line: offsets within the line, in code points.
+         */
+        ShapeHighlightOut: {
+            /** Annotation Id */
+            annotation_id: number;
+            /** End */
+            end: number;
+            /** Start */
+            start: number;
+            /** Type Id */
+            type_id: number;
+        };
+        /**
+         * ShapeLineOut
+         * @description One print line without its words. This model must never gain a text field.
+         */
+        ShapeLineOut: {
+            /** Ends Paragraph */
+            ends_paragraph: boolean;
+            /** Highlights */
+            highlights: components["schemas"]["ShapeHighlightOut"][];
+            /** Id */
+            id: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "paragraph" | "synopsis" | "chapter_number" | "ornament" | "rule";
+            /**
+             * Length
+             * @description Length in code points; 0 for page furniture.
+             */
+            length: number;
+            /** Line No */
+            line_no: number | null;
+            /** Page */
+            page: number;
+            /** Starts Paragraph */
+            starts_paragraph: boolean;
         };
         /**
          * TextLineOut
@@ -481,6 +562,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["VersionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    getPageShape: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+                page: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageShapeOut"];
                 };
             };
             /** @description Validation Error */

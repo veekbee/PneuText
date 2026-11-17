@@ -72,6 +72,40 @@ class PageTextOut(BaseModel):
     lines: list[TextLineOut]
 
 
+class ShapeHighlightOut(BaseModel):
+    """Where a note's span crosses a line: offsets within the line, in code points."""
+
+    annotation_id: int
+    type_id: int
+    start: int
+    end: int
+
+
+class ShapeLineOut(BaseModel):
+    """One print line without its words. This model must never gain a text field."""
+
+    id: int
+    kind: SegmentKind
+    page: int
+    line_no: int | None
+    starts_paragraph: bool
+    ends_paragraph: bool
+    length: int = Field(description="Length in code points; 0 for page furniture.")
+    highlights: list[ShapeHighlightOut]
+
+
+class PageShapeOut(BaseModel):
+    """The shape projection: all that blank mode and publishable exports may see."""
+
+    version_id: int
+    edit_seq: int
+    page: int
+    prev_page: int | None
+    next_page: int | None
+    division: DivisionOut | None
+    lines: list[ShapeLineOut]
+
+
 class CorpusImportIn(BaseModel):
     folder: str
     work_code: str

@@ -3,7 +3,8 @@ import { render } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { vi } from "vitest";
 
-import type { PageText, TextLine, Version } from "../src/api/client";
+import type { PageShape, PageText, ShapeLine, TextLine, Version } from "../src/api/client";
+import { resetPrefs } from "../src/lib/prefs";
 
 type Handler = (body: unknown) => { status?: number; body: unknown };
 
@@ -32,6 +33,12 @@ export function renderWithQuery(ui: ReactElement) {
 
 export function setUrl(url: string): void {
   window.history.replaceState(null, "", url);
+}
+
+/** Start a test with no remembered preferences. */
+export function forgetPrefs(): void {
+  window.localStorage.clear();
+  resetPrefs();
 }
 
 let nextId = 1;
@@ -80,5 +87,35 @@ export function pageOf(page: number, words: string): PageText {
     next_page: page < last ? page + 1 : null,
     division: VERSION.divisions[page >= 9 ? 1 : 0] ?? null,
     lines: [line(words, { line_no: 1, starts_paragraph: true, ends_paragraph: true })],
+  };
+}
+
+export function shapeLine(length: number, overrides: Partial<ShapeLine> = {}): ShapeLine {
+  return {
+    id: nextId++,
+    kind: "paragraph",
+    page: 45,
+    line_no: 1,
+    starts_paragraph: false,
+    ends_paragraph: false,
+    length,
+    highlights: [],
+    ...overrides,
+  };
+}
+
+export function shapeOf(page: number): PageShape {
+  const { lines, ...rest } = pageOf(page, "x".repeat(page));
+  return {
+    ...rest,
+    lines: lines.map((item) =>
+      shapeLine(item.length, {
+        id: item.id,
+        page,
+        line_no: item.line_no,
+        starts_paragraph: item.starts_paragraph,
+        ends_paragraph: item.ends_paragraph,
+      }),
+    ),
   };
 }

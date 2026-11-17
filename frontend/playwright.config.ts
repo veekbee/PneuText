@@ -5,6 +5,7 @@ import { defineConfig } from "@playwright/test";
 
 // End-to-end tests run against the real server with a throwaway library.
 // Run `npm run e2e`, which builds the front end first.
+// The spec files share that library and run in name order: 01 expects it empty.
 const PORT = 8791;
 const library = join(tmpdir(), "pneutext-e2e-library");
 

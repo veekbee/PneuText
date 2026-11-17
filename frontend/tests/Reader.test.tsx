@@ -1,9 +1,10 @@
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { App } from "../src/App";
-import { mockApi, pageOf, renderWithQuery, setUrl, VERSION } from "./helpers";
+import { forgetPrefs, mockApi, pageOf, renderWithQuery, setUrl, shapeOf, VERSION } from "./helpers";
 
+beforeEach(forgetPrefs);
 afterEach(cleanup);
 
 function mockBook() {
@@ -12,6 +13,8 @@ function mockBook() {
     "GET /api/versions/1/pages/7/text": () => ({ body: pageOf(7, "seventh page words") }),
     "GET /api/versions/1/pages/8/text": () => ({ body: pageOf(8, "eighth page words") }),
     "GET /api/versions/1/pages/9/text": () => ({ body: pageOf(9, "ninth page words") }),
+    "GET /api/versions/1/pages/7/shape": () => ({ body: shapeOf(7) }),
+    "GET /api/versions/1/pages/8/shape": () => ({ body: shapeOf(8) }),
     "GET /api/versions/1/pages/99/text": () => ({
       status: 404,
       body: { detail: "This text has no page 99." },
@@ -114,5 +117,53 @@ describe("Reader", () => {
     renderWithQuery(<App />);
     const alert = await screen.findByRole("alert");
     expect(alert.textContent).toContain("There is no text with id 5");
+  });
+});
+
+function requested(fetchMock: ReturnType<typeof mockBook>): string[] {
+  return fetchMock.mock.calls.map(([input]) => String(input));
+}
+
+describe("Reader in blank mode", () => {
+  it("switches to blank mode with one control and shows no words", async () => {
+    mockBook();
+    setUrl("/v/1/p/7");
+    renderWithQuery(<App />);
+    await screen.findByText("seventh page words");
+    fireEvent.click(screen.getByRole("button", { name: "Blank" }));
+    await waitFor(() => expect(screen.getByLabelText("Page 7").dataset.mode).toBe("blank"));
+    expect(screen.queryByText("seventh page words")).toBeNull();
+    expect(screen.getByRole("button", { name: "Blank" }).getAttribute("aria-pressed")).toBe("true");
+    expect(document.querySelectorAll(".bar").length).toBe(1);
+  });
+
+  it("requests only the shape projection while in blank mode", async () => {
+    window.localStorage.setItem("pneutext.prefs", JSON.stringify({ mode: "blank" }));
+    const fetchMock = mockBook();
+    setUrl("/v/1/p/7");
+    renderWithQuery(<App />);
+    await waitFor(() => expect(screen.getByLabelText("Page 7").dataset.mode).toBe("blank"));
+    fireEvent.keyDown(window, { key: "ArrowRight" });
+    await waitFor(() => expect(screen.getByLabelText("Page 8").dataset.mode).toBe("blank"));
+    const urls = requested(fetchMock);
+    expect(urls).toContain("/api/versions/1/pages/8/shape");
+    expect(urls.filter((url) => url.endsWith("/text"))).toEqual([]);
+  });
+
+  it("toggles with the b key and remembers the mode", async () => {
+    mockBook();
+    setUrl("/v/1/p/7");
+    const first = renderWithQuery(<App />);
+    await screen.findByText("seventh page words");
+    fireEvent.keyDown(window, { key: "b" });
+    await waitFor(() => expect(screen.getByLabelText("Page 7").dataset.mode).toBe("blank"));
+    expect(JSON.parse(window.localStorage.getItem("pneutext.prefs") ?? "{}")).toEqual({
+      mode: "blank",
+    });
+    first.unmount();
+    renderWithQuery(<App />);
+    await waitFor(() => expect(screen.getByLabelText("Page 7").dataset.mode).toBe("blank"));
+    fireEvent.keyDown(window, { key: "b" });
+    expect(await screen.findByText("seventh page words")).toBeTruthy();
   });
 });

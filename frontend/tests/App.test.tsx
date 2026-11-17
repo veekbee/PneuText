@@ -1,11 +1,12 @@
 import { cleanup, fireEvent, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { App } from "../src/App";
-import { mockApi, renderWithQuery, setUrl, VERSION } from "./helpers";
+import { forgetPrefs, mockApi, renderWithQuery, setUrl, VERSION } from "./helpers";
 
 const LIBRARY = { app_version: "0.1.0", schema_version: 2, created_at: "2026-01-01T00:00:00Z" };
 
+beforeEach(forgetPrefs);
 afterEach(cleanup);
 
 describe("Library home", () => {

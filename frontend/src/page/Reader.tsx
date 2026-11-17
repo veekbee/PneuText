@@ -1,7 +1,8 @@
 import { type FormEvent, useEffect, useRef, useState } from "react";
 
 import type { Division, Version } from "../api/client";
-import { usePageText, useVersion } from "../api/queries";
+import { usePageShape, usePageText, useVersion } from "../api/queries";
+import { type Mode, setPrefs, usePrefs } from "../lib/prefs";
 import { pagePath } from "../lib/route";
 import { Link, navigate } from "../router";
 import { PageView } from "./PageView";
@@ -45,13 +46,35 @@ function Chapters({
   );
 }
 
+function ModeSwitch({ mode }: { mode: Mode }) {
+  return (
+    <div className="mode-switch" role="group" aria-label="Reading mode">
+      {(["text", "blank"] as const).map((option) => (
+        <button
+          key={option}
+          type="button"
+          aria-pressed={mode === option}
+          title={option === "text" ? "Show the words (b)" : "Show the page's shape only (b)"}
+          onClick={() => setPrefs({ mode: option })}
+        >
+          {option === "text" ? "Text" : "Blank"}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function Reader({ versionId, page, line }: ReaderProps) {
+  const { mode } = usePrefs();
   const version = useVersion(versionId);
-  const pageText = usePageText(versionId, version.data?.edit_seq, page);
+  // Each mode asks only for its own projection: blank mode never requests the text.
+  const pageText = usePageText(versionId, version.data?.edit_seq, page, mode === "text");
+  const pageShape = usePageShape(versionId, version.data?.edit_seq, page, mode === "blank");
+  const active = mode === "text" ? pageText : pageShape;
   const goToRef = useRef<HTMLInputElement>(null);
   const [goTo, setGoTo] = useState("");
 
-  const shown = pageText.data;
+  const shown = active.data;
   // Neighbours come from the version's page list, not from the page being loaded, so
   // turning pages quickly never waits on the network.
   const pages = version.data?.pages ?? [];
@@ -67,11 +90,13 @@ export function Reader({ versionId, page, line }: ReaderProps) {
       else if (event.key === "g") {
         event.preventDefault();
         goToRef.current?.focus();
+      } else if (event.key === "b") {
+        setPrefs({ mode: mode === "text" ? "blank" : "text" });
       }
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [versionId, prev, next]);
+  }, [versionId, prev, next, mode]);
 
   useEffect(() => {
     if (line === null || shown?.page !== page) return;
@@ -120,6 +145,7 @@ export function Reader({ versionId, page, line }: ReaderProps) {
             )}
           </span>
         )}
+        <ModeSwitch mode={mode} />
         <nav className="page-nav" aria-label="Pages">
           {prev === null ? (
             <span className="nav-button is-disabled" aria-disabled="true">
@@ -164,21 +190,30 @@ export function Reader({ versionId, page, line }: ReaderProps) {
           )}
         </aside>
         <main className="stage">
-          {pageText.isError ? (
+          {active.isError ? (
             <div role="alert" className="notice">
-              <p>{pageText.error.message}</p>
+              <p>{active.error.message}</p>
               {version.data?.first_page != null && (
                 <Link to={pagePath(versionId, version.data.first_page)}>
                   Go to the first page
                 </Link>
               )}
             </div>
-          ) : shown && version.data ? (
+          ) : version.data && mode === "text" && pageText.data ? (
             <PageView
-              page={shown.page}
+              mode="text"
+              page={pageText.data.page}
               measure={version.data.measure}
-              lines={shown.lines}
-              targetLine={shown.page === page ? line : null}
+              lines={pageText.data.lines}
+              targetLine={pageText.data.page === page ? line : null}
+            />
+          ) : version.data && mode === "blank" && pageShape.data ? (
+            <PageView
+              mode="blank"
+              page={pageShape.data.page}
+              measure={version.data.measure}
+              lines={pageShape.data.lines}
+              targetLine={pageShape.data.page === page ? line : null}
             />
           ) : (
             <p className="quiet">Opening the page…</p>
