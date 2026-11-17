@@ -1,0 +1,15 @@
+# The design brief is kept locally and is not published.
+claude/
+
+# Python
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+
+# Front end
+node_modules/
+*.tsbuildinfo
+pneutext/web/dist/
+
+.DS_Store
