@@ -3,13 +3,14 @@ import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } fro
 
 import {
   api,
-  type Division,
+  type MentionInput,
   type NoteUpdateInput,
   type ShapeLine,
   type TextLine,
-  type Version,
 } from "../api/client";
 import {
+  useCategories,
+  useChange,
   useCreateNote,
   useCreatePassageLink,
   useDeleteNote,
@@ -23,6 +24,7 @@ import {
   useUpdateNote,
   useVersion,
 } from "../api/queries";
+import { TagEntityForm } from "../entities/TagEntityForm";
 import { isVisible, type NoteFilter } from "../lib/filters";
 import { cancelLink, startLink, useLinkInProgress } from "../lib/linkTray";
 import { type Mode, setPrefs, usePrefs } from "../lib/prefs";
@@ -40,6 +42,7 @@ import { NoteFilters } from "../notes/NoteFilters";
 import { NotesPanel } from "../notes/NotesPanel";
 import { Link, navigate } from "../router";
 import { SearchBox } from "../search/SearchBox";
+import { Sidebar } from "../shell/Sidebar";
 import { PageView } from "./PageView";
 import { SelectionPopover } from "./SelectionPopover";
 
@@ -69,26 +72,6 @@ function isTyping(target: EventTarget | null): boolean {
   );
 }
 
-function Chapters({ version, current }: { version: Version; current: Division | null }) {
-  const chapters = version.divisions.filter((division) => division.page !== null);
-  if (chapters.length === 0) return <p className="quiet">This text has no chapters.</p>;
-  return (
-    <ol className="chapter-list">
-      {chapters.map((division) => (
-        <li key={division.id}>
-          <Link
-            to={pagePath(version.id, division.page as number)}
-            aria-current={current?.id === division.id ? "true" : undefined}
-          >
-            <span className="chapter-label">{division.label}</span>
-            <span className="chapter-page">p. {division.page}</span>
-          </Link>
-        </li>
-      ))}
-    </ol>
-  );
-}
-
 function ModeSwitch({ mode }: { mode: Mode }) {
   return (
     <div className="segmented mode-switch" role="group" aria-label="Reading mode">
@@ -108,7 +91,7 @@ function ModeSwitch({ mode }: { mode: Mode }) {
 }
 
 export function Reader({ versionId, page, line }: ReaderProps) {
-  const { mode, level, hiddenTypes } = usePrefs();
+  const { mode, level, hiddenTypes, showMentions } = usePrefs();
   const queryClient = useQueryClient();
   const version = useVersion(versionId);
   const editSeq = version.data?.edit_seq;
@@ -123,6 +106,8 @@ export function Reader({ versionId, page, line }: ReaderProps) {
   const createNote = useCreateNote(versionId);
   const updateNote = useUpdateNote(versionId);
   const deleteNote = useDeleteNote(versionId);
+  const categories = useCategories();
+  const createMention = useChange((input: MentionInput) => api.createMention(versionId, input));
   const createLink = useCreatePassageLink(versionId);
   const deleteLink = useDeletePassageLink(versionId);
   // A link in progress is held outside this page, so it survives turning pages.
@@ -146,6 +131,9 @@ export function Reader({ versionId, page, line }: ReaderProps) {
   const [scrollTo, setScrollTo] = useState<{ note: number; tick: number } | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [lastType, setLastType] = useState<number | null>(null);
+  /** Whether the selection is being tagged as an entity, and the category used last. */
+  const [tagging, setTagging] = useState(false);
+  const [lastCategory, setLastCategory] = useState<number | null>(null);
 
   const shown = active.data;
   // Neighbours come from the version's page list, not from the page being loaded, so
@@ -159,6 +147,10 @@ export function Reader({ versionId, page, line }: ReaderProps) {
   const typeColors = useMemo(
     () => Object.fromEntries(types.map((type) => [type.id, type.color])),
     [types],
+  );
+  const categoryColors = useMemo(
+    () => Object.fromEntries((categories.data ?? []).map((item) => [item.id, item.color])),
+    [categories.data],
   );
   const defaultType = lastType ?? types[0]?.id ?? null;
 
@@ -188,8 +180,10 @@ export function Reader({ versionId, page, line }: ReaderProps) {
         highlights: item.highlights.filter((mark) =>
           isVisible({ ...mark, status: statusOf.get(mark.annotation_id) }, filter),
         ),
+        // The underline on entity mentions can be switched off.
+        mentions: showMentions ? item.mentions : [],
       })),
-    [filter, statusOf],
+    [filter, statusOf, showMentions],
   );
   const textLines = useMemo(
     () => (pageText.data ? filterLines(pageText.data.lines) : []),
@@ -204,6 +198,7 @@ export function Reader({ versionId, page, line }: ReaderProps) {
   const clearSelection = useCallback(() => {
     window.getSelection()?.removeAllRanges();
     setSelected(null);
+    setTagging(false);
   }, []);
 
   /** The lines of every page from one to another, for a passage that crosses pages. */
@@ -363,6 +358,20 @@ export function Reader({ versionId, page, line }: ReaderProps) {
     });
   }
 
+  /** Tag the selection: assign it to an entity, or record it as a time. */
+  function tagSelection(input: Omit<MentionInput, "span">): void {
+    if (selected === null) return;
+    createMention.mutate(
+      { ...input, span: selected.selection.span },
+      {
+        onSuccess: () => {
+          setLastCategory(input.category_id);
+          clearSelection();
+        },
+      },
+    );
+  }
+
   /** Start a passage-to-passage link from the selection, or complete the one in progress. */
   const linkSelection = useCallback(() => {
     if (selected === null) return;
@@ -417,6 +426,10 @@ export function Reader({ versionId, page, line }: ReaderProps) {
       } else if (event.key === "l" && selected) {
         event.preventDefault();
         linkSelection();
+      } else if (event.key === "e" && selected) {
+        event.preventDefault();
+        createMention.reset();
+        setTagging(true);
       } else if (event.key === "b") {
         setPrefs({ mode: mode === "text" ? "blank" : "text" });
       } else if ((event.key === "n" || event.key === "h") && selected && defaultType !== null) {
@@ -426,7 +439,18 @@ export function Reader({ versionId, page, line }: ReaderProps) {
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [versionId, prev, next, mode, selected, defaultType, addNote, clearSelection, linkSelection]);
+  }, [
+    versionId,
+    prev,
+    next,
+    mode,
+    selected,
+    defaultType,
+    addNote,
+    clearSelection,
+    linkSelection,
+    createMention,
+  ]);
 
   useEffect(() => {
     if (line === null || shown?.page !== page) return;
@@ -465,6 +489,7 @@ export function Reader({ versionId, page, line }: ReaderProps) {
   const pageView = {
     measure: version.data?.measure ?? 0,
     typeColors,
+    categoryColors,
     activeNotes: hovered,
     onHoverNotes: setHovered,
     onClickNotes: (notes: number[]) => {
@@ -537,6 +562,14 @@ export function Reader({ versionId, page, line }: ReaderProps) {
           onLevel={(value) => setPrefs({ level: value })}
           onHiddenTypes={(value) => setPrefs({ hiddenTypes: value })}
         />
+        <label className="mention-toggle">
+          <input
+            type="checkbox"
+            checked={showMentions}
+            onChange={(event) => setPrefs({ showMentions: event.target.checked })}
+          />
+          Underline entities
+        </label>
         {linking !== null && (
           <div className="link-tray" role="status" aria-label="Link in progress">
             <span>
@@ -550,10 +583,7 @@ export function Reader({ versionId, page, line }: ReaderProps) {
         )}
       </div>
       <div className="workspace">
-        <aside className="sidebar" aria-label="Chapters">
-          <h2>Chapters</h2>
-          {version.data && <Chapters version={version.data} current={division} />}
-        </aside>
+        <Sidebar version={version.data} currentDivision={division} />
         <main className="stage" ref={stage}>
           {message !== null && (
             <div role="alert" className="notice">
@@ -656,6 +686,24 @@ export function Reader({ versionId, page, line }: ReaderProps) {
           canContinue={next !== null}
           linking={linking !== null}
           onLink={linkSelection}
+          onTagEntity={() => {
+            createMention.reset();
+            setTagging(true);
+          }}
+          tagForm={
+            tagging ? (
+              <TagEntityForm
+                versionId={versionId}
+                words={selected.selection.span.exact.replace(/\s+/g, " ").trim()}
+                categories={categories.data ?? []}
+                defaultCategory={lastCategory}
+                saving={createMention.isPending}
+                error={createMention.error?.message ?? null}
+                onTag={tagSelection}
+                onCancel={() => setTagging(false)}
+              />
+            ) : null
+          }
           onNote={(typeId) => addNote(typeId, true)}
           onHighlight={(typeId) => addNote(typeId, false)}
           onCopied={clearSelection}

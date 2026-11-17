@@ -319,7 +319,9 @@ describe("the reference picker", () => {
     noteOf(41, { body_md: "First words", body: bodyOf("First words") }),
     noteOf(43, { type_id: 1, body_md: "A second note", body: bodyOf("A second note"), start: { page: 7, line_no: 2 } }),
   ];
-  const figures = [{ id: 1, label: "harbor", file: "harbor.png", caption: "The harbor", credit: "", has_file: true }];
+  const figures = [
+    { id: 1, label: "harbor", file: "harbor.png", caption: "The harbor", credit: "", has_file: true, uses: [] },
+  ];
 
   async function openEditor(): Promise<HTMLElement> {
     mockWorld({ notes, figures });

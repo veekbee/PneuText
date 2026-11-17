@@ -27,6 +27,7 @@ class AnchorRow:
     end_segment_id: int
     end_offset: int
     status: str
+    start_position: int = 0  # its first segment's place in reading order
 
 
 @dataclass(frozen=True)
@@ -260,6 +261,7 @@ def _note(conn: sqlite3.Connection, row: sqlite3.Row) -> NoteRow:
             end_segment_id=row["end_segment_id"],
             end_offset=row["end_offset"],
             status=row["anchor_status"],
+            start_position=row["start_position"],
         ),
         tags=[tag["name"] for tag in tags],
     )
@@ -348,3 +350,154 @@ def locate(
         (pagination_id, segment_id, offset),
     ).fetchone()
     return None if row is None else (row["page"], row["line_no"])
+
+
+# ---- Note types as data -----------------------------------------------------------
+
+
+def get_note_type(conn: sqlite3.Connection, type_id: int) -> NoteTypeRow | None:
+    return next((t for t in list_note_types(conn) if t.id == type_id), None)
+
+
+def insert_note_type(conn: sqlite3.Connection, name: str, code: str, color: str, role: str) -> int:
+    top = conn.execute("SELECT COALESCE(MAX(sort), 0) FROM note_type").fetchone()[0]
+    cursor = conn.execute(
+        "INSERT INTO note_type (name, code, color, sort, role) VALUES (?, ?, ?, ?, ?)",
+        (name, code, color, top + 10, role),
+    )
+    assert cursor.lastrowid is not None
+    return cursor.lastrowid
+
+
+def update_note_type(conn: sqlite3.Connection, type_id: int, changes: dict[str, object]) -> None:
+    columns = [name for name in ("name", "code", "color", "role", "sort") if name in changes]
+    if not columns:
+        return
+    assignments = ", ".join(f"{name} = ?" for name in columns)
+    conn.execute(
+        f"UPDATE note_type SET {assignments} WHERE id = ?",
+        (*[changes[name] for name in columns], type_id),
+    )
+
+
+def merge_note_type(conn: sqlite3.Connection, source_id: int, target_id: int) -> None:
+    """Give one type's notes to another and remove it."""
+    conn.execute("UPDATE annotation SET type_id = ? WHERE type_id = ?", (target_id, source_id))
+    conn.execute("DELETE FROM note_type WHERE id = ?", (source_id,))
+
+
+# ---- Review -------------------------------------------------------------------------
+
+
+def list_tags(conn: sqlite3.Connection) -> list[str]:
+    return [row["name"] for row in conn.execute("SELECT name FROM tag ORDER BY LOWER(name)")]
+
+
+def find_notes(
+    conn: sqlite3.Connection,
+    version_id: int,
+    *,
+    within: ReadingRange | None = None,
+    type_id: int | None = None,
+    level: int | None = None,
+    status: str | None = None,
+    tag: str | None = None,
+    body_like: str | None = None,
+) -> list[NoteRow]:
+    """Notes of a version that pass every given filter, in reading order of their spans."""
+    clauses = ["k.version_id = :version"]
+    params: dict[str, object] = {"version": version_id}
+    if within is not None:
+        # A note belongs to the stretch of text its span starts in.
+        clauses.append(
+            "(s1.position, k.start_offset) >= (:start_position, :start_offset)"
+            " AND (s1.position, k.start_offset) < (:end_position, :end_offset)"
+        )
+        params.update(
+            start_position=within.start_position,
+            start_offset=within.start_offset,
+            end_position=within.end_position,
+            end_offset=within.end_offset,
+        )
+    for name, value in (("type_id", type_id), ("level", level), ("status", status)):
+        if value is not None:
+            clauses.append(f"a.{name} = :{name}")
+            params[name] = value
+    if tag is not None:
+        clauses.append(
+            "a.id IN (SELECT j.annotation_id FROM annotation_tag j"
+            " JOIN tag t ON t.id = j.tag_id WHERE t.name = :tag)"
+        )
+        params["tag"] = tag
+    if body_like is not None:
+        clauses.append("a.body_md LIKE :body_like")
+        params["body_like"] = body_like
+    rows = conn.execute(
+        _NOTE_SELECT
+        + " WHERE "
+        + " AND ".join(clauses)
+        + " ORDER BY s1.position, k.start_offset, s2.position DESC, k.end_offset DESC, a.id",
+        params,
+    ).fetchall()
+    return [_note(conn, row) for row in rows]
+
+
+def set_status(conn: sqlite3.Connection, version_id: int, note_ids: list[int], status: str) -> int:
+    """Change the status of several notes of one version at once. Returns how many."""
+    if not note_ids:
+        return 0
+    marks = ",".join("?" * len(note_ids))
+    cursor = conn.execute(
+        f"UPDATE annotation SET status = ?, updated_at = {_NOW} WHERE id IN ({marks})"
+        " AND anchor_id IN (SELECT id FROM anchor WHERE version_id = ?)",
+        (status, *note_ids, version_id),
+    )
+    return cursor.rowcount
+
+
+def orphaned_notes(conn: sqlite3.Connection, version_id: int) -> list[NoteRow]:
+    rows = conn.execute(
+        _NOTE_SELECT + " WHERE k.version_id = ? AND k.status = 'orphaned' ORDER BY a.id",
+        (version_id,),
+    ).fetchall()
+    return [_note(conn, row) for row in rows]
+
+
+def division_range(
+    conn: sqlite3.Connection, version_id: int, division_id: int
+) -> ReadingRange | None:
+    """The stretch of text a division covers, in reading order."""
+    extent = division_extent(conn, version_id, division_id)
+    if extent is None:
+        return None
+    first_id, last_id, last_length = extent
+    rows = {
+        row["id"]: row["position"]
+        for row in conn.execute(
+            "SELECT id, position FROM segment WHERE id IN (?, ?)", (first_id, last_id)
+        )
+    }
+    return ReadingRange(rows[first_id], 0, rows[last_id], last_length + 1)
+
+
+def count_notes_starting_in(conn: sqlite3.Connection, version_id: int, within: ReadingRange) -> int:
+    """How many notes begin in a stretch of text (for a chapter's note count)."""
+    row = conn.execute(
+        """
+        SELECT COUNT(*)
+        FROM annotation a
+        JOIN anchor k ON k.id = a.anchor_id
+        JOIN segment s1 ON s1.id = k.start_segment_id
+        WHERE k.version_id = :version
+          AND (s1.position, k.start_offset) >= (:start_position, :start_offset)
+          AND (s1.position, k.start_offset) < (:end_position, :end_offset)
+        """,
+        {
+            "version": version_id,
+            "start_position": within.start_position,
+            "start_offset": within.start_offset,
+            "end_position": within.end_position,
+            "end_offset": within.end_offset,
+        },
+    ).fetchone()
+    return int(row[0])

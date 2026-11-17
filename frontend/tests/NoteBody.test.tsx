@@ -214,6 +214,30 @@ describe("NoteBody: PneuText's own forms", () => {
     expect(container.querySelector(".gloss i")?.textContent).toBe("camino");
   });
 
+  it("shows the narrative date and elapsed time worked out for the note's place", () => {
+    const { container } = render(
+      <NoteBody
+        env={ENV}
+        body={doc(
+          para(
+            text("It is "),
+            { type: "when", text: "{{when}}", attrs: { value: "3 March 1872", broken: false } },
+            text(", "),
+            { type: "since", text: "{{since:arrival}}", attrs: { label: "arrival", value: "2 days", broken: false } },
+            text(" on; "),
+            { type: "since", text: "{{since:nowhere}}", attrs: { label: "nowhere", broken: true } },
+          ),
+        )}
+      />,
+    );
+    expect(container.textContent).toBe("It is 3 March 1872, 2 days on; {{since:nowhere}}");
+    expect([...container.querySelectorAll(".narrative-time")].map((item) => item.textContent)).toEqual([
+      "3 March 1872",
+      "2 days",
+    ]);
+    expect(container.querySelector(".broken")?.textContent).toBe("{{since:nowhere}}");
+  });
+
   it("sets an editorial remark apart", () => {
     const { container } = render(
       <NoteBody env={ENV} body={doc(para(text("A note.")), { type: "todo", children: [text("check the date")] })} />,

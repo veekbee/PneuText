@@ -8,10 +8,13 @@ from pneutext.api.deps import LibraryDep
 from pneutext.api.schemas import (
     AnchorOut,
     BacklinkOut,
+    MergeIn,
     NoteCreateIn,
     NoteNode,
     NoteOut,
+    NoteTypeIn,
     NoteTypeOut,
+    NoteTypeUpdateIn,
     NoteUpdateIn,
     PlaceOut,
     RenderIn,
@@ -20,6 +23,7 @@ from pneutext.api.schemas import (
 )
 from pneutext.services import notes as notes_service
 from pneutext.services.notes import NewNote, NoteChanges, NoteView, Place, SpanInput
+from pneutext.store.notes import NoteTypeRow
 
 router = APIRouter(prefix="/api", tags=["notes"])
 
@@ -62,10 +66,37 @@ def _note(view: NoteView) -> NoteOut:
 
 @router.get("/note-types", operation_id="listNoteTypes")
 def list_note_types(library: LibraryDep) -> list[NoteTypeOut]:
-    return [
-        NoteTypeOut(id=t.id, name=t.name, code=t.code, color=t.color, sort=t.sort, role=t.role)
-        for t in notes_service.list_note_types(library)
-    ]
+    return [_type(row) for row in notes_service.list_note_types(library)]
+
+
+def _type(row: NoteTypeRow) -> NoteTypeOut:
+    return NoteTypeOut(
+        id=row.id, name=row.name, code=row.code, color=row.color, sort=row.sort, role=row.role
+    )
+
+
+@router.post("/note-types", operation_id="createNoteType", status_code=201)
+def create_note_type(body: NoteTypeIn, library: LibraryDep) -> NoteTypeOut:
+    return _type(
+        notes_service.create_note_type(library, body.name, body.code, body.color, body.role)
+    )
+
+
+@router.patch("/note-types/{type_id}", operation_id="updateNoteType")
+def update_note_type(type_id: int, body: NoteTypeUpdateIn, library: LibraryDep) -> NoteTypeOut:
+    """Rename or recolor a note type, or change its code or role."""
+    return _type(
+        notes_service.update_note_type(
+            library, type_id, body.name, body.code, body.color, body.role
+        )
+    )
+
+
+@router.post("/note-types/{type_id}/merge", operation_id="mergeNoteType", status_code=204)
+def merge_note_type(type_id: int, body: MergeIn, library: LibraryDep) -> Response:
+    """Give this type's notes to another type and remove it."""
+    notes_service.merge_note_type(library, type_id, body.into_id)
+    return Response(status_code=204)
 
 
 @router.get("/versions/{version_id}/pages/{page}/notes", operation_id="listPageNotes")
@@ -93,7 +124,7 @@ def create_note(version_id: int, body: NoteCreateIn, library: LibraryDep) -> Not
 @router.post("/notes/render", operation_id="renderNoteBody")
 def render_note_body(body: RenderIn, library: LibraryDep) -> RenderOut:
     """Parse a note body into its syntax tree, for the editor's live preview."""
-    tree = notes_service.render_body(library, body.body_md, body.version_id)
+    tree = notes_service.render_body(library, body.body_md, body.version_id, body.note_id)
     return RenderOut(body=NoteNode.model_validate(tree))
 
 

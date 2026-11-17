@@ -9,7 +9,17 @@ from fastapi.responses import FileResponse, JSONResponse
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 import pneutext
-from pneutext.api.routers import corpus, figures, legacy, library, links, notes, search
+from pneutext.api.routers import (
+    corpus,
+    entities,
+    figures,
+    legacy,
+    library,
+    links,
+    notes,
+    review,
+    search,
+)
 from pneutext.core.errors import PneuTextError
 from pneutext.store.library import Library
 
@@ -42,6 +52,8 @@ def create_app(library_: Library, web_dist: Path | None = WEB_DIST) -> FastAPI:
     app.include_router(links.router)
     app.include_router(search.router)
     app.include_router(figures.router)
+    app.include_router(entities.router)
+    app.include_router(review.router)
     if web_dist is not None:
         _serve_front_end(app, web_dist)
     return app

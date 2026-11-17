@@ -5,6 +5,9 @@ from __future__ import annotations
 import sqlite3
 from dataclasses import dataclass
 
+from pneutext.core.anchors import Span
+from pneutext.store.notes import ReadingRange
+
 
 @dataclass(frozen=True)
 class CategoryRow:
@@ -115,3 +118,260 @@ def list_mentions(conn: sqlite3.Connection, version_id: int) -> list[MentionRow]
         (version_id,),
     ).fetchall()
     return [MentionRow(**dict(row)) for row in rows]
+
+
+# ---- Categories ---------------------------------------------------------------
+
+
+def get_category(conn: sqlite3.Connection, category_id: int) -> CategoryRow | None:
+    return next((c for c in list_categories(conn) if c.id == category_id), None)
+
+
+def update_category(
+    conn: sqlite3.Connection, category_id: int, name: str | None, color: str | None
+) -> None:
+    if name is not None:
+        conn.execute("UPDATE entity_category SET name = ? WHERE id = ?", (name, category_id))
+    if color is not None:
+        conn.execute("UPDATE entity_category SET color = ? WHERE id = ?", (color, category_id))
+
+
+def merge_category(conn: sqlite3.Connection, source_id: int, target_id: int) -> None:
+    """Fold one category into another; entities of the same name become one entity."""
+    for row in conn.execute(
+        "SELECT id, name FROM entity WHERE category_id = ?", (source_id,)
+    ).fetchall():
+        twin = conn.execute(
+            "SELECT id FROM entity WHERE category_id = ? AND LOWER(name) = LOWER(?)",
+            (target_id, row["name"]),
+        ).fetchone()
+        if twin is None:
+            conn.execute("UPDATE entity SET category_id = ? WHERE id = ?", (target_id, row["id"]))
+        else:
+            conn.execute(
+                "UPDATE mention SET entity_id = ? WHERE entity_id = ?", (twin["id"], row["id"])
+            )
+            conn.execute("DELETE FROM entity WHERE id = ?", (row["id"],))
+    conn.execute("UPDATE mention SET category_id = ? WHERE category_id = ?", (target_id, source_id))
+    conn.execute("DELETE FROM entity_category WHERE id = ?", (source_id,))
+
+
+# ---- Entities -------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class EntityRow:
+    id: int
+    category_id: int
+    name: str
+    value: str | None
+
+
+@dataclass(frozen=True)
+class EntityPlace:
+    entity_id: int
+    mention_id: int
+    page: int | None
+    line_no: int | None
+
+
+def get_entity(conn: sqlite3.Connection, entity_id: int) -> EntityRow | None:
+    row = conn.execute(
+        "SELECT id, category_id, name, value FROM entity WHERE id = ?", (entity_id,)
+    ).fetchone()
+    return None if row is None else EntityRow(**dict(row))
+
+
+def list_entities(
+    conn: sqlite3.Connection, category_id: int | None = None, starting: str | None = None
+) -> list[EntityRow]:
+    rows = conn.execute(
+        """
+        SELECT e.id, e.category_id, e.name, e.value
+        FROM entity e JOIN entity_category c ON c.id = e.category_id
+        WHERE (:category IS NULL OR e.category_id = :category)
+          AND (:starting IS NULL OR LOWER(e.name) LIKE LOWER(:starting) || '%')
+        ORDER BY c.sort, c.id, LOWER(e.name), e.id
+        """,
+        {"category": category_id, "starting": starting},
+    ).fetchall()
+    return [EntityRow(**dict(row)) for row in rows]
+
+
+def entity_places(
+    conn: sqlite3.Connection, version_id: int, pagination_id: int
+) -> list[EntityPlace]:
+    """Where each entity is mentioned in a version, in reading order."""
+    rows = conn.execute(
+        """
+        SELECT m.entity_id, m.id AS mention_id,
+               (SELECT l.page FROM line l
+                 WHERE l.pagination_id = :pagination AND l.segment_id = k.start_segment_id
+                   AND l.start_offset <= k.start_offset
+                 ORDER BY l.start_offset DESC LIMIT 1) AS page,
+               (SELECT l.line_no FROM line l
+                 WHERE l.pagination_id = :pagination AND l.segment_id = k.start_segment_id
+                   AND l.start_offset <= k.start_offset
+                 ORDER BY l.start_offset DESC LIMIT 1) AS line_no
+        FROM mention m
+        JOIN anchor k ON k.id = m.anchor_id
+        JOIN segment s ON s.id = k.start_segment_id
+        WHERE k.version_id = :version AND m.entity_id IS NOT NULL
+        ORDER BY s.position, k.start_offset, m.id
+        """,
+        {"version": version_id, "pagination": pagination_id},
+    ).fetchall()
+    return [EntityPlace(**dict(row)) for row in rows]
+
+
+def update_entity(conn: sqlite3.Connection, entity_id: int, name: str, value: str | None) -> None:
+    conn.execute("UPDATE entity SET name = ?, value = ? WHERE id = ?", (name, value, entity_id))
+
+
+def name_taken(conn: sqlite3.Connection, category_id: int, name: str, except_id: int) -> bool:
+    row = conn.execute(
+        "SELECT 1 FROM entity WHERE category_id = ? AND name = ? AND id != ?",
+        (category_id, name, except_id),
+    ).fetchone()
+    return row is not None
+
+
+def merge_entity(conn: sqlite3.Connection, source_id: int, target_id: int) -> None:
+    conn.execute("UPDATE mention SET entity_id = ? WHERE entity_id = ?", (target_id, source_id))
+    conn.execute("DELETE FROM entity WHERE id = ?", (source_id,))
+
+
+def delete_unused_entities(conn: sqlite3.Connection) -> None:
+    conn.execute(
+        "DELETE FROM entity WHERE id NOT IN"
+        " (SELECT entity_id FROM mention WHERE entity_id IS NOT NULL)"
+    )
+
+
+# ---- Mentions -------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class MentionDetail:
+    id: int
+    anchor_id: int
+    version_id: int
+    category_id: int
+    entity_id: int | None
+
+
+def get_mention(conn: sqlite3.Connection, mention_id: int) -> MentionDetail | None:
+    row = conn.execute(
+        "SELECT m.id, m.anchor_id, k.version_id, m.category_id, m.entity_id"
+        " FROM mention m JOIN anchor k ON k.id = m.anchor_id WHERE m.id = ?",
+        (mention_id,),
+    ).fetchone()
+    return None if row is None else MentionDetail(**dict(row))
+
+
+def delete_mention(conn: sqlite3.Connection, mention_id: int) -> None:
+    """Delete a mention and its anchor (the anchor owns the row)."""
+    conn.execute(
+        "DELETE FROM anchor WHERE id = (SELECT anchor_id FROM mention WHERE id = ?)", (mention_id,)
+    )
+
+
+def mention_spans(conn: sqlite3.Connection, version_id: int, within: ReadingRange) -> list[Span]:
+    """Mentions over a stretch of text, as spans: id = mention, type = category. No text."""
+    rows = conn.execute(
+        """
+        SELECT m.id, m.category_id, s1.position AS start_position, k.start_offset,
+               s2.position AS end_position, k.end_offset
+        FROM mention m
+        JOIN anchor k ON k.id = m.anchor_id
+        JOIN segment s1 ON s1.id = k.start_segment_id
+        JOIN segment s2 ON s2.id = k.end_segment_id
+        WHERE k.version_id = :version AND k.status = 'ok'
+          AND (s1.position, k.start_offset) < (:end_position, :end_offset)
+          AND (s2.position, k.end_offset) > (:start_position, :start_offset)
+        """,
+        {
+            "version": version_id,
+            "start_position": within.start_position,
+            "start_offset": within.start_offset,
+            "end_position": within.end_position,
+            "end_offset": within.end_offset,
+        },
+    ).fetchall()
+    return [
+        Span(
+            annotation_id=row["id"],
+            type_id=row["category_id"],
+            level=1,
+            start_position=row["start_position"],
+            start_offset=row["start_offset"],
+            end_position=row["end_position"],
+            end_offset=row["end_offset"],
+        )
+        for row in rows
+    ]
+
+
+# ---- Time -------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class TimeMentionRow:
+    """A time mention in reading order, with its value if it has one."""
+
+    mention_id: int
+    start_segment_id: int
+    start_offset: int
+    position: int  # its segment's place in reading order
+    kind: str | None
+    at: str | None
+    offset: str | None
+    relative_to_id: int | None
+    label: str | None
+    remark: str
+
+
+def time_mentions(conn: sqlite3.Connection, version_id: int) -> list[TimeMentionRow]:
+    rows = conn.execute(
+        """
+        SELECT m.id AS mention_id, k.start_segment_id, k.start_offset, s.position,
+               t.kind, t.at, t."offset" AS "offset", t.relative_to_id, t.label,
+               COALESCE(t.remark, '') AS remark
+        FROM mention m
+        JOIN entity_category c ON c.id = m.category_id AND c.is_time = 1
+        JOIN anchor k ON k.id = m.anchor_id
+        JOIN segment s ON s.id = k.start_segment_id
+        LEFT JOIN time_point t ON t.mention_id = m.id
+        WHERE k.version_id = ?
+        ORDER BY s.position, k.start_offset, m.id
+        """,
+        (version_id,),
+    ).fetchall()
+    return [TimeMentionRow(**dict(row)) for row in rows]
+
+
+def set_time_point(
+    conn: sqlite3.Connection,
+    mention_id: int,
+    kind: str,
+    at: str | None,
+    offset: str | None,
+    relative_to_id: int | None,
+    label: str | None,
+    remark: str,
+) -> None:
+    conn.execute(
+        """
+        INSERT INTO time_point (mention_id, kind, at, "offset", relative_to_id, label, remark)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT (mention_id) DO UPDATE SET
+            kind = excluded.kind, at = excluded.at, "offset" = excluded."offset",
+            relative_to_id = excluded.relative_to_id, label = excluded.label,
+            remark = excluded.remark
+        """,
+        (mention_id, kind, at, offset, relative_to_id, label, remark),
+    )
+
+
+def clear_time_point(conn: sqlite3.Connection, mention_id: int) -> None:
+    conn.execute("DELETE FROM time_point WHERE mention_id = ?", (mention_id,))

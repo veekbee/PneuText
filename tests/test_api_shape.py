@@ -7,7 +7,13 @@ from typing import Any
 import pytest
 from fastapi.testclient import TestClient
 
-from pneutext.api.schemas import PageShapeOut, ShapeHighlightOut, ShapeLineOut
+from pneutext.api.schemas import (
+    DivisionOut,
+    MentionMarkOut,
+    PageShapeOut,
+    ShapeHighlightOut,
+    ShapeLineOut,
+)
 from pneutext.importers.paged_corpus import parse_pages, read_folder
 from tests.helpers import BOOK
 from tests.test_api_corpus import IMPORT, page_text
@@ -78,7 +84,8 @@ def test_no_shape_response_contains_corpus_text(client: TestClient, version_id: 
         response = client.get(f"/api/versions/{version_id}/pages/{page}/shape")
         body = response.json()
         fields = set(PageShapeOut.model_fields) | set(ShapeLineOut.model_fields)
-        fields |= set(ShapeHighlightOut.model_fields) | {"kind", "label"}
+        fields |= set(ShapeHighlightOut.model_fields) | set(DivisionOut.model_fields)
+        fields |= set(MentionMarkOut.model_fields)
         for value in strings_in(body):
             assert value in allowed or value in fields, f"unexpected string in shape: {value!r}"
         # Belt and braces: no word of four letters or more from the book appears anywhere.

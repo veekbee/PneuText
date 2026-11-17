@@ -1,6 +1,6 @@
 // What can be done with a selection: Note, Highlight, Copy reference, and carrying the
 // selection on to the next page. (Tag entity and Link join in later milestones.)
-import { type CSSProperties, useState } from "react";
+import { type CSSProperties, type ReactNode, useState } from "react";
 
 import type { NoteType } from "../api/client";
 
@@ -14,6 +14,9 @@ interface SelectionPopoverProps {
   /** Whether a link is already in progress, waiting for its second passage. */
   linking: boolean;
   onLink: () => void;
+  /** The form for tagging the selection as an entity, while it is open. */
+  tagForm: ReactNode | null;
+  onTagEntity: () => void;
   onNote: (typeId: number) => void;
   onHighlight: (typeId: number) => void;
   onCopied: () => void;
@@ -48,16 +51,25 @@ export function SelectionPopover(props: SelectionPopoverProps) {
       role="dialog"
       aria-label="Selection"
       style={style}
-      // Keep the page's selection while the popover is used.
-      onMouseDown={(event) => event.preventDefault()}
+      // Keep the page's selection while the popover's buttons are used. Fields must
+      // still take the cursor, so presses on them are left alone.
+      onMouseDown={(event) => {
+        const target = event.target as HTMLElement;
+        if (!target.closest("input, select, textarea, label")) event.preventDefault();
+      }}
     >
-      {choosing === null ? (
+      {props.tagForm !== null ? (
+        props.tagForm
+      ) : choosing === null ? (
         <div className="popover-actions">
           <button type="button" onClick={() => setChoosing("note")} title="New note (n)">
             Note
           </button>
           <button type="button" onClick={() => setChoosing("highlight")} title="Highlight only (h)">
             Highlight
+          </button>
+          <button type="button" onClick={props.onTagEntity} title="Tag as an entity or a time (e)">
+            Tag entity
           </button>
           <button
             type="button"

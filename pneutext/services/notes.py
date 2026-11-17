@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import sqlite3
 from dataclasses import dataclass, field
 
@@ -9,7 +10,7 @@ from pneutext import notes as note_parser
 from pneutext.core import anchors
 from pneutext.core.anchors import AnchorQuote, LineGeometry
 from pneutext.core.corpus import TEXT_KINDS
-from pneutext.core.errors import InvalidInput, NotFound
+from pneutext.core.errors import Conflict, InvalidInput, NotFound
 from pneutext.core.shape import ShapeHighlight
 from pneutext.services import links as links_service
 from pneutext.services.extents import WHOLE_UNIT, chapter_extent, page_extent
@@ -124,7 +125,12 @@ def _view(conn: sqlite3.Connection, note: NoteRow) -> NoteView:
 
     return NoteView(
         note=note,
-        body=links_service.resolve_tree(conn, version, note_parser.parse(note.body_md)),
+        body=links_service.resolve_tree(
+            conn,
+            version,
+            note_parser.parse(note.body_md),
+            (anchor.start_position, anchor.start_offset),
+        ),
         start=place(anchor.start_segment_id, anchor.start_offset),
         # The end is exclusive, so the last character covered is one before it.
         end=place(anchor.end_segment_id, max(anchor.end_offset - 1, 0)),
@@ -144,13 +150,101 @@ def list_note_types(library: Library) -> list[NoteTypeRow]:
         return notes_store.list_note_types(conn)
 
 
-def render_body(library: Library, body_md: str, version_id: int | None) -> note_parser.Node:
-    """Parse a note body for the editor's live preview, resolving its references."""
+def render_body(
+    library: Library, body_md: str, version_id: int | None, note_id: int | None = None
+) -> note_parser.Node:
+    """Parse a note body for the editor's live preview, resolving its references.
+
+    Given the note being edited, the dynamic date forms are worked out for its place.
+    """
     tree = note_parser.parse(body_md)
     if version_id is None:
         return tree
     with db.transaction(library.db_path) as conn:
-        return links_service.resolve_tree(conn, _require_version(conn, version_id), tree)
+        note = None if note_id is None else notes_store.get_note(conn, note_id)
+        at = None if note is None else (note.anchor.start_position, note.anchor.start_offset)
+        return links_service.resolve_tree(conn, _require_version(conn, version_id), tree, at)
+
+
+# ---- Note types are data: the author can add, rename, recolor and merge them ----
+
+ROLES = ("note", "definition", "chapter_title", "chapter_summary")
+_COLOR = re.compile(r"#[0-9a-fA-F]{6}")
+_CODE = re.compile(r"[a-z][a-z0-9]*")
+
+
+def _check_type_fields(
+    conn: sqlite3.Connection,
+    type_id: int | None,
+    name: str | None,
+    code: str | None,
+    color: str | None,
+    role: str | None,
+) -> None:
+    existing = [t for t in notes_store.list_note_types(conn) if t.id != type_id]
+    if name is not None:
+        if not name.strip():
+            raise InvalidInput("Give the note type a name.")
+        if any(t.name.lower() == name.strip().lower() for t in existing):
+            raise Conflict(f"There is already a note type called {name.strip()}.")
+    if code is not None:
+        if not _CODE.fullmatch(code):
+            raise InvalidInput("A type's code is lower-case letters and digits, such as cl.")
+        if any(t.code == code for t in existing):
+            raise Conflict(f"Another note type already uses the code {code}.")
+    if color is not None and not _COLOR.fullmatch(color):
+        raise InvalidInput("A color is written as #rrggbb.")
+    if role is not None and role not in ROLES:
+        raise InvalidInput("A note type is a note, a definition, a chapter title or a summary.")
+
+
+def _require_type(conn: sqlite3.Connection, type_id: int) -> NoteTypeRow:
+    found = notes_store.get_note_type(conn, type_id)
+    if found is None:
+        raise NotFound("That note type no longer exists.")
+    return found
+
+
+def create_note_type(library: Library, name: str, code: str, color: str, role: str) -> NoteTypeRow:
+    with db.transaction(library.db_path) as conn:
+        _check_type_fields(conn, None, name, code, color, role)
+        type_id = notes_store.insert_note_type(conn, name.strip(), code, color, role)
+        return _require_type(conn, type_id)
+
+
+def update_note_type(
+    library: Library,
+    type_id: int,
+    name: str | None = None,
+    code: str | None = None,
+    color: str | None = None,
+    role: str | None = None,
+) -> NoteTypeRow:
+    with db.transaction(library.db_path) as conn:
+        _require_type(conn, type_id)
+        _check_type_fields(conn, type_id, name, code, color, role)
+        changes: dict[str, object] = {
+            key: value
+            for key, value in (
+                ("name", name.strip() if name is not None else None),
+                ("code", code),
+                ("color", color),
+                ("role", role),
+            )
+            if value is not None
+        }
+        notes_store.update_note_type(conn, type_id, changes)
+        return _require_type(conn, type_id)
+
+
+def merge_note_type(library: Library, source_id: int, target_id: int) -> None:
+    """Give one type's notes to another type and remove it."""
+    with db.transaction(library.db_path) as conn:
+        _require_type(conn, source_id)
+        _require_type(conn, target_id)
+        if source_id == target_id:
+            raise InvalidInput("Choose a different note type to merge into.")
+        notes_store.merge_note_type(conn, source_id, target_id)
 
 
 def create_note(library: Library, version_id: int, new: NewNote) -> NoteView:

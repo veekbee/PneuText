@@ -27,6 +27,17 @@ export type PageLinks = Schemas["PageLinksOut"];
 export type PassageLink = Schemas["PassageLinkOut"];
 export type SearchResults = Schemas["SearchOut"];
 export type Figure = Schemas["FigureOut"];
+export type MentionMark = Schemas["MentionMarkOut"];
+export type Category = Schemas["CategoryOut"];
+export type Entity = Schemas["EntityOut"];
+export type MentionInput = Schemas["MentionIn"];
+export type TimeValueInput = Schemas["TimeValueIn"];
+export type ChronologyRow = Schemas["ChronologyRowOut"];
+export type NoteSummary = Schemas["NoteSummaryOut"];
+export type TodoList = Schemas["TodoListOut"];
+export type NoteTypeInput = Schemas["NoteTypeIn"];
+export type NoteTypeUpdate = Schemas["NoteTypeUpdateIn"];
+export type FigureUpdate = Schemas["FigureUpdateIn"];
 export type LegacyImportInput = Schemas["LegacyImportIn"];
 export type LegacyReport = Schemas["LegacyReportOut"];
 export type ReportItem = Schemas["ReportItemOut"];
@@ -104,8 +115,12 @@ export const api = {
   updateNote: (noteId: number, input: NoteUpdateInput) =>
     send<Note>("PATCH", `/api/notes/${noteId}`, input),
   deleteNote: (noteId: number) => request<undefined>(`/api/notes/${noteId}`, { method: "DELETE" }),
-  renderNoteBody: (bodyMd: string, versionId: number | null) =>
-    post<{ body: NoteNode }>("/api/notes/render", { body_md: bodyMd, version_id: versionId }),
+  renderNoteBody: (bodyMd: string, versionId: number | null, noteId: number | null = null) =>
+    post<{ body: NoteNode }>("/api/notes/render", {
+      body_md: bodyMd,
+      version_id: versionId,
+      note_id: noteId,
+    }),
   listPageLinks: (versionId: number, page: number) =>
     request<PageLinks>(`/api/versions/${versionId}/pages/${page}/links`),
   createPassageLink: (versionId: number, source: SpanInput, target: SpanInput) =>
@@ -117,9 +132,79 @@ export const api = {
       `/api/versions/${versionId}/search?q=${encodeURIComponent(query)}&corpus=${corpus}`,
     ),
   listFigures: () => request<Figure[]>("/api/figures"),
+  createFigure: (label: string, caption: string, credit: string) =>
+    post<Figure>("/api/figures", { label, caption, credit }),
+  updateFigure: (figureId: number, changes: FigureUpdate) =>
+    send<Figure>("PATCH", `/api/figures/${figureId}`, changes),
+  deleteFigure: (figureId: number) =>
+    request<undefined>(`/api/figures/${figureId}`, { method: "DELETE" }),
+  uploadFigureImage: (figureId: number, file: Blob) =>
+    request<Figure>(`/api/figures/${figureId}/image`, {
+      method: "PUT",
+      headers: { "content-type": file.type || "application/octet-stream" },
+      body: file,
+    }),
+
+  // Entities and narrative time
+  listCategories: () => request<Category[]>("/api/entity-categories"),
+  createCategory: (name: string) => post<Category>("/api/entity-categories", { name }),
+  updateCategory: (categoryId: number, changes: { name?: string; color?: string }) =>
+    send<Category>("PATCH", `/api/entity-categories/${categoryId}`, changes),
+  mergeCategory: (categoryId: number, intoId: number) =>
+    post<undefined>(`/api/entity-categories/${categoryId}/merge`, { into_id: intoId }),
+  listEntities: (versionId: number, categoryId?: number, starting?: string) => {
+    const params = new URLSearchParams();
+    if (categoryId !== undefined) params.set("category_id", String(categoryId));
+    if (starting) params.set("starting", starting);
+    const query = params.toString();
+    return request<Entity[]>(`/api/versions/${versionId}/entities${query ? `?${query}` : ""}`);
+  },
+  updateEntity: (entityId: number, changes: { name?: string; value?: string }) =>
+    send<undefined>("PATCH", `/api/entities/${entityId}`, changes),
+  mergeEntity: (entityId: number, intoId: number) =>
+    post<undefined>(`/api/entities/${entityId}/merge`, { into_id: intoId }),
+  createMention: (versionId: number, input: MentionInput) =>
+    post<{ id: number }>(`/api/versions/${versionId}/mentions`, input),
+  deleteMention: (mentionId: number) =>
+    request<undefined>(`/api/mentions/${mentionId}`, { method: "DELETE" }),
+  setTime: (mentionId: number, value: TimeValueInput) =>
+    send<undefined>("PUT", `/api/mentions/${mentionId}/time`, value),
+  clearTime: (mentionId: number) =>
+    request<undefined>(`/api/mentions/${mentionId}/time`, { method: "DELETE" }),
+  getChronology: (versionId: number) =>
+    request<ChronologyRow[]>(`/api/versions/${versionId}/chronology`),
+
+  // Review
+  listNotes: (versionId: number, filters: Record<string, string | number | null>) => {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(filters)) {
+      if (value !== null && value !== "") params.set(key, String(value));
+    }
+    const query = params.toString();
+    return request<NoteSummary[]>(`/api/versions/${versionId}/notes${query ? `?${query}` : ""}`);
+  },
+  setNotesStatus: (versionId: number, noteIds: number[], status: "draft" | "ready") =>
+    post<{ changed: number }>(`/api/versions/${versionId}/notes/status`, {
+      note_ids: noteIds,
+      status,
+    }),
+  listTags: () => request<string[]>("/api/tags"),
+  getTodoList: (versionId: number) => request<TodoList>(`/api/versions/${versionId}/todo`),
+
+  // Note types
+  createNoteType: (input: NoteTypeInput) => post<NoteType>("/api/note-types", input),
+  updateNoteType: (typeId: number, changes: NoteTypeUpdate) =>
+    send<NoteType>("PATCH", `/api/note-types/${typeId}`, changes),
+  mergeNoteType: (typeId: number, intoId: number) =>
+    post<undefined>(`/api/note-types/${typeId}/merge`, { into_id: intoId }),
 };
 
 /** Where a figure's image is served from (the local library, never the network). */
 export function figureFileUrl(label: string): string {
   return `/api/figures/${encodeURIComponent(label)}/file`;
+}
+
+/** Mentions and time points as a JSON file, for later map and timeline tools. */
+export function entitiesExportUrl(versionId: number): string {
+  return `/api/versions/${versionId}/entities/export`;
 }

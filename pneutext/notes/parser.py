@@ -14,6 +14,8 @@ Beyond CommonMark, a body may hold PneuText's own forms:
 - ``{{fig:tang}}``: a reference to that figure
 - ``{{gloss:word|meaning}}``: a foreign word with its translation
 - a paragraph starting ``TODO:``: an editorial remark, never exported
+- ``{{when}}``: the narrative date at the note's place in the text
+- ``{{since:expedition-start}}``: the time elapsed there since the time point so labeled
 
 The parser only reads syntax. Whether a reference leads anywhere is decided later, by
 the service that knows the library.
@@ -161,6 +163,11 @@ def _form(content: str) -> Node:
     source = _FORM_OPEN + content + _FORM_CLOSE
     name, colon, rest = content.partition(":")
     name, rest = name.strip(), rest.strip()
+    if not colon and name == "when":
+        # The narrative date at the note's place in the text; worked out when shown.
+        return {"type": "when", "text": source}
+    if colon and name == "since" and rest:
+        return {"type": "since", "attrs": {"label": rest}, "text": source}
     if colon and name == "note" and rest.isdigit():
         return {"type": "note_ref", "attrs": {"id": int(rest)}, "text": source}
     if colon and name == "fig" and rest:

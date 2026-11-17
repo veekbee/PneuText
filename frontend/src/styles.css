@@ -1011,3 +1011,311 @@ textarea {
 .line.is-target {
   animation: flash 1.2s ease-out;
 }
+
+/* ---- Entity mentions --------------------------------------------------- */
+
+.mention {
+  border-bottom: 1.5px solid var(--mention-color, var(--ink-quiet));
+}
+
+.bar-mention {
+  position: absolute;
+  top: calc(50% + 0.42em);
+  height: 1.5px;
+}
+
+.mention-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-left: 1rem;
+  white-space: nowrap;
+}
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.filter-bar .link-tray {
+  flex-basis: 100%;
+}
+
+.tag-form {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 17rem;
+}
+
+.tag-form label,
+.time-fields label {
+  display: grid;
+  gap: 0.15rem;
+  font-size: 0.78rem;
+  color: var(--ink-quiet);
+}
+
+.time-fields {
+  display: grid;
+  gap: 0.4rem;
+}
+
+/* ---- Sidebar views ----------------------------------------------------- */
+
+.sidebar h2:not(:first-child) {
+  margin-top: 1.25rem;
+}
+
+.view-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.view-list a {
+  display: block;
+  padding: 0.25rem 0.4rem;
+  border-radius: 4px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.view-list a[aria-current="page"] {
+  background: var(--paper);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.chapter-count {
+  margin-left: auto;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: var(--edge);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Views ------------------------------------------------------------- */
+
+.view-shell {
+  grid-template-rows: auto 1fr;
+}
+
+.view-workspace {
+  grid-template-columns: 12rem 1fr;
+}
+
+.back-to-text {
+  margin-left: auto;
+}
+
+.view {
+  padding: 1.25rem 1.75rem 3rem;
+  overflow: auto;
+  min-height: 0;
+}
+
+.view > h1 {
+  margin: 0 0 1rem;
+  font: 600 1.4rem var(--serif);
+}
+
+.view h2 {
+  margin: 1.25rem 0 0.4rem;
+  font-size: 1rem;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.data-table th,
+.data-table td {
+  padding: 0.3rem 0.5rem;
+  border-bottom: 1px solid var(--edge);
+  text-align: left;
+  vertical-align: top;
+}
+
+.data-table th {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-quiet);
+}
+
+.inline-edit {
+  width: 100%;
+  padding: 0.15rem 0.3rem;
+  border-color: transparent;
+  background: transparent;
+}
+
+.inline-edit:hover,
+.inline-edit:focus {
+  border-color: var(--edge);
+  background: var(--paper);
+}
+
+.category {
+  margin-bottom: 1.5rem;
+}
+
+.category-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.3rem;
+}
+
+.category-name {
+  width: 12rem;
+  font: 600 1.05rem var(--serif);
+}
+
+input[type="color"] {
+  width: 1.8rem;
+  height: 1.6rem;
+  padding: 0;
+  border: 1px solid var(--edge);
+  background: none;
+}
+
+.places {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.add-row,
+.filters,
+.bulk {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.6rem;
+  margin: 1rem 0;
+}
+
+.add-row label,
+.filters label {
+  display: grid;
+  gap: 0.15rem;
+  font-size: 0.78rem;
+  color: var(--ink-quiet);
+}
+
+.bulk {
+  align-items: center;
+}
+
+.chronology .time-fields {
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+}
+
+.time-form {
+  display: grid;
+  gap: 0.4rem;
+  justify-items: start;
+}
+
+.time-form .time-fields {
+  width: 100%;
+}
+
+.resolved {
+  font-family: var(--serif);
+  white-space: nowrap;
+}
+
+.resolved .quiet {
+  display: block;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  white-space: normal;
+}
+
+.figure-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.figure-card {
+  display: grid;
+  grid-template-columns: 12rem 1fr;
+  gap: 1rem;
+  padding: 0.75rem;
+  border: 1px solid var(--edge);
+  background: var(--paper);
+}
+
+.figure-image {
+  display: grid;
+  gap: 0.4rem;
+  align-content: start;
+}
+
+.figure-image img {
+  max-width: 100%;
+  max-height: 10rem;
+  border: 1px solid var(--edge);
+}
+
+.upload {
+  font-size: 0.8rem;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.upload input {
+  display: block;
+  margin-top: 0.2rem;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  font-size: 0.75rem;
+}
+
+.figure-fields {
+  display: grid;
+  gap: 0.3rem;
+  align-content: start;
+  justify-items: start;
+}
+
+.figure-fields label {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr;
+  align-items: center;
+  width: 100%;
+  font-size: 0.78rem;
+  color: var(--ink-quiet);
+}
+
+.figure-uses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+.badge.unused {
+  border-color: #a33;
+  color: #a33;
+}
+
+.todo-section ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.9rem;
+}

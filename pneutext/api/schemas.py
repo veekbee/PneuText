@@ -40,6 +40,7 @@ class DivisionOut(BaseModel):
     kind: str
     label: str
     page: int | None = Field(description="The page this division opens on.")
+    note_count: int = Field(default=0, description="How many notes begin in it.")
 
 
 class VersionOut(VersionSummaryOut):
@@ -58,6 +59,15 @@ class ShapeHighlightOut(BaseModel):
     end: int
 
 
+class MentionMarkOut(BaseModel):
+    """Where an entity mention crosses a line: offsets within the line, in code points."""
+
+    mention_id: int
+    category_id: int
+    start: int
+    end: int
+
+
 class TextLineOut(BaseModel):
     """One print line with its words. Only the text projection carries this."""
 
@@ -71,6 +81,7 @@ class TextLineOut(BaseModel):
     ends_paragraph: bool
     text: str
     highlights: list[ShapeHighlightOut]
+    mentions: list[MentionMarkOut]
 
 
 class PageTextOut(BaseModel):
@@ -94,6 +105,7 @@ class ShapeLineOut(BaseModel):
     ends_paragraph: bool
     length: int = Field(description="Length in code points; 0 for page furniture.")
     highlights: list[ShapeHighlightOut]
+    mentions: list[MentionMarkOut]
 
 
 class PageShapeOut(BaseModel):
@@ -249,6 +261,9 @@ class RenderIn(BaseModel):
     version_id: int | None = Field(
         default=None, description="The text the note belongs to, so its references resolve."
     )
+    note_id: int | None = Field(
+        default=None, description="The note being edited, so dates are worked out for its place."
+    )
 
 
 class RenderOut(BaseModel):
@@ -357,6 +372,15 @@ class SearchOut(BaseModel):
     notes: list[NoteHitOut]
 
 
+class FigureUseOut(BaseModel):
+    note_id: int
+    type_id: int
+    version_id: int
+    page: int | None
+    line_no: int | None
+    placed: bool = Field(description="Placed in the note, as opposed to referred to.")
+
+
 class FigureOut(BaseModel):
     id: int
     label: str
@@ -364,3 +388,170 @@ class FigureOut(BaseModel):
     caption: str
     credit: str
     has_file: bool
+    uses: list[FigureUseOut] = Field(description="Where the figure is used; empty if unused.")
+
+
+class FigureIn(BaseModel):
+    label: str
+    caption: str = ""
+    credit: str = ""
+
+
+class FigureUpdateIn(BaseModel):
+    label: str | None = None
+    caption: str | None = None
+    credit: str | None = None
+
+
+RoleName = Literal["note", "definition", "chapter_title", "chapter_summary"]
+
+
+class NoteTypeIn(BaseModel):
+    name: str
+    code: str
+    color: str = "#8a8a8a"
+    role: RoleName = "note"
+
+
+class NoteTypeUpdateIn(BaseModel):
+    name: str | None = None
+    code: str | None = None
+    color: str | None = None
+    role: RoleName | None = None
+
+
+class MergeIn(BaseModel):
+    into_id: int = Field(description="The one that remains and takes over everything.")
+
+
+class CategoryOut(BaseModel):
+    id: int
+    name: str
+    color: str
+    sort: int
+    is_time: bool
+
+
+class CategoryIn(BaseModel):
+    name: str
+
+
+class CategoryUpdateIn(BaseModel):
+    name: str | None = None
+    color: str | None = None
+
+
+class EntityPlaceOut(BaseModel):
+    page: int
+    line_no: int | None
+
+
+class EntityOut(BaseModel):
+    id: int
+    category_id: int
+    name: str
+    value: str | None
+    places: list[EntityPlaceOut] = Field(description="Every place it occurs in this text.")
+
+
+class EntityUpdateIn(BaseModel):
+    name: str | None = None
+    value: str | None = Field(default=None, description="A normalized form; empty to clear it.")
+
+
+class TimeValueIn(BaseModel):
+    """A time: an absolute date at any precision, or an offset from another time."""
+
+    kind: Literal["absolute", "offset"]
+    at: str | None = Field(default=None, description="1871, 1871-10, 1871-10-28 or with a time.")
+    offset: str | None = Field(default=None, description="An ISO 8601 duration, such as P5D.")
+    relative_to_label: str | None = Field(
+        default=None, description="The labeled time it counts from; the previous time if empty."
+    )
+    label: str | None = None
+    remark: str = ""
+
+
+class MentionIn(BaseModel):
+    span: SpanIn
+    category_id: int
+    entity_id: int | None = None
+    entity_name: str | None = None
+    value: str | None = None
+    time: TimeValueIn | None = None
+
+
+class SinceOut(BaseModel):
+    label: str
+    iso: str
+    words: str
+
+
+class ChronologyRowOut(BaseModel):
+    """A time point in reading order, with the narrative date it resolves to."""
+
+    mention_id: int
+    page: int | None
+    line_no: int | None
+    kind: Literal["absolute", "offset"] | None = Field(description="Null until a value is given.")
+    at: str | None
+    offset: str | None
+    relative_to_label: str | None
+    label: str | None
+    remark: str
+    date_iso: str | None
+    date_words: str | None
+    elapsed_iso: str | None = Field(description="For a chain with no date: time since it began.")
+    elapsed_words: str | None
+    problem: str | None
+    since: list[SinceOut] = Field(description="Time elapsed since each earlier labeled point.")
+
+
+class NoteSummaryOut(BaseModel):
+    id: int
+    type_id: int
+    scope: Literal["span", "page", "chapter"]
+    level: int
+    status: Literal["draft", "ready"]
+    tags: list[str]
+    page: int | None
+    line_no: int | None
+    excerpt: str
+
+
+class BulkStatusIn(BaseModel):
+    note_ids: list[int]
+    status: Literal["draft", "ready"]
+
+
+class TodoRemarkOut(BaseModel):
+    note: NoteSummaryOut
+    text: str
+
+
+class BrokenReferenceOut(BaseModel):
+    note: NoteSummaryOut
+    form: str
+
+
+class UnvaluedTimeOut(BaseModel):
+    mention_id: int
+    page: int | None
+    line_no: int | None
+
+
+class UnusedFigureOut(BaseModel):
+    id: int
+    label: str
+    caption: str
+
+
+class TodoListOut(BaseModel):
+    """Everything still to be dealt with before the notes can be published."""
+
+    remarks: list[TodoRemarkOut]
+    drafts: list[NoteSummaryOut]
+    broken_references: list[BrokenReferenceOut]
+    orphaned: list[NoteSummaryOut]
+    unused_figures: list[UnusedFigureOut]
+    times_without_value: list[UnvaluedTimeOut]

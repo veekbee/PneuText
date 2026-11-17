@@ -12,6 +12,7 @@ from pneutext.api.schemas import (
     CorpusSummaryOut,
     DivisionOut,
     ImportProblemOut,
+    MentionMarkOut,
     PageShapeOut,
     PageTextOut,
     ShapeHighlightOut,
@@ -78,7 +79,10 @@ def get_version(version_id: int, library: LibraryDep) -> VersionOut:
         **_summary_fields(detail.version),
         measure=detail.measure,
         pages=detail.pages,
-        divisions=[_division(d) for d in detail.divisions],
+        divisions=[
+            DivisionOut(**asdict(d), note_count=detail.note_counts.get(d.id, 0))
+            for d in detail.divisions
+        ],
     )
 
 
@@ -105,8 +109,11 @@ def get_page_text(version_id: int, page: int, library: LibraryDep) -> PageTextOu
                 ends_paragraph=line.shape.ends_paragraph,
                 text=line.text,
                 highlights=[ShapeHighlightOut(**asdict(h)) for h in marks],
+                mentions=[MentionMarkOut(**asdict(m)) for m in tagged],
             )
-            for line, marks in zip(result.lines, result.highlights, strict=True)
+            for line, marks, tagged in zip(
+                result.lines, result.highlights, result.mentions, strict=True
+            )
         ],
     )
 
@@ -132,8 +139,9 @@ def get_page_shape(version_id: int, page: int, library: LibraryDep) -> PageShape
                 ends_paragraph=line.ends_paragraph,
                 length=line.length,
                 highlights=[ShapeHighlightOut(**asdict(h)) for h in line.highlights],
+                mentions=[MentionMarkOut(**asdict(m)) for m in tagged],
             )
-            for line in result.lines
+            for line, tagged in zip(result.lines, result.mentions, strict=True)
         ],
     )
 

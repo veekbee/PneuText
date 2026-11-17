@@ -4,6 +4,104 @@
  */
 
 export interface paths {
+    "/api/entities/{entity_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update Entity
+         * @description Rename an entry or set its normalized value.
+         */
+        patch: operations["updateEntity"];
+        trace?: never;
+    };
+    "/api/entities/{entity_id}/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Merge Entity
+         * @description Give this entry's mentions to another entry and remove it.
+         */
+        post: operations["mergeEntity"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/entity-categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Categories */
+        get: operations["listCategories"];
+        put?: never;
+        /** Create Category */
+        post: operations["createCategory"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/entity-categories/{category_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update Category
+         * @description Rename or recolor a category.
+         */
+        patch: operations["updateCategory"];
+        trace?: never;
+    };
+    "/api/entity-categories/{category_id}/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Merge Category
+         * @description Fold this category into another, with everything in it.
+         */
+        post: operations["mergeCategory"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/figures": {
         parameters: {
             query?: never;
@@ -11,9 +109,54 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List Figures */
+        /**
+         * List Figures
+         * @description Every figure, with where each is used.
+         */
         get: operations["listFigures"];
         put?: never;
+        /** Create Figure */
+        post: operations["createFigure"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/figures/{figure_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Figure */
+        delete: operations["deleteFigure"];
+        options?: never;
+        head?: never;
+        /**
+         * Update Figure
+         * @description Edit a figure's label, caption or credit. A new label is followed in the notes.
+         */
+        patch: operations["updateFigure"];
+        trace?: never;
+    };
+    "/api/figures/{figure_id}/image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Upload Figure Image
+         * @description Store the request body as the figure's image. The content type names its format.
+         */
+        put: operations["uploadFigureImage"];
         post?: never;
         delete?: never;
         options?: never;
@@ -112,6 +255,44 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/mentions/{mention_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Mention */
+        delete: operations["deleteMention"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/mentions/{mention_id}/time": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set Time
+         * @description Give a time mention its value: a date, or an offset from another time.
+         */
+        put: operations["setTime"];
+        post?: never;
+        /** Clear Time */
+        delete: operations["clearTime"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/note-types": {
         parameters: {
             query?: never;
@@ -122,7 +303,48 @@ export interface paths {
         /** List Note Types */
         get: operations["listNoteTypes"];
         put?: never;
+        /** Create Note Type */
+        post: operations["createNoteType"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/note-types/{type_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update Note Type
+         * @description Rename or recolor a note type, or change its code or role.
+         */
+        patch: operations["updateNoteType"];
+        trace?: never;
+    };
+    "/api/note-types/{type_id}/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Merge Note Type
+         * @description Give this type's notes to another type and remove it.
+         */
+        post: operations["mergeNoteType"];
         delete?: never;
         options?: never;
         head?: never;
@@ -168,6 +390,23 @@ export interface paths {
         patch: operations["updateNote"];
         trace?: never;
     };
+    "/api/tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Tags */
+        get: operations["listTags"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/versions": {
         parameters: {
             query?: never;
@@ -194,6 +433,66 @@ export interface paths {
         };
         /** Get Version */
         get: operations["getVersion"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/versions/{version_id}/chronology": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Chronology
+         * @description Every time point in reading order, with its resolved date and elapsed times.
+         */
+        get: operations["getChronology"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/versions/{version_id}/entities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Entities
+         * @description The index: each entity with every place it occurs. `starting` is for type-ahead.
+         */
+        get: operations["listEntities"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/versions/{version_id}/entities/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export Entities
+         * @description Mentions and time points as data, for later map and timeline tools.
+         */
+        get: operations["exportEntities"];
         put?: never;
         post?: never;
         delete?: never;
@@ -259,7 +558,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/versions/{version_id}/notes": {
+    "/api/versions/{version_id}/mentions": {
         parameters: {
             query?: never;
             header?: never;
@@ -268,8 +567,52 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * Create Mention
+         * @description Tag a selection as an entity, or as a time.
+         */
+        post: operations["createMention"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/versions/{version_id}/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Notes
+         * @description Notes filtered by chapter, type, level, status and tag, in reading order.
+         */
+        get: operations["listNotes"];
+        put?: never;
         /** Create Note */
         post: operations["createNote"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/versions/{version_id}/notes/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Set Notes Status
+         * @description Mark several notes draft or ready at once.
+         */
+        post: operations["setNotesStatus"];
         delete?: never;
         options?: never;
         head?: never;
@@ -376,6 +719,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/versions/{version_id}/todo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Todo List
+         * @description Every TODO remark, draft note, broken reference, orphaned anchor, unused figure and
+         *     time without a value.
+         */
+        get: operations["getTodoList"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -427,6 +791,92 @@ export interface components {
             target: string | null;
             /** Type Id */
             type_id: number;
+        };
+        /** BrokenReferenceOut */
+        BrokenReferenceOut: {
+            /** Form */
+            form: string;
+            note: components["schemas"]["NoteSummaryOut"];
+        };
+        /** BulkStatusIn */
+        BulkStatusIn: {
+            /** Note Ids */
+            note_ids: number[];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "ready";
+        };
+        /** CategoryIn */
+        CategoryIn: {
+            /** Name */
+            name: string;
+        };
+        /** CategoryOut */
+        CategoryOut: {
+            /** Color */
+            color: string;
+            /** Id */
+            id: number;
+            /** Is Time */
+            is_time: boolean;
+            /** Name */
+            name: string;
+            /** Sort */
+            sort: number;
+        };
+        /** CategoryUpdateIn */
+        CategoryUpdateIn: {
+            /** Color */
+            color?: string | null;
+            /** Name */
+            name?: string | null;
+        };
+        /**
+         * ChronologyRowOut
+         * @description A time point in reading order, with the narrative date it resolves to.
+         */
+        ChronologyRowOut: {
+            /** At */
+            at: string | null;
+            /** Date Iso */
+            date_iso: string | null;
+            /** Date Words */
+            date_words: string | null;
+            /**
+             * Elapsed Iso
+             * @description For a chain with no date: time since it began.
+             */
+            elapsed_iso: string | null;
+            /** Elapsed Words */
+            elapsed_words: string | null;
+            /**
+             * Kind
+             * @description Null until a value is given.
+             */
+            kind: ("absolute" | "offset") | null;
+            /** Label */
+            label: string | null;
+            /** Line No */
+            line_no: number | null;
+            /** Mention Id */
+            mention_id: number;
+            /** Offset */
+            offset: string | null;
+            /** Page */
+            page: number | null;
+            /** Problem */
+            problem: string | null;
+            /** Relative To Label */
+            relative_to_label: string | null;
+            /** Remark */
+            remark: string;
+            /**
+             * Since
+             * @description Time elapsed since each earlier labeled point.
+             */
+            since: components["schemas"]["SinceOut"][];
         };
         /**
          * CorpusHitOut
@@ -523,10 +973,64 @@ export interface components {
             /** Label */
             label: string;
             /**
+             * Note Count
+             * @description How many notes begin in it.
+             * @default 0
+             */
+            note_count: number;
+            /**
              * Page
              * @description The page this division opens on.
              */
             page: number | null;
+        };
+        /** EntityOut */
+        EntityOut: {
+            /** Category Id */
+            category_id: number;
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /**
+             * Places
+             * @description Every place it occurs in this text.
+             */
+            places: components["schemas"]["EntityPlaceOut"][];
+            /** Value */
+            value: string | null;
+        };
+        /** EntityPlaceOut */
+        EntityPlaceOut: {
+            /** Line No */
+            line_no: number | null;
+            /** Page */
+            page: number;
+        };
+        /** EntityUpdateIn */
+        EntityUpdateIn: {
+            /** Name */
+            name?: string | null;
+            /**
+             * Value
+             * @description A normalized form; empty to clear it.
+             */
+            value?: string | null;
+        };
+        /** FigureIn */
+        FigureIn: {
+            /**
+             * Caption
+             * @default
+             */
+            caption: string;
+            /**
+             * Credit
+             * @default
+             */
+            credit: string;
+            /** Label */
+            label: string;
         };
         /** FigureOut */
         FigureOut: {
@@ -542,6 +1046,38 @@ export interface components {
             id: number;
             /** Label */
             label: string;
+            /**
+             * Uses
+             * @description Where the figure is used; empty if unused.
+             */
+            uses: components["schemas"]["FigureUseOut"][];
+        };
+        /** FigureUpdateIn */
+        FigureUpdateIn: {
+            /** Caption */
+            caption?: string | null;
+            /** Credit */
+            credit?: string | null;
+            /** Label */
+            label?: string | null;
+        };
+        /** FigureUseOut */
+        FigureUseOut: {
+            /** Line No */
+            line_no: number | null;
+            /** Note Id */
+            note_id: number;
+            /** Page */
+            page: number | null;
+            /**
+             * Placed
+             * @description Placed in the note, as opposed to referred to.
+             */
+            placed: boolean;
+            /** Type Id */
+            type_id: number;
+            /** Version Id */
+            version_id: number;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -617,6 +1153,41 @@ export interface components {
             created_at: string;
             /** Schema Version */
             schema_version: number;
+        };
+        /** MentionIn */
+        MentionIn: {
+            /** Category Id */
+            category_id: number;
+            /** Entity Id */
+            entity_id?: number | null;
+            /** Entity Name */
+            entity_name?: string | null;
+            span: components["schemas"]["SpanIn"];
+            time?: components["schemas"]["TimeValueIn"] | null;
+            /** Value */
+            value?: string | null;
+        };
+        /**
+         * MentionMarkOut
+         * @description Where an entity mention crosses a line: offsets within the line, in code points.
+         */
+        MentionMarkOut: {
+            /** Category Id */
+            category_id: number;
+            /** End */
+            end: number;
+            /** Mention Id */
+            mention_id: number;
+            /** Start */
+            start: number;
+        };
+        /** MergeIn */
+        MergeIn: {
+            /**
+             * Into Id
+             * @description The one that remains and takes over everything.
+             */
+            into_id: number;
         };
         /** NoteCreateIn */
         NoteCreateIn: {
@@ -734,6 +1305,51 @@ export interface components {
             /** Version Id */
             version_id: number;
         };
+        /** NoteSummaryOut */
+        NoteSummaryOut: {
+            /** Excerpt */
+            excerpt: string;
+            /** Id */
+            id: number;
+            /** Level */
+            level: number;
+            /** Line No */
+            line_no: number | null;
+            /** Page */
+            page: number | null;
+            /**
+             * Scope
+             * @enum {string}
+             */
+            scope: "span" | "page" | "chapter";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "ready";
+            /** Tags */
+            tags: string[];
+            /** Type Id */
+            type_id: number;
+        };
+        /** NoteTypeIn */
+        NoteTypeIn: {
+            /** Code */
+            code: string;
+            /**
+             * Color
+             * @default #8a8a8a
+             */
+            color: string;
+            /** Name */
+            name: string;
+            /**
+             * Role
+             * @default note
+             * @enum {string}
+             */
+            role: "note" | "definition" | "chapter_title" | "chapter_summary";
+        };
         /** NoteTypeOut */
         NoteTypeOut: {
             /** Code */
@@ -751,6 +1367,17 @@ export interface components {
             role: "note" | "definition" | "chapter_title" | "chapter_summary";
             /** Sort */
             sort: number;
+        };
+        /** NoteTypeUpdateIn */
+        NoteTypeUpdateIn: {
+            /** Code */
+            code?: string | null;
+            /** Color */
+            color?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Role */
+            role?: ("note" | "definition" | "chapter_title" | "chapter_summary") | null;
         };
         /**
          * NoteUpdateIn
@@ -869,6 +1496,11 @@ export interface components {
             /** Body Md */
             body_md: string;
             /**
+             * Note Id
+             * @description The note being edited, so dates are worked out for its place.
+             */
+            note_id?: number | null;
+            /**
              * Version Id
              * @description The text the note belongs to, so its references resolve.
              */
@@ -960,10 +1592,21 @@ export interface components {
             length: number;
             /** Line No */
             line_no: number | null;
+            /** Mentions */
+            mentions: components["schemas"]["MentionMarkOut"][];
             /** Page */
             page: number;
             /** Starts Paragraph */
             starts_paragraph: boolean;
+        };
+        /** SinceOut */
+        SinceOut: {
+            /** Iso */
+            iso: string;
+            /** Label */
+            label: string;
+            /** Words */
+            words: string;
         };
         /**
          * SpanIn
@@ -1007,6 +1650,8 @@ export interface components {
             length: number;
             /** Line No */
             line_no: number | null;
+            /** Mentions */
+            mentions: components["schemas"]["MentionMarkOut"][];
             /** Segment Id */
             segment_id: number;
             /**
@@ -1018,6 +1663,81 @@ export interface components {
             starts_paragraph: boolean;
             /** Text */
             text: string;
+        };
+        /**
+         * TimeValueIn
+         * @description A time: an absolute date at any precision, or an offset from another time.
+         */
+        TimeValueIn: {
+            /**
+             * At
+             * @description 1871, 1871-10, 1871-10-28 or with a time.
+             */
+            at?: string | null;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "absolute" | "offset";
+            /** Label */
+            label?: string | null;
+            /**
+             * Offset
+             * @description An ISO 8601 duration, such as P5D.
+             */
+            offset?: string | null;
+            /**
+             * Relative To Label
+             * @description The labeled time it counts from; the previous time if empty.
+             */
+            relative_to_label?: string | null;
+            /**
+             * Remark
+             * @default
+             */
+            remark: string;
+        };
+        /**
+         * TodoListOut
+         * @description Everything still to be dealt with before the notes can be published.
+         */
+        TodoListOut: {
+            /** Broken References */
+            broken_references: components["schemas"]["BrokenReferenceOut"][];
+            /** Drafts */
+            drafts: components["schemas"]["NoteSummaryOut"][];
+            /** Orphaned */
+            orphaned: components["schemas"]["NoteSummaryOut"][];
+            /** Remarks */
+            remarks: components["schemas"]["TodoRemarkOut"][];
+            /** Times Without Value */
+            times_without_value: components["schemas"]["UnvaluedTimeOut"][];
+            /** Unused Figures */
+            unused_figures: components["schemas"]["UnusedFigureOut"][];
+        };
+        /** TodoRemarkOut */
+        TodoRemarkOut: {
+            note: components["schemas"]["NoteSummaryOut"];
+            /** Text */
+            text: string;
+        };
+        /** UnusedFigureOut */
+        UnusedFigureOut: {
+            /** Caption */
+            caption: string;
+            /** Id */
+            id: number;
+            /** Label */
+            label: string;
+        };
+        /** UnvaluedTimeOut */
+        UnvaluedTimeOut: {
+            /** Line No */
+            line_no: number | null;
+            /** Mention Id */
+            mention_id: number;
+            /** Page */
+            page: number | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -1102,6 +1822,193 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    updateEntity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entity_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EntityUpdateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    mergeEntity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entity_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MergeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listCategories: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryOut"][];
+                };
+            };
+        };
+    };
+    createCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CategoryIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    updateCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                category_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CategoryUpdateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    mergeCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                category_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MergeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     listFigures: {
         parameters: {
             query?: never;
@@ -1118,6 +2025,134 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FigureOut"][];
+                };
+            };
+        };
+    };
+    createFigure: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FigureIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FigureOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    deleteFigure: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                figure_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    updateFigure: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                figure_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FigureUpdateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FigureOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    uploadFigureImage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                figure_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FigureOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -1268,6 +2303,97 @@ export interface operations {
             };
         };
     };
+    deleteMention: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                mention_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    setTime: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                mention_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TimeValueIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    clearTime: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                mention_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     listNoteTypes: {
         parameters: {
             query?: never;
@@ -1284,6 +2410,107 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["NoteTypeOut"][];
+                };
+            };
+        };
+    };
+    createNoteType: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NoteTypeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NoteTypeOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    updateNoteType: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                type_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NoteTypeUpdateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NoteTypeOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    mergeNoteType: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                type_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MergeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -1416,6 +2643,26 @@ export interface operations {
             };
         };
     };
+    listTags: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
+            };
+        };
+    };
     listVersions: {
         parameters: {
             query?: never;
@@ -1454,6 +2701,102 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["VersionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    getChronology: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChronologyRowOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listEntities: {
+        parameters: {
+            query?: {
+                category_id?: number | null;
+                starting?: string | null;
+            };
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EntityOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    exportEntities: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
@@ -1574,6 +2917,80 @@ export interface operations {
             };
         };
     };
+    createMention: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MentionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: number;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listNotes: {
+        parameters: {
+            query?: {
+                division_id?: number | null;
+                type_id?: number | null;
+                level?: number | null;
+                status?: ("draft" | "ready") | null;
+                tag?: string | null;
+            };
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NoteSummaryOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     createNote: {
         parameters: {
             query?: never;
@@ -1596,6 +3013,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["NoteOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    setNotesStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkStatusIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: number;
+                    };
                 };
             };
             /** @description Validation Error */
@@ -1758,6 +3212,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SearchOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    getTodoList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TodoListOut"];
                 };
             };
             /** @description Validation Error */

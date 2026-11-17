@@ -13,9 +13,12 @@ from pneutext.core.errors import Conflict, InvalidInput, NotFound
 from pneutext.core.shape import ShapeHighlight, ShapeLine
 from pneutext.importers import paged_corpus
 from pneutext.importers.paged_corpus import CorpusFormat
+from pneutext.services import entities as entities_service
 from pneutext.services import notes as notes_service
+from pneutext.services.entities import MentionMark
 from pneutext.store import corpus as corpus_store
 from pneutext.store import db
+from pneutext.store import notes as notes_store
 from pneutext.store.corpus import DivisionRow, LineTextRow, NewVersion, VersionRow
 from pneutext.store.library import Library
 
@@ -47,6 +50,7 @@ class VersionDetail:
     measure: int
     pages: list[int]
     divisions: list[DivisionRow]
+    note_counts: dict[int, int]  # notes beginning in each division, by division id
 
 
 @dataclass(frozen=True)
@@ -59,6 +63,7 @@ class PageText:
     division: DivisionRow | None
     lines: list[LineTextRow]
     highlights: list[list[ShapeHighlight]]  # one list per line, in the same order
+    mentions: list[list[MentionMark]]
 
 
 @dataclass(frozen=True)
@@ -72,6 +77,7 @@ class PageShape:
     next_page: int | None
     division: DivisionRow | None
     lines: list[ShapeLine]
+    mentions: list[list[MentionMark]]  # one list per line, in the same order
 
 
 def _validated(request: CorpusImportRequest) -> CorpusImportRequest:
@@ -148,11 +154,21 @@ def _require_version(conn: sqlite3.Connection, version_id: int) -> VersionRow:
 def get_version(library: Library, version_id: int) -> VersionDetail:
     with db.transaction(library.db_path) as conn:
         version = _require_version(conn, version_id)
+        divisions = corpus_store.list_divisions(conn, version.id, version.pagination_id)
+        counts: dict[int, int] = {}
+        for division in divisions:
+            within = notes_store.division_range(conn, version.id, division.id)
+            counts[division.id] = (
+                0
+                if within is None
+                else notes_store.count_notes_starting_in(conn, version.id, within)
+            )
         return VersionDetail(
             version=version,
             measure=shape.measure(corpus_store.text_line_lengths(conn, version.pagination_id)),
             pages=corpus_store.list_pages(conn, version.pagination_id),
-            divisions=corpus_store.list_divisions(conn, version.id, version.pagination_id),
+            divisions=divisions,
+            note_counts=counts,
         )
 
 
@@ -173,6 +189,9 @@ def get_page_text(library: Library, version_id: int, page: int) -> PageText:
             division=corpus_store.division_at_page(conn, version.id, version.pagination_id, page),
             lines=lines,
             highlights=notes_service.page_highlights(
+                conn, version.id, [line.shape for line in lines]
+            ),
+            mentions=entities_service.page_mentions(
                 conn, version.id, [line.shape for line in lines]
             ),
         )
@@ -208,4 +227,5 @@ def get_page_shape(library: Library, version_id: int, page: int) -> PageShape:
                 )
                 for row, marks in zip(rows, highlights, strict=True)
             ],
+            mentions=entities_service.page_mentions(conn, version.id, rows),
         )

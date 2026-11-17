@@ -5,7 +5,7 @@
 // modes moves nothing. Blank mode is given the shape projection, which has no text.
 import { type CSSProperties, type MouseEvent, useLayoutEffect, useRef } from "react";
 
-import type { ShapeLine, TextLine } from "../api/client";
+import type { Highlight, MentionMark, ShapeLine, TextLine } from "../api/client";
 import { splitLine, stripes } from "../lib/highlights";
 import { sliceCodePoints } from "../lib/offsets";
 import { type DrawnLine, INDENT, isTextKind, layoutLine } from "../lib/pageLayout";
@@ -17,6 +17,8 @@ interface CommonProps {
   targetLine?: number | null;
   /** Each note type's color, by type id. */
   typeColors?: Record<number, string>;
+  /** Each entity category's color, by category id, for the underline on mentions. */
+  categoryColors?: Record<number, string>;
   /** Notes to emphasize (the ones hovered in the side panel). */
   activeNotes?: number[];
   onHoverNotes?: (notes: number[]) => void;
@@ -67,8 +69,12 @@ function Furniture({ kind, label }: { kind: string; label?: string }) {
 interface RowContext {
   measure: number;
   colorOf: (typeId: number) => string;
+  categoryColorOf: (categoryId: number) => string;
   activeNotes: number[];
 }
+
+type NoteMark = Highlight & { kind: "note" };
+type TagMark = MentionMark & { kind: "mention" };
 
 function TextRow({
   line,
@@ -85,7 +91,11 @@ function TextRow({
   // The line is cut at highlight boundaries; a piece can belong to several notes, which
   // show as stacked stripes in the same bands blank mode uses.
   const drawn = layoutLine(line, context.measure);
-  const pieces = splitLine(line.length, line.highlights);
+  const marks: (NoteMark | TagMark)[] = [
+    ...line.highlights.map((mark) => ({ ...mark, kind: "note" as const })),
+    ...line.mentions.map((mark) => ({ ...mark, kind: "mention" as const })),
+  ];
+  const pieces = splitLine(line.length, marks);
   return (
     <div
       {...rowAttributes(line, isTarget, [])}
@@ -97,18 +107,33 @@ function TextRow({
       {pieces.map((piece) => {
         const text = sliceCodePoints(line.text, piece.start, piece.end);
         if (piece.marks.length === 0) return text;
-        const notes = piece.marks.map((mark) => mark.annotation_id);
+        const noteMarks = piece.marks.filter((mark) => mark.kind === "note");
+        const tags = piece.marks.filter((mark) => mark.kind === "mention");
+        const notes = noteMarks.map((mark) => mark.annotation_id);
         const isActive = notes.some((note) => context.activeNotes.includes(note));
+        const classes = [
+          noteMarks.length > 0 ? "hl" : "",
+          tags.length > 0 ? "mention" : "",
+          isActive ? "is-active" : "",
+        ];
+        const tag = tags[0];
         return (
           <span
             key={piece.start}
-            className={isActive ? "hl is-active" : "hl"}
-            data-notes={notes.join(" ")}
-            style={{
-              backgroundImage: stripes(piece.marks, drawn.highlights, drawn.bands, (typeId) =>
-                `color-mix(in srgb, ${context.colorOf(typeId)} 55%, transparent)`,
-              ),
-            }}
+            className={classes.filter(Boolean).join(" ")}
+            data-notes={notes.length > 0 ? notes.join(" ") : undefined}
+            data-mentions={
+              tags.length > 0 ? tags.map((mark) => mark.mention_id).join(" ") : undefined
+            }
+            style={
+              {
+                backgroundImage: stripes(noteMarks, drawn.highlights, drawn.bands, (typeId) =>
+                  `color-mix(in srgb, ${context.colorOf(typeId)} 55%, transparent)`,
+                ),
+                // Entity mentions show as a thin underline in their category's color.
+                "--mention-color": tag ? context.categoryColorOf(tag.category_id) : undefined,
+              } as CSSProperties
+            }
           >
             {text}
           </span>
@@ -118,11 +143,34 @@ function TextRow({
   );
 }
 
-function Bar({ drawn, context }: { drawn: DrawnLine; context: RowContext }) {
+function Bar({
+  drawn,
+  line,
+  context,
+}: {
+  drawn: DrawnLine;
+  line: ShapeLine;
+  context: RowContext;
+}) {
   const bar = { left: percent(drawn.x0), width: percent(drawn.x1 - drawn.x0) };
+  // A mention is placed along the bar as a highlight is: by its share of the line.
+  const along = (offset: number): number =>
+    drawn.x0 + (line.length > 0 ? ((drawn.x1 - drawn.x0) * offset) / line.length : 0);
   return (
     <>
       <span className="bar" style={bar} />
+      {line.mentions.map((mention) => (
+        <span
+          key={`m${mention.mention_id}`}
+          className="bar-mention"
+          data-mentions={mention.mention_id}
+          style={{
+            left: percent(along(mention.start)),
+            width: percent(along(mention.end) - along(mention.start)),
+            background: context.categoryColorOf(mention.category_id),
+          }}
+        />
+      ))}
       {drawn.highlights.map((highlight) => (
         <span
           key={highlight.annotation_id}
@@ -161,7 +209,7 @@ function BlankRow({
   if (!isTextKind(line.kind)) return <Furniture kind={line.kind} />;
   return (
     <div {...rowAttributes(line, isTarget, ["blank"])}>
-      <Bar drawn={layoutLine(line, context.measure)} context={context} />
+      <Bar drawn={layoutLine(line, context.measure)} line={line} context={context} />
     </div>
   );
 }
@@ -174,6 +222,7 @@ function notesAt(target: EventTarget | null): number[] {
 
 export function PageView(props: PageViewProps) {
   const { page, measure, targetLine = null, typeColors = {}, activeNotes = [] } = props;
+  const categoryColors = props.categoryColors ?? {};
   const style = { "--measure": Math.max(measure, 1), "--indent": INDENT } as CSSProperties;
   const body = useRef<HTMLDivElement>(null);
   const isTarget = (line: ShapeLine | TextLine): boolean =>
@@ -181,6 +230,7 @@ export function PageView(props: PageViewProps) {
   const context: RowContext = {
     measure,
     colorOf: (typeId) => typeColors[typeId] ?? FALLBACK_COLOR,
+    categoryColorOf: (categoryId) => categoryColors[categoryId] ?? FALLBACK_COLOR,
     activeNotes,
   };
 

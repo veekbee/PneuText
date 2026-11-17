@@ -1,7 +1,13 @@
+import { ChronologyView } from "./entities/ChronologyView";
+import { EntitiesView } from "./entities/EntitiesView";
+import { FiguresView } from "./figures/FiguresView";
 import { ImportCommentary } from "./library/ImportCommentary";
 import { ImportCorpus } from "./library/ImportCorpus";
 import { LibraryHome } from "./library/LibraryHome";
+import { TypesView } from "./notes/TypesView";
 import { Reader } from "./page/Reader";
+import { ReviewView } from "./review/ReviewView";
+import { TodoView } from "./review/TodoView";
 import { Link, useRoute } from "./router";
 
 export function App() {
@@ -13,6 +19,22 @@ export function App() {
       return <ImportCorpus />;
     case "import-commentary":
       return <ImportCommentary versionId={route.versionId} />;
+    case "view":
+      switch (route.view) {
+        case "review":
+          return <ReviewView versionId={route.versionId} />;
+        case "todo":
+          return <TodoView versionId={route.versionId} />;
+        case "entities":
+          return <EntitiesView versionId={route.versionId} />;
+        case "chronology":
+          return <ChronologyView versionId={route.versionId} />;
+        case "figures":
+          return <FiguresView versionId={route.versionId} />;
+        case "types":
+          return <TypesView versionId={route.versionId} />;
+      }
+    // eslint-disable-next-line no-fallthrough -- every view returns above
     case "page":
       return <Reader versionId={route.versionId} page={route.page} line={route.line} />;
     case "not-found":

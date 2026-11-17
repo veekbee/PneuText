@@ -110,6 +110,300 @@
         "title": "BacklinkOut",
         "type": "object"
       },
+      "BrokenReferenceOut": {
+        "properties": {
+          "form": {
+            "title": "Form",
+            "type": "string"
+          },
+          "note": {
+            "$ref": "#/components/schemas/NoteSummaryOut"
+          }
+        },
+        "required": [
+          "note",
+          "form"
+        ],
+        "title": "BrokenReferenceOut",
+        "type": "object"
+      },
+      "BulkStatusIn": {
+        "properties": {
+          "note_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Note Ids",
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "ready"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "note_ids",
+          "status"
+        ],
+        "title": "BulkStatusIn",
+        "type": "object"
+      },
+      "CategoryIn": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "CategoryIn",
+        "type": "object"
+      },
+      "CategoryOut": {
+        "properties": {
+          "color": {
+            "title": "Color",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "is_time": {
+            "title": "Is Time",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "sort": {
+            "title": "Sort",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "color",
+          "sort",
+          "is_time"
+        ],
+        "title": "CategoryOut",
+        "type": "object"
+      },
+      "CategoryUpdateIn": {
+        "properties": {
+          "color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "title": "CategoryUpdateIn",
+        "type": "object"
+      },
+      "ChronologyRowOut": {
+        "description": "A time point in reading order, with the narrative date it resolves to.",
+        "properties": {
+          "at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "At"
+          },
+          "date_iso": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date Iso"
+          },
+          "date_words": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date Words"
+          },
+          "elapsed_iso": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "For a chain with no date: time since it began.",
+            "title": "Elapsed Iso"
+          },
+          "elapsed_words": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Elapsed Words"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "enum": [
+                  "absolute",
+                  "offset"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null until a value is given.",
+            "title": "Kind"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "line_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line No"
+          },
+          "mention_id": {
+            "title": "Mention Id",
+            "type": "integer"
+          },
+          "offset": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offset"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "problem": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Problem"
+          },
+          "relative_to_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relative To Label"
+          },
+          "remark": {
+            "title": "Remark",
+            "type": "string"
+          },
+          "since": {
+            "description": "Time elapsed since each earlier labeled point.",
+            "items": {
+              "$ref": "#/components/schemas/SinceOut"
+            },
+            "title": "Since",
+            "type": "array"
+          }
+        },
+        "required": [
+          "mention_id",
+          "page",
+          "line_no",
+          "kind",
+          "at",
+          "offset",
+          "relative_to_label",
+          "label",
+          "remark",
+          "date_iso",
+          "date_words",
+          "elapsed_iso",
+          "elapsed_words",
+          "problem",
+          "since"
+        ],
+        "title": "ChronologyRowOut",
+        "type": "object"
+      },
       "CorpusHitOut": {
         "description": "A place in the text where the query was found, with its print line.",
         "properties": {
@@ -342,6 +636,12 @@
             "title": "Label",
             "type": "string"
           },
+          "note_count": {
+            "default": 0,
+            "description": "How many notes begin in it.",
+            "title": "Note Count",
+            "type": "integer"
+          },
           "page": {
             "anyOf": [
               {
@@ -362,6 +662,127 @@
           "page"
         ],
         "title": "DivisionOut",
+        "type": "object"
+      },
+      "EntityOut": {
+        "properties": {
+          "category_id": {
+            "title": "Category Id",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "places": {
+            "description": "Every place it occurs in this text.",
+            "items": {
+              "$ref": "#/components/schemas/EntityPlaceOut"
+            },
+            "title": "Places",
+            "type": "array"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "id",
+          "category_id",
+          "name",
+          "value",
+          "places"
+        ],
+        "title": "EntityOut",
+        "type": "object"
+      },
+      "EntityPlaceOut": {
+        "properties": {
+          "line_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line No"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "page",
+          "line_no"
+        ],
+        "title": "EntityPlaceOut",
+        "type": "object"
+      },
+      "EntityUpdateIn": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "A normalized form; empty to clear it.",
+            "title": "Value"
+          }
+        },
+        "title": "EntityUpdateIn",
+        "type": "object"
+      },
+      "FigureIn": {
+        "properties": {
+          "caption": {
+            "default": "",
+            "title": "Caption",
+            "type": "string"
+          },
+          "credit": {
+            "default": "",
+            "title": "Credit",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "label"
+        ],
+        "title": "FigureIn",
         "type": "object"
       },
       "FigureOut": {
@@ -389,6 +810,14 @@
           "label": {
             "title": "Label",
             "type": "string"
+          },
+          "uses": {
+            "description": "Where the figure is used; empty if unused.",
+            "items": {
+              "$ref": "#/components/schemas/FigureUseOut"
+            },
+            "title": "Uses",
+            "type": "array"
           }
         },
         "required": [
@@ -397,9 +826,102 @@
           "file",
           "caption",
           "credit",
-          "has_file"
+          "has_file",
+          "uses"
         ],
         "title": "FigureOut",
+        "type": "object"
+      },
+      "FigureUpdateIn": {
+        "properties": {
+          "caption": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Caption"
+          },
+          "credit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credit"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          }
+        },
+        "title": "FigureUpdateIn",
+        "type": "object"
+      },
+      "FigureUseOut": {
+        "properties": {
+          "line_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line No"
+          },
+          "note_id": {
+            "title": "Note Id",
+            "type": "integer"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "placed": {
+            "description": "Placed in the note, as opposed to referred to.",
+            "title": "Placed",
+            "type": "boolean"
+          },
+          "type_id": {
+            "title": "Type Id",
+            "type": "integer"
+          },
+          "version_id": {
+            "title": "Version Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "note_id",
+          "type_id",
+          "version_id",
+          "page",
+          "line_no",
+          "placed"
+        ],
+        "title": "FigureUseOut",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -609,6 +1131,109 @@
           "created_at"
         ],
         "title": "LibraryOut",
+        "type": "object"
+      },
+      "MentionIn": {
+        "properties": {
+          "category_id": {
+            "title": "Category Id",
+            "type": "integer"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "entity_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Name"
+          },
+          "span": {
+            "$ref": "#/components/schemas/SpanIn"
+          },
+          "time": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TimeValueIn"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "span",
+          "category_id"
+        ],
+        "title": "MentionIn",
+        "type": "object"
+      },
+      "MentionMarkOut": {
+        "description": "Where an entity mention crosses a line: offsets within the line, in code points.",
+        "properties": {
+          "category_id": {
+            "title": "Category Id",
+            "type": "integer"
+          },
+          "end": {
+            "title": "End",
+            "type": "integer"
+          },
+          "mention_id": {
+            "title": "Mention Id",
+            "type": "integer"
+          },
+          "start": {
+            "title": "Start",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "mention_id",
+          "category_id",
+          "start",
+          "end"
+        ],
+        "title": "MentionMarkOut",
+        "type": "object"
+      },
+      "MergeIn": {
+        "properties": {
+          "into_id": {
+            "description": "The one that remains and takes over everything.",
+            "title": "Into Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "into_id"
+        ],
+        "title": "MergeIn",
         "type": "object"
       },
       "NoteCreateIn": {
@@ -944,6 +1569,119 @@
         "title": "NoteOut",
         "type": "object"
       },
+      "NoteSummaryOut": {
+        "properties": {
+          "excerpt": {
+            "title": "Excerpt",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "level": {
+            "title": "Level",
+            "type": "integer"
+          },
+          "line_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line No"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "scope": {
+            "enum": [
+              "span",
+              "page",
+              "chapter"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "ready"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "type_id": {
+            "title": "Type Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "type_id",
+          "scope",
+          "level",
+          "status",
+          "tags",
+          "page",
+          "line_no",
+          "excerpt"
+        ],
+        "title": "NoteSummaryOut",
+        "type": "object"
+      },
+      "NoteTypeIn": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "color": {
+            "default": "#8a8a8a",
+            "title": "Color",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "role": {
+            "default": "note",
+            "enum": [
+              "note",
+              "definition",
+              "chapter_title",
+              "chapter_summary"
+            ],
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "code"
+        ],
+        "title": "NoteTypeIn",
+        "type": "object"
+      },
       "NoteTypeOut": {
         "properties": {
           "code": {
@@ -986,6 +1724,62 @@
           "role"
         ],
         "title": "NoteTypeOut",
+        "type": "object"
+      },
+      "NoteTypeUpdateIn": {
+        "properties": {
+          "code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code"
+          },
+          "color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "enum": [
+                  "note",
+                  "definition",
+                  "chapter_title",
+                  "chapter_summary"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role"
+          }
+        },
+        "title": "NoteTypeUpdateIn",
         "type": "object"
       },
       "NoteUpdateIn": {
@@ -1387,6 +2181,18 @@
             "title": "Body Md",
             "type": "string"
           },
+          "note_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The note being edited, so dates are worked out for its place.",
+            "title": "Note Id"
+          },
           "version_id": {
             "anyOf": [
               {
@@ -1615,6 +2421,13 @@
             ],
             "title": "Line No"
           },
+          "mentions": {
+            "items": {
+              "$ref": "#/components/schemas/MentionMarkOut"
+            },
+            "title": "Mentions",
+            "type": "array"
+          },
           "page": {
             "title": "Page",
             "type": "integer"
@@ -1632,9 +2445,33 @@
           "starts_paragraph",
           "ends_paragraph",
           "length",
-          "highlights"
+          "highlights",
+          "mentions"
         ],
         "title": "ShapeLineOut",
+        "type": "object"
+      },
+      "SinceOut": {
+        "properties": {
+          "iso": {
+            "title": "Iso",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "words": {
+            "title": "Words",
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "iso",
+          "words"
+        ],
+        "title": "SinceOut",
         "type": "object"
       },
       "SpanIn": {
@@ -1717,6 +2554,13 @@
             ],
             "title": "Line No"
           },
+          "mentions": {
+            "items": {
+              "$ref": "#/components/schemas/MentionMarkOut"
+            },
+            "title": "Mentions",
+            "type": "array"
+          },
           "segment_id": {
             "title": "Segment Id",
             "type": "integer"
@@ -1745,9 +2589,214 @@
           "starts_paragraph",
           "ends_paragraph",
           "text",
-          "highlights"
+          "highlights",
+          "mentions"
         ],
         "title": "TextLineOut",
+        "type": "object"
+      },
+      "TimeValueIn": {
+        "description": "A time: an absolute date at any precision, or an offset from another time.",
+        "properties": {
+          "at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "1871, 1871-10, 1871-10-28 or with a time.",
+            "title": "At"
+          },
+          "kind": {
+            "enum": [
+              "absolute",
+              "offset"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "offset": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "An ISO 8601 duration, such as P5D.",
+            "title": "Offset"
+          },
+          "relative_to_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The labeled time it counts from; the previous time if empty.",
+            "title": "Relative To Label"
+          },
+          "remark": {
+            "default": "",
+            "title": "Remark",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "TimeValueIn",
+        "type": "object"
+      },
+      "TodoListOut": {
+        "description": "Everything still to be dealt with before the notes can be published.",
+        "properties": {
+          "broken_references": {
+            "items": {
+              "$ref": "#/components/schemas/BrokenReferenceOut"
+            },
+            "title": "Broken References",
+            "type": "array"
+          },
+          "drafts": {
+            "items": {
+              "$ref": "#/components/schemas/NoteSummaryOut"
+            },
+            "title": "Drafts",
+            "type": "array"
+          },
+          "orphaned": {
+            "items": {
+              "$ref": "#/components/schemas/NoteSummaryOut"
+            },
+            "title": "Orphaned",
+            "type": "array"
+          },
+          "remarks": {
+            "items": {
+              "$ref": "#/components/schemas/TodoRemarkOut"
+            },
+            "title": "Remarks",
+            "type": "array"
+          },
+          "times_without_value": {
+            "items": {
+              "$ref": "#/components/schemas/UnvaluedTimeOut"
+            },
+            "title": "Times Without Value",
+            "type": "array"
+          },
+          "unused_figures": {
+            "items": {
+              "$ref": "#/components/schemas/UnusedFigureOut"
+            },
+            "title": "Unused Figures",
+            "type": "array"
+          }
+        },
+        "required": [
+          "remarks",
+          "drafts",
+          "broken_references",
+          "orphaned",
+          "unused_figures",
+          "times_without_value"
+        ],
+        "title": "TodoListOut",
+        "type": "object"
+      },
+      "TodoRemarkOut": {
+        "properties": {
+          "note": {
+            "$ref": "#/components/schemas/NoteSummaryOut"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "note",
+          "text"
+        ],
+        "title": "TodoRemarkOut",
+        "type": "object"
+      },
+      "UnusedFigureOut": {
+        "properties": {
+          "caption": {
+            "title": "Caption",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "caption"
+        ],
+        "title": "UnusedFigureOut",
+        "type": "object"
+      },
+      "UnvaluedTimeOut": {
+        "properties": {
+          "line_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line No"
+          },
+          "mention_id": {
+            "title": "Mention Id",
+            "type": "integer"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          }
+        },
+        "required": [
+          "mention_id",
+          "page",
+          "line_no"
+        ],
+        "title": "UnvaluedTimeOut",
         "type": "object"
       },
       "ValidationError": {
@@ -1976,8 +3025,264 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/entities/{entity_id}": {
+      "patch": {
+        "description": "Rename an entry or set its normalized value.",
+        "operationId": "updateEntity",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntityUpdateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Entity",
+        "tags": [
+          "entities"
+        ]
+      }
+    },
+    "/api/entities/{entity_id}/merge": {
+      "post": {
+        "description": "Give this entry's mentions to another entry and remove it.",
+        "operationId": "mergeEntity",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MergeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Merge Entity",
+        "tags": [
+          "entities"
+        ]
+      }
+    },
+    "/api/entity-categories": {
+      "get": {
+        "operationId": "listCategories",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CategoryOut"
+                  },
+                  "title": "Response Listcategories",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Categories",
+        "tags": [
+          "entities"
+        ]
+      },
+      "post": {
+        "operationId": "createCategory",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Category",
+        "tags": [
+          "entities"
+        ]
+      }
+    },
+    "/api/entity-categories/{category_id}": {
+      "patch": {
+        "description": "Rename or recolor a category.",
+        "operationId": "updateCategory",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "category_id",
+            "required": true,
+            "schema": {
+              "title": "Category Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryUpdateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Category",
+        "tags": [
+          "entities"
+        ]
+      }
+    },
+    "/api/entity-categories/{category_id}/merge": {
+      "post": {
+        "description": "Fold this category into another, with everything in it.",
+        "operationId": "mergeCategory",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "category_id",
+            "required": true,
+            "schema": {
+              "title": "Category Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MergeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Merge Category",
+        "tags": [
+          "entities"
+        ]
+      }
+    },
     "/api/figures": {
       "get": {
+        "description": "Every figure, with where each is used.",
         "operationId": "listFigures",
         "responses": {
           "200": {
@@ -1996,6 +3301,174 @@
           }
         },
         "summary": "List Figures",
+        "tags": [
+          "figures"
+        ]
+      },
+      "post": {
+        "operationId": "createFigure",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FigureIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FigureOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Figure",
+        "tags": [
+          "figures"
+        ]
+      }
+    },
+    "/api/figures/{figure_id}": {
+      "delete": {
+        "operationId": "deleteFigure",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "figure_id",
+            "required": true,
+            "schema": {
+              "title": "Figure Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Figure",
+        "tags": [
+          "figures"
+        ]
+      },
+      "patch": {
+        "description": "Edit a figure's label, caption or credit. A new label is followed in the notes.",
+        "operationId": "updateFigure",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "figure_id",
+            "required": true,
+            "schema": {
+              "title": "Figure Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FigureUpdateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FigureOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Figure",
+        "tags": [
+          "figures"
+        ]
+      }
+    },
+    "/api/figures/{figure_id}/image": {
+      "put": {
+        "description": "Store the request body as the figure's image. The content type names its format.",
+        "operationId": "uploadFigureImage",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "figure_id",
+            "required": true,
+            "schema": {
+              "title": "Figure Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FigureOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upload Figure Image",
         "tags": [
           "figures"
         ]
@@ -2181,6 +3654,120 @@
         ]
       }
     },
+    "/api/mentions/{mention_id}": {
+      "delete": {
+        "operationId": "deleteMention",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "mention_id",
+            "required": true,
+            "schema": {
+              "title": "Mention Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Mention",
+        "tags": [
+          "entities"
+        ]
+      }
+    },
+    "/api/mentions/{mention_id}/time": {
+      "delete": {
+        "operationId": "clearTime",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "mention_id",
+            "required": true,
+            "schema": {
+              "title": "Mention Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Clear Time",
+        "tags": [
+          "entities"
+        ]
+      },
+      "put": {
+        "description": "Give a time mention its value: a date, or an offset from another time.",
+        "operationId": "setTime",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "mention_id",
+            "required": true,
+            "schema": {
+              "title": "Mention Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimeValueIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Time",
+        "tags": [
+          "entities"
+        ]
+      }
+    },
     "/api/note-types": {
       "get": {
         "operationId": "listNoteTypes",
@@ -2201,6 +3788,144 @@
           }
         },
         "summary": "List Note Types",
+        "tags": [
+          "notes"
+        ]
+      },
+      "post": {
+        "operationId": "createNoteType",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoteTypeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteTypeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Note Type",
+        "tags": [
+          "notes"
+        ]
+      }
+    },
+    "/api/note-types/{type_id}": {
+      "patch": {
+        "description": "Rename or recolor a note type, or change its code or role.",
+        "operationId": "updateNoteType",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "type_id",
+            "required": true,
+            "schema": {
+              "title": "Type Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoteTypeUpdateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteTypeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Note Type",
+        "tags": [
+          "notes"
+        ]
+      }
+    },
+    "/api/note-types/{type_id}/merge": {
+      "post": {
+        "description": "Give this type's notes to another type and remove it.",
+        "operationId": "mergeNoteType",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "type_id",
+            "required": true,
+            "schema": {
+              "title": "Type Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MergeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Merge Note Type",
         "tags": [
           "notes"
         ]
@@ -2373,6 +4098,31 @@
         ]
       }
     },
+    "/api/tags": {
+      "get": {
+        "operationId": "listTags",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Response Listtags",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Tags",
+        "tags": [
+          "review"
+        ]
+      }
+    },
     "/api/versions": {
       "get": {
         "operationId": "listVersions",
@@ -2437,6 +4187,173 @@
         "summary": "Get Version",
         "tags": [
           "corpus"
+        ]
+      }
+    },
+    "/api/versions/{version_id}/chronology": {
+      "get": {
+        "description": "Every time point in reading order, with its resolved date and elapsed times.",
+        "operationId": "getChronology",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ChronologyRowOut"
+                  },
+                  "title": "Response Getchronology",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Chronology",
+        "tags": [
+          "entities"
+        ]
+      }
+    },
+    "/api/versions/{version_id}/entities": {
+      "get": {
+        "description": "The index: each entity with every place it occurs. `starting` is for type-ahead.",
+        "operationId": "listEntities",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "category_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "starting",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Starting"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EntityOut"
+                  },
+                  "title": "Response Listentities",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Entities",
+        "tags": [
+          "entities"
+        ]
+      }
+    },
+    "/api/versions/{version_id}/entities/export": {
+      "get": {
+        "description": "Mentions and time points as data, for later map and timeline tools.",
+        "operationId": "exportEntities",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Export Entities",
+        "tags": [
+          "entities"
         ]
       }
     },
@@ -2602,7 +4519,193 @@
         ]
       }
     },
+    "/api/versions/{version_id}/mentions": {
+      "post": {
+        "description": "Tag a selection as an entity, or as a time.",
+        "operationId": "createMention",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MentionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "integer"
+                  },
+                  "title": "Response Createmention",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Mention",
+        "tags": [
+          "entities"
+        ]
+      }
+    },
     "/api/versions/{version_id}/notes": {
+      "get": {
+        "description": "Notes filtered by chapter, type, level, status and tag, in reading order.",
+        "operationId": "listNotes",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "division_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Division Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "type_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Type Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "level",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Level"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "draft",
+                    "ready"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tag",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tag"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/NoteSummaryOut"
+                  },
+                  "title": "Response Listnotes",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Notes",
+        "tags": [
+          "review"
+        ]
+      },
       "post": {
         "operationId": "createNote",
         "parameters": [
@@ -2651,6 +4754,63 @@
         "summary": "Create Note",
         "tags": [
           "notes"
+        ]
+      }
+    },
+    "/api/versions/{version_id}/notes/status": {
+      "post": {
+        "description": "Mark several notes draft or ready at once.",
+        "operationId": "setNotesStatus",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkStatusIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "integer"
+                  },
+                  "title": "Response Setnotesstatus",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Notes Status",
+        "tags": [
+          "review"
         ]
       }
     },
@@ -2925,6 +5085,49 @@
         "summary": "Search",
         "tags": [
           "search"
+        ]
+      }
+    },
+    "/api/versions/{version_id}/todo": {
+      "get": {
+        "description": "Every TODO remark, draft note, broken reference, orphaned anchor, unused figure and\ntime without a value.",
+        "operationId": "getTodoList",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodoListOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Todo List",
+        "tags": [
+          "review"
         ]
       }
     }

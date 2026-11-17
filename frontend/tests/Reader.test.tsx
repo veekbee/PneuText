@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { App } from "../src/App";
@@ -98,7 +98,8 @@ describe("Reader", () => {
     setUrl("/v/1/p/7");
     renderWithQuery(<App />);
     await screen.findByText("seventh page words");
-    const chapterOne = screen.getByRole("link", { name: /^I\s*p\. 7$/ });
+    const chapterOne = screen.getByRole("link", { name: /^I\s*5\s*p\. 7$/ });
+    expect(within(chapterOne).getByTitle("5 notes")).toBeTruthy();
     const chapterTwo = screen.getByRole("link", { name: /^II\s*p\. 9$/ });
     expect(chapterOne.getAttribute("aria-current")).toBe("true");
     fireEvent.click(chapterTwo);

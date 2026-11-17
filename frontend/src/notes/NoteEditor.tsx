@@ -43,7 +43,12 @@ export function NoteEditor(props: NoteEditorProps) {
   // The preview is drawn from the server's parse of what is typed, the same tree the
   // saved note and the export use.
   const settledBody = useDebounced(body, 250);
-  const rendered = useRenderedBody(settledBody, note.version_id, settledBody !== note.body_md);
+  const rendered = useRenderedBody(
+    settledBody,
+    note.version_id,
+    note.id,
+    settledBody !== note.body_md,
+  );
   const textarea = useRef<HTMLTextAreaElement>(null);
 
   /** Put a reference where the cursor is (or over what is selected) in the note. */

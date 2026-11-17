@@ -9,15 +9,22 @@ export interface LineMark {
   end: number;
 }
 
-export interface Piece {
+export interface Piece<T> {
   start: number;
   end: number;
-  /** The notes covering this piece, in the order given; empty for plain text. */
-  marks: LineMark[];
+  /** The marks covering this piece, in the order given; empty for plain text. */
+  marks: T[];
 }
 
-/** Cut the range 0..length at every highlight boundary. Pieces cover it exactly once. */
-export function splitLine(length: number, marks: LineMark[]): Piece[] {
+/**
+ * Cut the range 0..length at every mark boundary. Pieces cover it exactly once. The
+ * marks may be of any kind (note highlights, entity mentions) so long as each says
+ * where it starts and ends within the line.
+ */
+export function splitLine<T extends { start: number; end: number }>(
+  length: number,
+  marks: T[],
+): Piece<T>[] {
   const clamp = (offset: number): number => Math.max(0, Math.min(offset, length));
   const usable = marks
     .map((mark) => ({ ...mark, start: clamp(mark.start), end: clamp(mark.end) }))
@@ -28,7 +35,7 @@ export function splitLine(length: number, marks: LineMark[]): Piece[] {
     cuts.add(mark.end);
   }
   const edges = [...cuts].sort((a, b) => a - b);
-  const pieces: Piece[] = [];
+  const pieces: Piece<T>[] = [];
   for (let index = 0; index + 1 < edges.length; index += 1) {
     const start = edges[index] as number;
     const end = edges[index + 1] as number;

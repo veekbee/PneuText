@@ -164,6 +164,18 @@ function Node({ node, env }: { node: NoteNode; env: NoteEnv }): ReactNode {
         </span>
       );
     }
+    case "when":
+    case "since":
+      // The narrative date at the note's place, or the time elapsed there since a
+      // labeled point. Worked out by the server each time the note is shown.
+      if (attrs.broken !== false || typeof attrs.value !== "string") {
+        const why =
+          node.type === "when"
+            ? "No time before this place in the text has a value"
+            : "The time elapsed since that label cannot be worked out here";
+        return <Broken text={node.text ?? ""} why={why} />;
+      }
+      return <span className="narrative-time">{attrs.value}</span>;
     case "todo":
       // An editorial remark: shown here, listed among the to-dos, never exported.
       return (

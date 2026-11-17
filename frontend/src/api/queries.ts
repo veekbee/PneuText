@@ -94,10 +94,15 @@ export function usePageNotes(versionId: number, page: number) {
 }
 
 /** The server's parse of a note body, for the editor's live preview. */
-export function useRenderedBody(bodyMd: string, versionId: number, enabled: boolean) {
+export function useRenderedBody(
+  bodyMd: string,
+  versionId: number,
+  noteId: number | null,
+  enabled: boolean,
+) {
   return useQuery({
-    queryKey: ["note-render", versionId, bodyMd],
-    queryFn: async () => (await api.renderNoteBody(bodyMd, versionId)).body,
+    queryKey: ["note-render", versionId, noteId, bodyMd],
+    queryFn: async () => (await api.renderNoteBody(bodyMd, versionId, noteId)).body,
     enabled,
     placeholderData: keepPreviousData,
     staleTime: Infinity,
@@ -273,4 +278,56 @@ export function useSearch(versionId: number, query: string, corpus: boolean) {
 
 export function useFigures() {
   return useQuery({ queryKey: ["figures"], queryFn: api.listFigures });
+}
+
+// ---- Entities, time, figures, review, types -------------------------------------
+
+/**
+ * Almost everything on these screens is derived from the same data, so after any change
+ * the lot is asked for again rather than patched piece by piece.
+ */
+export function useRefreshAll() {
+  const queryClient = useQueryClient();
+  return () => queryClient.invalidateQueries();
+}
+
+/** A change sent to the server, after which everything shown is refreshed. */
+export function useChange<TInput, TResult>(change: (input: TInput) => Promise<TResult>) {
+  const refresh = useRefreshAll();
+  return useMutation({ mutationFn: change, onSuccess: refresh });
+}
+
+export function useCategories() {
+  return useQuery({ queryKey: ["categories"], queryFn: api.listCategories });
+}
+
+export function useEntities(versionId: number, categoryId?: number, starting?: string) {
+  return useQuery({
+    queryKey: ["entities", versionId, categoryId ?? null, starting ?? ""],
+    queryFn: () => api.listEntities(versionId, categoryId, starting),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useChronology(versionId: number) {
+  return useQuery({
+    queryKey: ["chronology", versionId],
+    queryFn: () => api.getChronology(versionId),
+  });
+}
+
+export function useNoteList(versionId: number, filters: Record<string, string | number | null>) {
+  return useQuery({
+    queryKey: ["note-list", versionId, filters],
+    queryFn: () => api.listNotes(versionId, filters),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useTags() {
+  return useQuery({ queryKey: ["tags"], queryFn: api.listTags });
+}
+
+export function useTodoList(versionId: number) {
+  return useQuery({ queryKey: ["todo", versionId], queryFn: () => api.getTodoList(versionId) });
 }

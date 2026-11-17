@@ -64,6 +64,7 @@ export function line(text: string, overrides: Partial<TextLine> = {}): TextLine 
     ends_paragraph: false,
     text,
     highlights: [],
+    mentions: [],
     ...overrides,
   };
 }
@@ -81,8 +82,8 @@ export const VERSION: Version = {
   measure: 20,
   pages: [7, 8, 9],
   divisions: [
-    { id: 1, kind: "chapter", label: "I", page: 7 },
-    { id: 2, kind: "chapter", label: "II", page: 9 },
+    { id: 1, kind: "chapter", label: "I", page: 7, note_count: 5 },
+    { id: 2, kind: "chapter", label: "II", page: 9, note_count: 0 },
   ],
 };
 
@@ -110,6 +111,7 @@ export function shapeLine(length: number, overrides: Partial<ShapeLine> = {}): S
     ends_paragraph: false,
     length,
     highlights: [],
+    mentions: [],
     ...overrides,
   };
 }
@@ -180,4 +182,44 @@ export function selectText(
   selection?.removeAllRanges();
   selection?.addRange(range);
   document.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+}
+
+export interface Sent {
+  method: string;
+  path: string;
+  query: Record<string, string>;
+  body: unknown;
+}
+
+/**
+ * Answer `fetch` by method and path, ignoring the query string (which is passed to the
+ * handler). Records every request that changes something.
+ */
+export function mockServer(
+  handlers: Record<string, (request: Sent) => { status?: number; body: unknown }>,
+) {
+  const sent: Sent[] = [];
+  const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    const url = new URL(String(input), "http://local");
+    const method = init?.method ?? "GET";
+    let body: unknown = undefined;
+    if (typeof init?.body === "string") body = JSON.parse(init.body);
+    else if (init?.body instanceof Blob) body = init.body;
+    const request: Sent = {
+      method,
+      path: url.pathname,
+      query: Object.fromEntries(url.searchParams),
+      body,
+    };
+    if (method !== "GET") sent.push(request);
+    const handler = handlers[`${method} ${url.pathname}`];
+    if (handler === undefined) {
+      return new Response(JSON.stringify({ detail: `No test handler for ${method} ${url.pathname}` }), {
+        status: 404,
+      });
+    }
+    const { status = 200, body: answer } = handler(request);
+    return new Response(status === 204 ? null : JSON.stringify(answer), { status });
+  });
+  return { sent, fetchMock };
 }

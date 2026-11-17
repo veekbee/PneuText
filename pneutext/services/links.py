@@ -13,9 +13,10 @@ import sqlite3
 from dataclasses import dataclass
 
 from pneutext import notes as note_parser
-from pneutext.core import anchors
+from pneutext.core import anchors, timeline
 from pneutext.core.errors import InvalidInput, NotFound
 from pneutext.core.references import Place, format_citation, parse_reference
+from pneutext.services.entities import NarrativeMoment, Timeline
 from pneutext.services.extents import WHOLE_UNIT, Extent, line_extent, page_extent
 from pneutext.store import corpus as corpus_store
 from pneutext.store import db, figures
@@ -115,9 +116,26 @@ def _locate(
 
 
 def resolve_tree(
-    conn: sqlite3.Connection, home: VersionRow, tree: note_parser.Node
+    conn: sqlite3.Connection,
+    home: VersionRow,
+    tree: note_parser.Node,
+    at: tuple[int, int] | None = None,
 ) -> note_parser.Node:
-    """A copy of a parsed body with every reference resolved, or marked as broken."""
+    """A copy of a parsed body with every reference resolved, or marked as broken.
+
+    ``at`` is the note's place in the text (segment position, offset). The dynamic forms
+    ``{{when}}`` and ``{{since:label}}`` are worked out for that place, so they follow
+    every change to a time value.
+    """
+    times: Timeline | None = None
+
+    def moment() -> NarrativeMoment | None:
+        nonlocal times
+        if at is None:
+            return None
+        if times is None:
+            times = Timeline(conn, home.id)
+        return times.at(*at)
 
     def resolve(node: note_parser.Node) -> note_parser.Node:
         node = dict(node)
@@ -155,6 +173,24 @@ def resolve_tree(
                 if kind == "figure_ref" or not attrs.get("caption"):
                     attrs["caption"] = figure.caption
                 attrs["credit"] = figure.credit
+        elif kind == "when":
+            now = moment()
+            attrs["broken"] = now is None
+            if now is not None and now.resolved.date is not None:
+                attrs["value"] = now.resolved.date.words()
+            elif now is not None and now.resolved.elapsed is not None:
+                attrs["value"] = now.resolved.elapsed.words() + " in"
+        elif kind == "since":
+            now = moment()
+            origin = times.labeled(str(attrs["label"])) if times is not None else None
+            elapsed = (
+                timeline.elapsed_between(origin, now.resolved)
+                if now is not None and origin is not None
+                else None
+            )
+            attrs["broken"] = elapsed is None
+            if elapsed is not None:
+                attrs["value"] = elapsed.words()
         if attrs:
             node["attrs"] = attrs
         if "children" in node:
