@@ -555,3 +555,52 @@ class TodoListOut(BaseModel):
     orphaned: list[NoteSummaryOut]
     unused_figures: list[UnusedFigureOut]
     times_without_value: list[UnvaluedTimeOut]
+
+
+class ProfileOut(BaseModel):
+    """An edition: which notes an export includes."""
+
+    id: int
+    name: str
+    type_ids: list[int] | None = Field(description="Note types included; null means all.")
+    levels: list[int]
+    statuses: list[Literal["draft", "ready"]]
+
+
+class ProfileIn(BaseModel):
+    name: str
+    type_ids: list[int] | None = None
+    levels: list[int] = [1]
+    statuses: list[Literal["draft", "ready"]] = ["ready"]
+
+
+class ExportDefaultsOut(BaseModel):
+    folder: str = Field(description="Where the export is written unless another folder is given.")
+    pdf_builder: str | None = Field(description="The installed program that can build the PDF.")
+
+
+class MonographIn(BaseModel):
+    profile_id: int
+    folder: str | None = None
+    build_pdf: bool = True
+
+
+class MonographOut(BaseModel):
+    folder: str
+    files: list[str]
+    notes: int
+    pages: int
+    pdf: str | None
+    build: str = Field(description="What happened with the PDF, in plain words.")
+    warnings: list[str]
+
+
+class BackupIn(BaseModel):
+    folder: str | None = None
+    include_text: bool = Field(description="False leaves the corpus text out.")
+
+
+class BackupOut(BaseModel):
+    folder: str
+    files: list[str]
+    includes_text: bool

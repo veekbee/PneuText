@@ -38,6 +38,11 @@ export type TodoList = Schemas["TodoListOut"];
 export type NoteTypeInput = Schemas["NoteTypeIn"];
 export type NoteTypeUpdate = Schemas["NoteTypeUpdateIn"];
 export type FigureUpdate = Schemas["FigureUpdateIn"];
+export type Profile = Schemas["ProfileOut"];
+export type ProfileInput = Schemas["ProfileIn"];
+export type ExportDefaults = Schemas["ExportDefaultsOut"];
+export type MonographResult = Schemas["MonographOut"];
+export type BackupResult = Schemas["BackupOut"];
 export type LegacyImportInput = Schemas["LegacyImportIn"];
 export type LegacyReport = Schemas["LegacyReportOut"];
 export type ReportItem = Schemas["ReportItemOut"];
@@ -190,6 +195,26 @@ export const api = {
     }),
   listTags: () => request<string[]>("/api/tags"),
   getTodoList: (versionId: number) => request<TodoList>(`/api/versions/${versionId}/todo`),
+
+  // Export
+  listProfiles: () => request<Profile[]>("/api/export-profiles"),
+  createProfile: (input: ProfileInput) => post<Profile>("/api/export-profiles", input),
+  updateProfile: (profileId: number, input: ProfileInput) =>
+    send<Profile>("PUT", `/api/export-profiles/${profileId}`, input),
+  deleteProfile: (profileId: number) =>
+    request<undefined>(`/api/export-profiles/${profileId}`, { method: "DELETE" }),
+  getMonographDefaults: (versionId: number, profileId: number) =>
+    request<ExportDefaults>(
+      `/api/versions/${versionId}/exports/monograph/defaults?profile_id=${profileId}`,
+    ),
+  exportMonograph: (versionId: number, profileId: number, folder: string, buildPdf: boolean) =>
+    post<MonographResult>(`/api/versions/${versionId}/exports/monograph`, {
+      profile_id: profileId,
+      folder: folder || null,
+      build_pdf: buildPdf,
+    }),
+  exportBackup: (folder: string, includeText: boolean) =>
+    post<BackupResult>("/api/exports/backup", { folder: folder || null, include_text: includeText }),
 
   // Note types
   createNoteType: (input: NoteTypeInput) => post<NoteType>("/api/note-types", input),

@@ -1,0 +1,139 @@
+% PneuText monograph style.
+%
+% Defines every command the export uses, so nothing else is needed to build it.
+% Compile with LuaLaTeX (or XeLaTeX): latexmk -lualatex main.tex
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{pneutext}[2026/11/17 PneuText monograph style]
+
+\RequirePackage{fontspec}
+\RequirePackage[margin=30mm]{geometry}
+\RequirePackage{xcolor}
+\RequirePackage{graphicx}
+\RequirePackage{multicol}
+\RequirePackage{tikz}
+\RequirePackage[hidelinks]{hyperref}
+
+% In a full edition every level 2 note carries a visible mark, so a first-time reader
+% can skip it. The main file switches this on when the edition includes level 2 notes.
+\newif\ifpneushowlevel
+\pneushowlevelfalse
+
+\definecolor{pneubar}{HTML}{B9B2A4}
+\definecolor{pneuink}{HTML}{23201B}
+
+% ---- Chapter openings --------------------------------------------------------
+
+% \pneuchapter{IV}: a chapter opens with its number.
+\newcommand{\pneuchapter}[1]{%
+  \chapter*{#1}%
+  \addcontentsline{toc}{chapter}{#1}%
+  \markboth{#1}{#1}}
+
+% The author's own chapter title and chapter summary.
+\newcommand{\pneuchaptertitle}[1]{{\Large\itshape #1\par}\bigskip}
+\newenvironment{pneuchaptersummary}{\begin{quote}\itshape}{\end{quote}}
+
+% ---- Page facsimiles ---------------------------------------------------------
+%
+% A print page is drawn blank: each line is an empty bar, with a numbered marker on each
+% highlight. Coordinates are worked out by the export: x runs from 0 to 1 across the
+% measure, y counts lines down the page.
+
+\newlength{\pneupagewidth}
+\AtBeginDocument{\setlength{\pneupagewidth}{0.70\textwidth}}
+\newlength{\pneurowheight}
+\setlength{\pneurowheight}{4.4mm}
+
+\tikzset{
+  pneumarker/.style={font=\tiny\bfseries, text=pneuink, inner sep=0.5pt, anchor=south west},
+}
+
+% \begin{pneupage}{print page}{rows}: one facsimile, on a monograph page of its own.
+\newenvironment{pneupage}[2]{%
+  \clearpage
+  \begin{center}%
+  \hypertarget{pneu-page-#1}{}%
+  \begin{tikzpicture}[x=\pneupagewidth, y=\pneurowheight]
+    \draw[pneubar, line width=0.4pt] (-0.12, 2) rectangle (1.12, -#2 - 3);
+    \node[font=\small, text=pneuink] at (0.5, -#2 - 1.75) {#1};
+}{%
+  \end{tikzpicture}%
+  \end{center}
+  \clearpage}
+
+% \pneubar{y}{x0}{x1}: the bar of one print line.
+\newcommand{\pneubar}[3]{\fill[pneubar] (#2, -#1) rectangle (#3, -#1 - 0.5);}
+
+% \pneuhl{y0}{y1}{x0}{x1}{color}: one band of a highlight on a bar.
+\newcommand{\pneuhl}[5]{\fill[#5] (#3, -#1) rectangle (#4, -#2);}
+
+% \pneumark{y}{x}{number}: the numbered marker at the start of a highlight.
+\newcommand{\pneumark}[3]{\node[pneumarker] at (#2, -#1 + 0.05) {#3};}
+
+% Page furniture, each a fixed placeholder for its kind.
+\newcommand{\pneurule}[1]{\draw[pneuink, line width=0.4pt] (0, -#1 - 0.25) -- (1, -#1 - 0.25);}
+\newcommand{\pneuornament}[1]{\node[text=pneuink, font=\small] at (0.5, -#1 - 0.25) {$\diamond$};}
+\newcommand{\pneuchapternumber}[1]{\fill[pneubar] (0.46, -#1 - 0.75) rectangle (0.54, -#1 - 1.25);}
+
+% ---- Notes -------------------------------------------------------------------
+
+\newenvironment{pneunotes}[1]{\section*{Notes to page #1}}{}
+\newenvironment{pneuchapternotes}{\section*{On this chapter}}{}
+
+% \pneunote{number}{type}{level}{id}: the head of a note. The numbered highlight on the
+% facsimile is the only tie to the passage; the words it is attached to are never shown.
+\newcommand{\pneuleveltwo}{\textdagger\ \emph{for re-readers}}
+\newcommand{\pneunote}[4]{%
+  \par\medskip\noindent
+  \hypertarget{pneu-note-#4}{}%
+  \textbf{#1}\quad\textsc{#2}%
+  \ifnum#3>1 \ifpneushowlevel\quad\pneuleveltwo\fi\fi
+  \par\nobreak\smallskip\noindent\ignorespaces}
+
+% ---- Citations, glosses and figures -------------------------------------------
+
+% \pneupageref{print page}{text}: a citation that links to that page's facsimile.
+\newcommand{\pneupageref}[2]{\hyperlink{pneu-page-#1}{#2}}
+% \pneunoteref{note id}{text}: a citation that links to a note.
+\newcommand{\pneunoteref}[2]{\hyperlink{pneu-note-#1}{#2}}
+% \pneugloss{word}{meaning}: a foreign word with its translation.
+\newcommand{\pneugloss}[2]{\emph{#1} (#2)}
+
+% \pneufigure{number}{file}{caption}{credit}: a figure placed in a note.
+\newcommand{\pneufigure}[4]{%
+  \par\medskip
+  \begin{center}
+    \hypertarget{pneu-figure-#1}{}%
+    \includegraphics[width=0.8\linewidth, height=0.4\textheight, keepaspectratio]{#2}\par
+    \smallskip
+    {\small\textbf{Figure #1.} #3 \emph{#4}\par}
+  \end{center}
+  \medskip}
+% The same, for a figure whose image could not be included.
+\newcommand{\pneufiguremissing}[3]{%
+  \par\medskip
+  \begin{center}
+    \hypertarget{pneu-figure-#1}{}%
+    \fbox{\rule{0pt}{4em}\hspace{2em}\small image not included\hspace{2em}}\par
+    \smallskip
+    {\small\textbf{Figure #1.} #2 \emph{#3}\par}
+  \end{center}
+  \medskip}
+% \pneufigureref{number}: a reference to a figure.
+\newcommand{\pneufigureref}[1]{\hyperlink{pneu-figure-#1}{Figure~#1}}
+
+% ---- Glossary, indexes and list of figures -----------------------------------
+
+\newcommand{\pneubackmatter}[1]{%
+  \chapter*{#1}%
+  \addcontentsline{toc}{chapter}{#1}%
+  \markboth{#1}{#1}}
+
+% \pneuglossaryentry{term}{definition}{citation}
+\newcommand{\pneuglossaryentry}[3]{\par\smallskip\noindent\hangindent=1.5em\textbf{#1}\quad #2\quad{\small #3}}
+% \pneuindexentry{entry}{pages}
+\newcommand{\pneuindexentry}[2]{\par\noindent\hangindent=1.5em #1\quad #2}
+% \pneufigureentry{number}{caption}{citation}
+\newcommand{\pneufigureentry}[3]{\par\smallskip\noindent\hangindent=1.5em\textbf{#1.}\quad #2\quad{\small #3}}
+
+\endinput

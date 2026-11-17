@@ -1,5 +1,6 @@
 import { ChronologyView } from "./entities/ChronologyView";
 import { EntitiesView } from "./entities/EntitiesView";
+import { ExportView } from "./export/ExportView";
 import { FiguresView } from "./figures/FiguresView";
 import { ImportCommentary } from "./library/ImportCommentary";
 import { ImportCorpus } from "./library/ImportCorpus";
@@ -33,6 +34,8 @@ export function App() {
           return <FiguresView versionId={route.versionId} />;
         case "types":
           return <TypesView versionId={route.versionId} />;
+        case "export":
+          return <ExportView versionId={route.versionId} />;
       }
     // eslint-disable-next-line no-fallthrough -- every view returns above
     case "page":

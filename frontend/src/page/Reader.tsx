@@ -28,7 +28,7 @@ import { TagEntityForm } from "../entities/TagEntityForm";
 import { isVisible, type NoteFilter } from "../lib/filters";
 import { cancelLink, startLink, useLinkInProgress } from "../lib/linkTray";
 import { type Mode, setPrefs, usePrefs } from "../lib/prefs";
-import { pagePath } from "../lib/route";
+import { pagePath, viewPath } from "../lib/route";
 import {
   citationFor,
   readSelection,
@@ -521,6 +521,9 @@ export function Reader({ versionId, page, line }: ReaderProps) {
           onOpenNote={(note) => setScrollTo({ note, tick: Date.now() })}
         />
         <ModeSwitch mode={mode} />
+        <Link className="nav-button" to={viewPath(versionId, "export")}>
+          Export
+        </Link>
         <nav className="page-nav" aria-label="Pages">
           {prev === null ? (
             <span className="nav-button is-disabled" aria-disabled="true">

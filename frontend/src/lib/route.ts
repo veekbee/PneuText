@@ -1,7 +1,15 @@
 // The app's URLs. Every page and line has a stable address:
 //   /v/{version_id}/p/{page}  and  /v/{version_id}/p/{page}#l{line_no}
 
-export const VIEWS = ["review", "todo", "entities", "chronology", "figures", "types"] as const;
+export const VIEWS = [
+  "review",
+  "todo",
+  "entities",
+  "chronology",
+  "figures",
+  "types",
+  "export",
+] as const;
 export type ViewName = (typeof VIEWS)[number];
 
 export type Route =

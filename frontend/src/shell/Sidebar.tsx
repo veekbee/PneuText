@@ -10,6 +10,7 @@ const VIEW_LABELS: [ViewName, string][] = [
   ["chronology", "Chronology"],
   ["figures", "Figures"],
   ["types", "Note types"],
+  ["export", "Export"],
 ];
 
 interface SidebarProps {

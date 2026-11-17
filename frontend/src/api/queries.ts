@@ -331,3 +331,17 @@ export function useTags() {
 export function useTodoList(versionId: number) {
   return useQuery({ queryKey: ["todo", versionId], queryFn: () => api.getTodoList(versionId) });
 }
+
+// ---- Export -------------------------------------------------------------------
+
+export function useProfiles() {
+  return useQuery({ queryKey: ["profiles"], queryFn: api.listProfiles });
+}
+
+export function useMonographDefaults(versionId: number, profileId: number | null) {
+  return useQuery({
+    queryKey: ["monograph-defaults", versionId, profileId],
+    queryFn: () => api.getMonographDefaults(versionId, profileId as number),
+    enabled: profileId !== null,
+  });
+}

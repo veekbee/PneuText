@@ -1,0 +1,50 @@
+% !TeX program = lualatex
+% ((( book.title|tex ))): ((( book.edition|tex )))
+% Written by PneuText. The source stays editable; exporting again replaces it.
+\documentclass[11pt,oneside]{book}
+\usepackage{pneutext}
+((* if book.show_level_marks *))
+\pneushowleveltrue
+((* endif *))
+
+% The color of each note type, as on the page facsimiles.
+((* for type in book.types *))
+\definecolor{pneutype((( type.id )))}{HTML}{((( type.color[1:]|upper )))} % ((( type.name|tex )))
+((* endfor *))
+
+\title{((( book.title|tex )))}
+\author{((( book.author|tex )))}
+\date{((( book.edition|tex )))}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+((* for chapter in book.chapters *))
+\input{chapters/chapter-((( chapter.key )))}
+((* endfor *))
+((* if glossary *))
+
+\pneubackmatter{Glossary}
+((* for line in glossary *))
+((( line )))
+((* endfor *))
+((* endif *))
+((* for index in indexes *))
+
+\pneubackmatter{Index of ((( index.category|tex )))}
+\begin{multicols}{2}
+((* for line in index.lines *))
+((( line )))
+((* endfor *))
+\end{multicols}
+((* endfor *))
+((* if figures *))
+
+\pneubackmatter{Figures}
+((* for line in figures *))
+((( line )))
+((* endfor *))
+((* endif *))
+
+\end{document}

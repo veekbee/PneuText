@@ -1,0 +1,69 @@
+% !TeX program = lualatex
+% The Fixture Book: Full edition
+% Written by PneuText. The source stays editable; exporting again replaces it.
+\documentclass[11pt,oneside]{book}
+\usepackage{pneutext}
+\pneushowleveltrue
+
+% The color of each note type, as on the page facsimiles.
+\definecolor{pneutype1}{HTML}{7D9BBD} % Clarification
+\definecolor{pneutype2}{HTML}{D9B44A} % Comment
+\definecolor{pneutype3}{HTML}{A5673F} % Historical
+\definecolor{pneutype4}{HTML}{8F7AB8} % Meditation
+\definecolor{pneutype5}{HTML}{6FA287} % Literary
+\definecolor{pneutype6}{HTML}{C9705F} % Spanish
+\definecolor{pneutype7}{HTML}{4F7F86} % Definition
+\definecolor{pneutype8}{HTML}{8A8A8A} % Chapter title
+\definecolor{pneutype9}{HTML}{B0B0B0} % Chapter summary
+
+\title{The Fixture Book}
+\author{A. N. Author}
+\date{Full edition}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\input{chapters/chapter-01}
+\input{chapters/chapter-02}
+
+\pneubackmatter{Glossary}
+\pneuglossaryentry{theodolite}{a surveying instrument for measuring angles}{\pneunoteref{3}{p.~7, note~3}}
+
+\pneubackmatter{Index of places}
+\begin{multicols}{2}
+\pneuindexentry{Low Harbor}{\pneupageref{7}{7}}
+\end{multicols}
+
+\pneubackmatter{Index of animals}
+\begin{multicols}{2}
+\pneuindexentry{eels}{\pneupageref{8}{8}}
+\pneuindexentry{gulls}{\pneupageref{7}{7}}
+\pneuindexentry{heron}{\pneupageref{8}{8}}
+\end{multicols}
+
+\pneubackmatter{Index of plants}
+\begin{multicols}{2}
+\pneuindexentry{Reeds}{\pneupageref{8}{8}}
+\pneuindexentry{willow}{\pneupageref{9}{9}}
+\end{multicols}
+
+\pneubackmatter{Index of numbers}
+\begin{multicols}{2}
+\pneuindexentry{eleven (11)}{\pneupageref{8}{8}}
+\pneuindexentry{forty-seven (47)}{\pneupageref{12}{12}}
+\pneuindexentry{forty-six (46)}{\pneupageref{9}{9}}
+\pneuindexentry{nine (9)}{\pneupageref{7}{7}}
+\pneuindexentry{two (2)}{\pneupageref{8}{8}}
+\end{multicols}
+
+\pneubackmatter{Index of weather}
+\begin{multicols}{2}
+\pneuindexentry{sea}{\pneupageref{9}{9}}
+\end{multicols}
+
+\pneubackmatter{Figures}
+\pneufigureentry{1}{The harbor at low water}{\pneupageref{7}{7}}
+\pneufigureentry{2}{A survey chain}{\pneupageref{9}{9}}
+
+\end{document}

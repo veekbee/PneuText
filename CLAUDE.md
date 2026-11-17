@@ -36,6 +36,8 @@ server with a React/TypeScript front end. The design brief is `claude/pneutext-d
 ## Toolchain notes
 
 - TypeScript is pinned to 5.9 because `openapi-typescript` 7 requires TypeScript 5.
+- The export's compile check runs with `latexmk` or Tectonic and is skipped when neither is
+  installed. Nothing under `pneutext/export/` may import the store.
 - Playwright needs its browser once: `cd frontend && npx playwright install chromium`.
 - The fixture book in `tests/fixtures/book/` is invented prose; the golden files in
   `tests/fixtures/golden/` are derived from it.

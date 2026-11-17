@@ -58,6 +58,7 @@ describe("the views in the sidebar", () => {
       ["Chronology", "/v/1/chronology"],
       ["Figures", "/v/1/figures"],
       ["Note types", "/v/1/types"],
+      ["Export", "/v/1/export"],
     ]);
     expect(within(nav).getByRole("link", { name: "To-do" }).getAttribute("aria-current")).toBe("page");
     expect(screen.getByRole("link", { name: "Back to the text" }).getAttribute("href")).toBe("/v/1/p/7");

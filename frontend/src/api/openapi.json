@@ -110,6 +110,57 @@
         "title": "BacklinkOut",
         "type": "object"
       },
+      "BackupIn": {
+        "properties": {
+          "folder": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Folder"
+          },
+          "include_text": {
+            "description": "False leaves the corpus text out.",
+            "title": "Include Text",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "include_text"
+        ],
+        "title": "BackupIn",
+        "type": "object"
+      },
+      "BackupOut": {
+        "properties": {
+          "files": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Files",
+            "type": "array"
+          },
+          "folder": {
+            "title": "Folder",
+            "type": "string"
+          },
+          "includes_text": {
+            "title": "Includes Text",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "folder",
+          "files",
+          "includes_text"
+        ],
+        "title": "BackupOut",
+        "type": "object"
+      },
       "BrokenReferenceOut": {
         "properties": {
           "form": {
@@ -762,6 +813,33 @@
         "title": "EntityUpdateIn",
         "type": "object"
       },
+      "ExportDefaultsOut": {
+        "properties": {
+          "folder": {
+            "description": "Where the export is written unless another folder is given.",
+            "title": "Folder",
+            "type": "string"
+          },
+          "pdf_builder": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The installed program that can build the PDF.",
+            "title": "Pdf Builder"
+          }
+        },
+        "required": [
+          "folder",
+          "pdf_builder"
+        ],
+        "title": "ExportDefaultsOut",
+        "type": "object"
+      },
       "FigureIn": {
         "properties": {
           "caption": {
@@ -1234,6 +1312,92 @@
           "into_id"
         ],
         "title": "MergeIn",
+        "type": "object"
+      },
+      "MonographIn": {
+        "properties": {
+          "build_pdf": {
+            "default": true,
+            "title": "Build Pdf",
+            "type": "boolean"
+          },
+          "folder": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Folder"
+          },
+          "profile_id": {
+            "title": "Profile Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "profile_id"
+        ],
+        "title": "MonographIn",
+        "type": "object"
+      },
+      "MonographOut": {
+        "properties": {
+          "build": {
+            "description": "What happened with the PDF, in plain words.",
+            "title": "Build",
+            "type": "string"
+          },
+          "files": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Files",
+            "type": "array"
+          },
+          "folder": {
+            "title": "Folder",
+            "type": "string"
+          },
+          "notes": {
+            "title": "Notes",
+            "type": "integer"
+          },
+          "pages": {
+            "title": "Pages",
+            "type": "integer"
+          },
+          "pdf": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pdf"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "folder",
+          "files",
+          "notes",
+          "pages",
+          "pdf",
+          "build",
+          "warnings"
+        ],
+        "title": "MonographOut",
         "type": "object"
       },
       "NoteCreateIn": {
@@ -2148,6 +2312,112 @@
           "line_no"
         ],
         "title": "PlaceOut",
+        "type": "object"
+      },
+      "ProfileIn": {
+        "properties": {
+          "levels": {
+            "default": [
+              1
+            ],
+            "items": {
+              "type": "integer"
+            },
+            "title": "Levels",
+            "type": "array"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "statuses": {
+            "default": [
+              "ready"
+            ],
+            "items": {
+              "enum": [
+                "draft",
+                "ready"
+              ],
+              "type": "string"
+            },
+            "title": "Statuses",
+            "type": "array"
+          },
+          "type_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type Ids"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "ProfileIn",
+        "type": "object"
+      },
+      "ProfileOut": {
+        "description": "An edition: which notes an export includes.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "levels": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Levels",
+            "type": "array"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "statuses": {
+            "items": {
+              "enum": [
+                "draft",
+                "ready"
+              ],
+              "type": "string"
+            },
+            "title": "Statuses",
+            "type": "array"
+          },
+          "type_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Note types included; null means all.",
+            "title": "Type Ids"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type_ids",
+          "levels",
+          "statuses"
+        ],
+        "title": "ProfileOut",
         "type": "object"
       },
       "ReferenceHitOut": {
@@ -3280,6 +3550,197 @@
         ]
       }
     },
+    "/api/export-profiles": {
+      "get": {
+        "operationId": "listProfiles",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProfileOut"
+                  },
+                  "title": "Response Listprofiles",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Profiles",
+        "tags": [
+          "export"
+        ]
+      },
+      "post": {
+        "operationId": "createProfile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Profile",
+        "tags": [
+          "export"
+        ]
+      }
+    },
+    "/api/export-profiles/{profile_id}": {
+      "delete": {
+        "operationId": "deleteProfile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "profile_id",
+            "required": true,
+            "schema": {
+              "title": "Profile Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Profile",
+        "tags": [
+          "export"
+        ]
+      },
+      "put": {
+        "operationId": "updateProfile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "profile_id",
+            "required": true,
+            "schema": {
+              "title": "Profile Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Profile",
+        "tags": [
+          "export"
+        ]
+      }
+    },
+    "/api/exports/backup": {
+      "post": {
+        "description": "Write the whole library as JSON plus figures, with or without the corpus text.",
+        "operationId": "exportBackup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackupIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Export Backup",
+        "tags": [
+          "export"
+        ]
+      }
+    },
     "/api/figures": {
       "get": {
         "description": "Every figure, with where each is used.",
@@ -4354,6 +4815,111 @@
         "summary": "Export Entities",
         "tags": [
           "entities"
+        ]
+      }
+    },
+    "/api/versions/{version_id}/exports/monograph": {
+      "post": {
+        "description": "Write the monograph as a LaTeX project, and build the PDF if LaTeX is installed.",
+        "operationId": "exportMonograph",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonographIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonographOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Export Monograph",
+        "tags": [
+          "export"
+        ]
+      }
+    },
+    "/api/versions/{version_id}/exports/monograph/defaults": {
+      "get": {
+        "description": "Where an edition would be written, and whether a PDF can be built here.",
+        "operationId": "getMonographDefaults",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "profile_id",
+            "required": true,
+            "schema": {
+              "title": "Profile Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportDefaultsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Monograph Defaults",
+        "tags": [
+          "export"
         ]
       }
     },

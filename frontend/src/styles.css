@@ -1319,3 +1319,56 @@ input[type="color"] {
   gap: 0.2rem;
   font-size: 0.9rem;
 }
+
+/* ---- Export ------------------------------------------------------------ */
+
+.export-form {
+  max-width: 40rem;
+}
+
+.form .check,
+.profile-editor fieldset label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+
+.profile-editor {
+  display: grid;
+  gap: 0.6rem;
+  max-width: 40rem;
+  margin: 0.5rem 0 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--edge);
+  background: var(--paper);
+}
+
+.profile-editor > label {
+  display: grid;
+  gap: 0.15rem;
+  font-size: 0.78rem;
+  color: var(--ink-quiet);
+}
+
+.profile-editor fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 1rem;
+  margin: 0;
+  padding: 0.3rem 0.6rem 0.5rem;
+  border: 1px solid var(--edge);
+}
+
+.profile-editor legend {
+  padding: 0 0.3rem;
+  font-size: 0.78rem;
+  color: var(--ink-quiet);
+}
+
+.notice pre {
+  max-height: 12rem;
+  overflow: auto;
+  font-size: 0.75rem;
+}

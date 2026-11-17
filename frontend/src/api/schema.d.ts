@@ -102,6 +102,62 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/export-profiles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Profiles */
+        get: operations["listProfiles"];
+        put?: never;
+        /** Create Profile */
+        post: operations["createProfile"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/export-profiles/{profile_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update Profile */
+        put: operations["updateProfile"];
+        post?: never;
+        /** Delete Profile */
+        delete: operations["deleteProfile"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/exports/backup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Export Backup
+         * @description Write the whole library as JSON plus figures, with or without the corpus text.
+         */
+        post: operations["exportBackup"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/figures": {
         parameters: {
             query?: never;
@@ -501,6 +557,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/versions/{version_id}/exports/monograph": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Export Monograph
+         * @description Write the monograph as a LaTeX project, and build the PDF if LaTeX is installed.
+         */
+        post: operations["exportMonograph"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/versions/{version_id}/exports/monograph/defaults": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Monograph Defaults
+         * @description Where an edition would be written, and whether a PDF can be built here.
+         */
+        get: operations["getMonographDefaults"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/versions/{version_id}/imports/commentary": {
         parameters: {
             query?: never;
@@ -792,6 +888,25 @@ export interface components {
             /** Type Id */
             type_id: number;
         };
+        /** BackupIn */
+        BackupIn: {
+            /** Folder */
+            folder?: string | null;
+            /**
+             * Include Text
+             * @description False leaves the corpus text out.
+             */
+            include_text: boolean;
+        };
+        /** BackupOut */
+        BackupOut: {
+            /** Files */
+            files: string[];
+            /** Folder */
+            folder: string;
+            /** Includes Text */
+            includes_text: boolean;
+        };
         /** BrokenReferenceOut */
         BrokenReferenceOut: {
             /** Form */
@@ -1017,6 +1132,19 @@ export interface components {
              */
             value?: string | null;
         };
+        /** ExportDefaultsOut */
+        ExportDefaultsOut: {
+            /**
+             * Folder
+             * @description Where the export is written unless another folder is given.
+             */
+            folder: string;
+            /**
+             * Pdf Builder
+             * @description The installed program that can build the PDF.
+             */
+            pdf_builder: string | null;
+        };
         /** FigureIn */
         FigureIn: {
             /**
@@ -1188,6 +1316,38 @@ export interface components {
              * @description The one that remains and takes over everything.
              */
             into_id: number;
+        };
+        /** MonographIn */
+        MonographIn: {
+            /**
+             * Build Pdf
+             * @default true
+             */
+            build_pdf: boolean;
+            /** Folder */
+            folder?: string | null;
+            /** Profile Id */
+            profile_id: number;
+        };
+        /** MonographOut */
+        MonographOut: {
+            /**
+             * Build
+             * @description What happened with the PDF, in plain words.
+             */
+            build: string;
+            /** Files */
+            files: string[];
+            /** Folder */
+            folder: string;
+            /** Notes */
+            notes: number;
+            /** Pages */
+            pages: number;
+            /** Pdf */
+            pdf: string | null;
+            /** Warnings */
+            warnings: string[];
         };
         /** NoteCreateIn */
         NoteCreateIn: {
@@ -1483,6 +1643,46 @@ export interface components {
             line_no: number | null;
             /** Page */
             page: number;
+        };
+        /** ProfileIn */
+        ProfileIn: {
+            /**
+             * Levels
+             * @default [
+             *       1
+             *     ]
+             */
+            levels: number[];
+            /** Name */
+            name: string;
+            /**
+             * Statuses
+             * @default [
+             *       "ready"
+             *     ]
+             */
+            statuses: ("draft" | "ready")[];
+            /** Type Ids */
+            type_ids?: number[] | null;
+        };
+        /**
+         * ProfileOut
+         * @description An edition: which notes an export includes.
+         */
+        ProfileOut: {
+            /** Id */
+            id: number;
+            /** Levels */
+            levels: number[];
+            /** Name */
+            name: string;
+            /** Statuses */
+            statuses: ("draft" | "ready")[];
+            /**
+             * Type Ids
+             * @description Note types included; null means all.
+             */
+            type_ids: number[] | null;
         };
         /** ReferenceHitOut */
         ReferenceHitOut: {
@@ -1997,6 +2197,156 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listProfiles: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileOut"][];
+                };
+            };
+        };
+    };
+    createProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    updateProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                profile_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    deleteProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                profile_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    exportBackup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BackupIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BackupOut"];
+                };
             };
             /** @description Validation Error */
             422: {
@@ -2797,6 +3147,74 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    exportMonograph: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MonographIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MonographOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    getMonographDefaults: {
+        parameters: {
+            query: {
+                profile_id: number;
+            };
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExportDefaultsOut"];
                 };
             };
             /** @description Validation Error */
