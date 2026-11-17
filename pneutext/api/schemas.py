@@ -48,6 +48,16 @@ class VersionOut(VersionSummaryOut):
     divisions: list[DivisionOut]
 
 
+class ShapeHighlightOut(BaseModel):
+    """Where a note's span crosses a line: offsets within the line, in code points."""
+
+    annotation_id: int
+    type_id: int
+    level: int = Field(description="The note's reading level: 1, or 2 for have-read notes.")
+    start: int
+    end: int
+
+
 class TextLineOut(BaseModel):
     """One print line with its words. Only the text projection carries this."""
 
@@ -60,6 +70,7 @@ class TextLineOut(BaseModel):
     starts_paragraph: bool
     ends_paragraph: bool
     text: str
+    highlights: list[ShapeHighlightOut]
 
 
 class PageTextOut(BaseModel):
@@ -70,15 +81,6 @@ class PageTextOut(BaseModel):
     next_page: int | None
     division: DivisionOut | None
     lines: list[TextLineOut]
-
-
-class ShapeHighlightOut(BaseModel):
-    """Where a note's span crosses a line: offsets within the line, in code points."""
-
-    annotation_id: int
-    type_id: int
-    start: int
-    end: int
 
 
 class ShapeLineOut(BaseModel):
@@ -143,3 +145,95 @@ class CorpusImportPreviewOut(BaseModel):
 
 class CorpusImportOut(CorpusImportPreviewOut):
     version_id: int
+
+
+class NoteTypeOut(BaseModel):
+    id: int
+    name: str
+    code: str
+    color: str
+    sort: int
+    role: Literal["note", "definition", "chapter_title", "chapter_summary"]
+
+
+class SpanIn(BaseModel):
+    """A selected passage: where it runs (end exclusive) and the words it covers."""
+
+    start_segment_id: int
+    start_offset: int = Field(description="In code points.")
+    end_segment_id: int
+    end_offset: int
+    exact: str = Field(description="The selected text; the server checks it against the corpus.")
+
+
+class AnchorOut(BaseModel):
+    """Where a note attaches. Carries positions only, never the words."""
+
+    start_segment_id: int
+    start_offset: int
+    end_segment_id: int
+    end_offset: int
+    status: Literal["ok", "orphaned"]
+
+
+class PlaceOut(BaseModel):
+    page: int
+    line_no: int | None
+
+
+class NoteNode(BaseModel):
+    """One node of a parsed note body."""
+
+    type: str
+    text: str | None = None
+    attrs: dict[str, str | int | None] | None = None
+    children: list[NoteNode] | None = None
+
+
+class NoteOut(BaseModel):
+    id: int
+    version_id: int
+    type_id: int
+    scope: Literal["span", "page", "chapter"]
+    level: int
+    status: Literal["draft", "ready"]
+    body_md: str
+    body: NoteNode = Field(description="The body parsed into a syntax tree.")
+    tags: list[str]
+    legacy_id: str | None
+    created_at: str
+    updated_at: str
+    anchor: AnchorOut
+    start: PlaceOut | None = Field(description="Where the passage begins in print.")
+    end: PlaceOut | None = Field(description="Where it ends.")
+
+
+class NoteCreateIn(BaseModel):
+    type_id: int
+    scope: Literal["span", "page", "chapter"] = "span"
+    level: int = 1
+    status: Literal["draft", "ready"] = "draft"
+    body_md: str = ""
+    tags: list[str] = []
+    span: SpanIn | None = None
+    page: int | None = None
+    division_id: int | None = None
+
+
+class NoteUpdateIn(BaseModel):
+    """Fields to change; anything left out stays as it is."""
+
+    type_id: int | None = None
+    level: int | None = None
+    status: Literal["draft", "ready"] | None = None
+    body_md: str | None = None
+    tags: list[str] | None = None
+    span: SpanIn | None = None
+
+
+class RenderIn(BaseModel):
+    body_md: str
+
+
+class RenderOut(BaseModel):
+    body: NoteNode

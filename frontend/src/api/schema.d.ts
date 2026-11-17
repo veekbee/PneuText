@@ -58,6 +58,62 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/note-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Note Types */
+        get: operations["listNoteTypes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notes/render": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Render Note Body
+         * @description Parse a note body into its syntax tree, for the editor's live preview.
+         */
+        post: operations["renderNoteBody"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notes/{note_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Note */
+        get: operations["getNote"];
+        put?: never;
+        post?: never;
+        /** Delete Note */
+        delete: operations["deleteNote"];
+        options?: never;
+        head?: never;
+        /** Update Note */
+        patch: operations["updateNote"];
+        trace?: never;
+    };
     "/api/versions": {
         parameters: {
             query?: never;
@@ -84,6 +140,43 @@ export interface paths {
         };
         /** Get Version */
         get: operations["getVersion"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/versions/{version_id}/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Note */
+        post: operations["createNote"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/versions/{version_id}/pages/{page}/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Page Notes
+         * @description The notes beside a page, in reading order. Carries no corpus text.
+         */
+        get: operations["listPageNotes"];
         put?: never;
         post?: never;
         delete?: never;
@@ -136,6 +229,25 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * AnchorOut
+         * @description Where a note attaches. Carries positions only, never the words.
+         */
+        AnchorOut: {
+            /** End Offset */
+            end_offset: number;
+            /** End Segment Id */
+            end_segment_id: number;
+            /** Start Offset */
+            start_offset: number;
+            /** Start Segment Id */
+            start_segment_id: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "ok" | "orphaned";
+        };
         /** CorpusImportIn */
         CorpusImportIn: {
             /**
@@ -248,6 +360,132 @@ export interface components {
             /** Schema Version */
             schema_version: number;
         };
+        /** NoteCreateIn */
+        NoteCreateIn: {
+            /**
+             * Body Md
+             * @default
+             */
+            body_md: string;
+            /** Division Id */
+            division_id?: number | null;
+            /**
+             * Level
+             * @default 1
+             */
+            level: number;
+            /** Page */
+            page?: number | null;
+            /**
+             * Scope
+             * @default span
+             * @enum {string}
+             */
+            scope: "span" | "page" | "chapter";
+            span?: components["schemas"]["SpanIn"] | null;
+            /**
+             * Status
+             * @default draft
+             * @enum {string}
+             */
+            status: "draft" | "ready";
+            /**
+             * Tags
+             * @default []
+             */
+            tags: string[];
+            /** Type Id */
+            type_id: number;
+        };
+        /**
+         * NoteNode
+         * @description One node of a parsed note body.
+         */
+        NoteNode: {
+            /** Attrs */
+            attrs?: {
+                [key: string]: string | number | null;
+            } | null;
+            /** Children */
+            children?: components["schemas"]["NoteNode"][] | null;
+            /** Text */
+            text?: string | null;
+            /** Type */
+            type: string;
+        };
+        /** NoteOut */
+        NoteOut: {
+            anchor: components["schemas"]["AnchorOut"];
+            /** @description The body parsed into a syntax tree. */
+            body: components["schemas"]["NoteNode"];
+            /** Body Md */
+            body_md: string;
+            /** Created At */
+            created_at: string;
+            /** @description Where it ends. */
+            end: components["schemas"]["PlaceOut"] | null;
+            /** Id */
+            id: number;
+            /** Legacy Id */
+            legacy_id: string | null;
+            /** Level */
+            level: number;
+            /**
+             * Scope
+             * @enum {string}
+             */
+            scope: "span" | "page" | "chapter";
+            /** @description Where the passage begins in print. */
+            start: components["schemas"]["PlaceOut"] | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "ready";
+            /** Tags */
+            tags: string[];
+            /** Type Id */
+            type_id: number;
+            /** Updated At */
+            updated_at: string;
+            /** Version Id */
+            version_id: number;
+        };
+        /** NoteTypeOut */
+        NoteTypeOut: {
+            /** Code */
+            code: string;
+            /** Color */
+            color: string;
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "note" | "definition" | "chapter_title" | "chapter_summary";
+            /** Sort */
+            sort: number;
+        };
+        /**
+         * NoteUpdateIn
+         * @description Fields to change; anything left out stays as it is.
+         */
+        NoteUpdateIn: {
+            /** Body Md */
+            body_md?: string | null;
+            /** Level */
+            level?: number | null;
+            span?: components["schemas"]["SpanIn"] | null;
+            /** Status */
+            status?: ("draft" | "ready") | null;
+            /** Tags */
+            tags?: string[] | null;
+            /** Type Id */
+            type_id?: number | null;
+        };
         /**
          * PageShapeOut
          * @description The shape projection: all that blank mode and publishable exports may see.
@@ -283,6 +521,23 @@ export interface components {
             /** Version Id */
             version_id: number;
         };
+        /** PlaceOut */
+        PlaceOut: {
+            /** Line No */
+            line_no: number | null;
+            /** Page */
+            page: number;
+        };
+        /** RenderIn */
+        RenderIn: {
+            /** Body Md */
+            body_md: string;
+        };
+        /** RenderOut */
+        RenderOut: {
+            /** @description The body parsed into a syntax tree. */
+            body: components["schemas"]["NoteNode"];
+        };
         /**
          * ShapeHighlightOut
          * @description Where a note's span crosses a line: offsets within the line, in code points.
@@ -292,6 +547,11 @@ export interface components {
             annotation_id: number;
             /** End */
             end: number;
+            /**
+             * Level
+             * @description The note's reading level: 1, or 2 for have-read notes.
+             */
+            level: number;
             /** Start */
             start: number;
             /** Type Id */
@@ -326,12 +586,36 @@ export interface components {
             starts_paragraph: boolean;
         };
         /**
+         * SpanIn
+         * @description A selected passage: where it runs (end exclusive) and the words it covers.
+         */
+        SpanIn: {
+            /** End Offset */
+            end_offset: number;
+            /** End Segment Id */
+            end_segment_id: number;
+            /**
+             * Exact
+             * @description The selected text; the server checks it against the corpus.
+             */
+            exact: string;
+            /**
+             * Start Offset
+             * @description In code points.
+             */
+            start_offset: number;
+            /** Start Segment Id */
+            start_segment_id: number;
+        };
+        /**
          * TextLineOut
          * @description One print line with its words. Only the text projection carries this.
          */
         TextLineOut: {
             /** Ends Paragraph */
             ends_paragraph: boolean;
+            /** Highlights */
+            highlights: components["schemas"]["ShapeHighlightOut"][];
             /** Id */
             id: number;
             /**
@@ -524,6 +808,154 @@ export interface operations {
             };
         };
     };
+    listNoteTypes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NoteTypeOut"][];
+                };
+            };
+        };
+    };
+    renderNoteBody: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RenderIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RenderOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    getNote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                note_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NoteOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    deleteNote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                note_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    updateNote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                note_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NoteUpdateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NoteOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     listVersions: {
         parameters: {
             query?: never;
@@ -562,6 +994,73 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["VersionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    createNote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NoteCreateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NoteOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listPageNotes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+                page: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NoteOut"][];
                 };
             };
             /** @description Validation Error */

@@ -10,9 +10,10 @@ from pathlib import Path
 from pneutext.core import shape
 from pneutext.core.corpus import TEXT_KINDS, CorpusSummary, ImportProblem
 from pneutext.core.errors import Conflict, InvalidInput, NotFound
-from pneutext.core.shape import ShapeLine
+from pneutext.core.shape import ShapeHighlight, ShapeLine
 from pneutext.importers import paged_corpus
 from pneutext.importers.paged_corpus import CorpusFormat
+from pneutext.services import notes as notes_service
 from pneutext.store import corpus as corpus_store
 from pneutext.store import db
 from pneutext.store.corpus import DivisionRow, LineTextRow, NewVersion, VersionRow
@@ -57,6 +58,7 @@ class PageText:
     next_page: int | None
     division: DivisionRow | None
     lines: list[LineTextRow]
+    highlights: list[list[ShapeHighlight]]  # one list per line, in the same order
 
 
 @dataclass(frozen=True)
@@ -170,6 +172,9 @@ def get_page_text(library: Library, version_id: int, page: int) -> PageText:
             next_page=next_page,
             division=corpus_store.division_at_page(conn, version.id, version.pagination_id, page),
             lines=lines,
+            highlights=notes_service.page_highlights(
+                conn, version.id, [line.shape for line in lines]
+            ),
         )
 
 
@@ -181,6 +186,7 @@ def get_page_shape(library: Library, version_id: int, page: int) -> PageShape:
         if not rows:
             raise NotFound(f"This text has no page {page}.")
         prev_page, next_page = corpus_store.neighbouring_pages(conn, version.pagination_id, page)
+        highlights = notes_service.page_highlights(conn, version.id, rows)
         return PageShape(
             version_id=version.id,
             edit_seq=version.edit_seq,
@@ -198,7 +204,8 @@ def get_page_shape(library: Library, version_id: int, page: int) -> PageShape:
                     ends_paragraph=row.ends_paragraph,
                     # Furniture is a fixed placeholder: its label's length is not shape.
                     length=row.length if row.kind in TEXT_KINDS else 0,
+                    highlights=marks,
                 )
-                for row in rows
+                for row, marks in zip(rows, highlights, strict=True)
             ],
         )

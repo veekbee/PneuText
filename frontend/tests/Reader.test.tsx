@@ -2,7 +2,16 @@ import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { App } from "../src/App";
-import { forgetPrefs, mockApi, pageOf, renderWithQuery, setUrl, shapeOf, VERSION } from "./helpers";
+import {
+  forgetPrefs,
+  mockApi,
+  pageOf,
+  renderWithQuery,
+  setUrl,
+  shapeOf,
+  TYPES,
+  VERSION,
+} from "./helpers";
 
 beforeEach(forgetPrefs);
 afterEach(cleanup);
@@ -10,6 +19,10 @@ afterEach(cleanup);
 function mockBook() {
   return mockApi({
     "GET /api/versions/1": () => ({ body: VERSION }),
+    "GET /api/note-types": () => ({ body: TYPES }),
+    ...Object.fromEntries(
+      [7, 8, 9].map((page) => [`GET /api/versions/1/pages/${page}/notes`, () => ({ body: [] })]),
+    ),
     "GET /api/versions/1/pages/7/text": () => ({ body: pageOf(7, "seventh page words") }),
     "GET /api/versions/1/pages/8/text": () => ({ body: pageOf(8, "eighth page words") }),
     "GET /api/versions/1/pages/9/text": () => ({ body: pageOf(9, "ninth page words") }),
@@ -157,7 +170,7 @@ describe("Reader in blank mode", () => {
     await screen.findByText("seventh page words");
     fireEvent.keyDown(window, { key: "b" });
     await waitFor(() => expect(screen.getByLabelText("Page 7").dataset.mode).toBe("blank"));
-    expect(JSON.parse(window.localStorage.getItem("pneutext.prefs") ?? "{}")).toEqual({
+    expect(JSON.parse(window.localStorage.getItem("pneutext.prefs") ?? "{}")).toMatchObject({
       mode: "blank",
     });
     first.unmount();

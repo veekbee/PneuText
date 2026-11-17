@@ -2,21 +2,33 @@
 // Remembered in localStorage when it is available, and harmless when it is not.
 import { useSyncExternalStore } from "react";
 
+import type { ReadingLevel } from "./filters";
+
 export type Mode = "text" | "blank";
 
 export interface Prefs {
   mode: Mode;
+  /** First reading hides level 2 notes. */
+  level: ReadingLevel;
+  /** Note types the reader has switched off. */
+  hiddenTypes: number[];
 }
 
 const KEY = "pneutext.prefs";
-const DEFAULTS: Prefs = { mode: "text" };
+const DEFAULTS: Prefs = { mode: "text", level: "all", hiddenTypes: [] };
 
 function load(): Prefs {
   try {
     const stored: unknown = JSON.parse(window.localStorage.getItem(KEY) ?? "{}");
     if (typeof stored === "object" && stored !== null) {
-      const mode = (stored as { mode?: unknown }).mode;
-      return { mode: mode === "blank" ? "blank" : "text" };
+      const { mode, level, hiddenTypes } = stored as Record<string, unknown>;
+      return {
+        mode: mode === "blank" ? "blank" : "text",
+        level: level === "first" ? "first" : "all",
+        hiddenTypes: Array.isArray(hiddenTypes)
+          ? hiddenTypes.filter((id): id is number => typeof id === "number")
+          : [],
+      };
     }
   } catch {
     // Storage is unavailable or holds something unreadable; use the defaults.

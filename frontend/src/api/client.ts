@@ -15,6 +15,13 @@ export type CorpusImportInput = Schemas["CorpusImportIn"];
 export type CorpusImportPreview = Schemas["CorpusImportPreviewOut"];
 export type CorpusImportResult = Schemas["CorpusImportOut"];
 export type ImportProblem = Schemas["ImportProblemOut"];
+export type NoteType = Schemas["NoteTypeOut"];
+export type Note = Schemas["NoteOut"];
+export type NoteNode = Schemas["NoteNode"];
+export type NoteCreateInput = Schemas["NoteCreateIn"];
+export type NoteUpdateInput = Schemas["NoteUpdateIn"];
+export type SpanInput = Schemas["SpanIn"];
+export type Highlight = Schemas["ShapeHighlightOut"];
 
 export class ApiError extends Error {
   readonly status: number;
@@ -49,15 +56,20 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (!response.ok) {
     throw new ApiError(response.status, await errorMessage(response));
   }
+  if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
 }
 
-function post<T>(path: string, body: unknown): Promise<T> {
+function send<T>(method: string, path: string, body: unknown): Promise<T> {
   return request<T>(path, {
-    method: "POST",
+    method,
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
   });
+}
+
+function post<T>(path: string, body: unknown): Promise<T> {
+  return send<T>("POST", path, body);
 }
 
 export const api = {
@@ -72,4 +84,14 @@ export const api = {
     post<CorpusImportPreview>("/api/imports/corpus/preview", input),
   importCorpus: (input: CorpusImportInput) =>
     post<CorpusImportResult>("/api/imports/corpus", input),
+  listNoteTypes: () => request<NoteType[]>("/api/note-types"),
+  listPageNotes: (versionId: number, page: number) =>
+    request<Note[]>(`/api/versions/${versionId}/pages/${page}/notes`),
+  createNote: (versionId: number, input: NoteCreateInput) =>
+    post<Note>(`/api/versions/${versionId}/notes`, input),
+  updateNote: (noteId: number, input: NoteUpdateInput) =>
+    send<Note>("PATCH", `/api/notes/${noteId}`, input),
+  deleteNote: (noteId: number) => request<undefined>(`/api/notes/${noteId}`, { method: "DELETE" }),
+  renderNoteBody: (bodyMd: string) =>
+    post<{ body: NoteNode }>("/api/notes/render", { body_md: bodyMd }),
 };

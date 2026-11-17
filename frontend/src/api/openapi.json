@@ -1,6 +1,44 @@
 {
   "components": {
     "schemas": {
+      "AnchorOut": {
+        "description": "Where a note attaches. Carries positions only, never the words.",
+        "properties": {
+          "end_offset": {
+            "title": "End Offset",
+            "type": "integer"
+          },
+          "end_segment_id": {
+            "title": "End Segment Id",
+            "type": "integer"
+          },
+          "start_offset": {
+            "title": "Start Offset",
+            "type": "integer"
+          },
+          "start_segment_id": {
+            "title": "Start Segment Id",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "ok",
+              "orphaned"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "start_segment_id",
+          "start_offset",
+          "end_segment_id",
+          "end_offset",
+          "status"
+        ],
+        "title": "AnchorOut",
+        "type": "object"
+      },
       "CorpusImportIn": {
         "properties": {
           "allow_duplicate": {
@@ -293,6 +331,389 @@
         "title": "LibraryOut",
         "type": "object"
       },
+      "NoteCreateIn": {
+        "properties": {
+          "body_md": {
+            "default": "",
+            "title": "Body Md",
+            "type": "string"
+          },
+          "division_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Division Id"
+          },
+          "level": {
+            "default": 1,
+            "title": "Level",
+            "type": "integer"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "scope": {
+            "default": "span",
+            "enum": [
+              "span",
+              "page",
+              "chapter"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "span": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SpanIn"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "default": "draft",
+            "enum": [
+              "draft",
+              "ready"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "tags": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "type_id": {
+            "title": "Type Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "type_id"
+        ],
+        "title": "NoteCreateIn",
+        "type": "object"
+      },
+      "NoteNode": {
+        "description": "One node of a parsed note body.",
+        "properties": {
+          "attrs": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attrs"
+          },
+          "children": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/NoteNode"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Children"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "NoteNode",
+        "type": "object"
+      },
+      "NoteOut": {
+        "properties": {
+          "anchor": {
+            "$ref": "#/components/schemas/AnchorOut"
+          },
+          "body": {
+            "$ref": "#/components/schemas/NoteNode",
+            "description": "The body parsed into a syntax tree."
+          },
+          "body_md": {
+            "title": "Body Md",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "end": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PlaceOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Where it ends."
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "legacy_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Legacy Id"
+          },
+          "level": {
+            "title": "Level",
+            "type": "integer"
+          },
+          "scope": {
+            "enum": [
+              "span",
+              "page",
+              "chapter"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "start": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PlaceOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Where the passage begins in print."
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "ready"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "type_id": {
+            "title": "Type Id",
+            "type": "integer"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string"
+          },
+          "version_id": {
+            "title": "Version Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "version_id",
+          "type_id",
+          "scope",
+          "level",
+          "status",
+          "body_md",
+          "body",
+          "tags",
+          "legacy_id",
+          "created_at",
+          "updated_at",
+          "anchor",
+          "start",
+          "end"
+        ],
+        "title": "NoteOut",
+        "type": "object"
+      },
+      "NoteTypeOut": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "color": {
+            "title": "Color",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "note",
+              "definition",
+              "chapter_title",
+              "chapter_summary"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "sort": {
+            "title": "Sort",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "code",
+          "color",
+          "sort",
+          "role"
+        ],
+        "title": "NoteTypeOut",
+        "type": "object"
+      },
+      "NoteUpdateIn": {
+        "description": "Fields to change; anything left out stays as it is.",
+        "properties": {
+          "body_md": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Body Md"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Level"
+          },
+          "span": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SpanIn"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "draft",
+                  "ready"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags"
+          },
+          "type_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type Id"
+          }
+        },
+        "title": "NoteUpdateIn",
+        "type": "object"
+      },
       "PageShapeOut": {
         "description": "The shape projection: all that blank mode and publishable exports may see.",
         "properties": {
@@ -426,6 +847,57 @@
         "title": "PageTextOut",
         "type": "object"
       },
+      "PlaceOut": {
+        "properties": {
+          "line_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line No"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "page",
+          "line_no"
+        ],
+        "title": "PlaceOut",
+        "type": "object"
+      },
+      "RenderIn": {
+        "properties": {
+          "body_md": {
+            "title": "Body Md",
+            "type": "string"
+          }
+        },
+        "required": [
+          "body_md"
+        ],
+        "title": "RenderIn",
+        "type": "object"
+      },
+      "RenderOut": {
+        "properties": {
+          "body": {
+            "$ref": "#/components/schemas/NoteNode",
+            "description": "The body parsed into a syntax tree."
+          }
+        },
+        "required": [
+          "body"
+        ],
+        "title": "RenderOut",
+        "type": "object"
+      },
       "ShapeHighlightOut": {
         "description": "Where a note's span crosses a line: offsets within the line, in code points.",
         "properties": {
@@ -435,6 +907,11 @@
           },
           "end": {
             "title": "End",
+            "type": "integer"
+          },
+          "level": {
+            "description": "The note's reading level: 1, or 2 for have-read notes.",
+            "title": "Level",
             "type": "integer"
           },
           "start": {
@@ -449,6 +926,7 @@
         "required": [
           "annotation_id",
           "type_id",
+          "level",
           "start",
           "end"
         ],
@@ -522,12 +1000,55 @@
         "title": "ShapeLineOut",
         "type": "object"
       },
+      "SpanIn": {
+        "description": "A selected passage: where it runs (end exclusive) and the words it covers.",
+        "properties": {
+          "end_offset": {
+            "title": "End Offset",
+            "type": "integer"
+          },
+          "end_segment_id": {
+            "title": "End Segment Id",
+            "type": "integer"
+          },
+          "exact": {
+            "description": "The selected text; the server checks it against the corpus.",
+            "title": "Exact",
+            "type": "string"
+          },
+          "start_offset": {
+            "description": "In code points.",
+            "title": "Start Offset",
+            "type": "integer"
+          },
+          "start_segment_id": {
+            "title": "Start Segment Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "start_segment_id",
+          "start_offset",
+          "end_segment_id",
+          "end_offset",
+          "exact"
+        ],
+        "title": "SpanIn",
+        "type": "object"
+      },
       "TextLineOut": {
         "description": "One print line with its words. Only the text projection carries this.",
         "properties": {
           "ends_paragraph": {
             "title": "Ends Paragraph",
             "type": "boolean"
+          },
+          "highlights": {
+            "items": {
+              "$ref": "#/components/schemas/ShapeHighlightOut"
+            },
+            "title": "Highlights",
+            "type": "array"
           },
           "id": {
             "title": "Id",
@@ -586,7 +1107,8 @@
           "length",
           "starts_paragraph",
           "ends_paragraph",
-          "text"
+          "text",
+          "highlights"
         ],
         "title": "TextLineOut",
         "type": "object"
@@ -921,6 +1443,198 @@
         ]
       }
     },
+    "/api/note-types": {
+      "get": {
+        "operationId": "listNoteTypes",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/NoteTypeOut"
+                  },
+                  "title": "Response Listnotetypes",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Note Types",
+        "tags": [
+          "notes"
+        ]
+      }
+    },
+    "/api/notes/render": {
+      "post": {
+        "description": "Parse a note body into its syntax tree, for the editor's live preview.",
+        "operationId": "renderNoteBody",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenderIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RenderOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Render Note Body",
+        "tags": [
+          "notes"
+        ]
+      }
+    },
+    "/api/notes/{note_id}": {
+      "delete": {
+        "operationId": "deleteNote",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "note_id",
+            "required": true,
+            "schema": {
+              "title": "Note Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Note",
+        "tags": [
+          "notes"
+        ]
+      },
+      "get": {
+        "operationId": "getNote",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "note_id",
+            "required": true,
+            "schema": {
+              "title": "Note Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Note",
+        "tags": [
+          "notes"
+        ]
+      },
+      "patch": {
+        "operationId": "updateNote",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "note_id",
+            "required": true,
+            "schema": {
+              "title": "Note Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoteUpdateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Note",
+        "tags": [
+          "notes"
+        ]
+      }
+    },
     "/api/versions": {
       "get": {
         "operationId": "listVersions",
@@ -985,6 +1699,114 @@
         "summary": "Get Version",
         "tags": [
           "corpus"
+        ]
+      }
+    },
+    "/api/versions/{version_id}/notes": {
+      "post": {
+        "operationId": "createNote",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoteCreateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Note",
+        "tags": [
+          "notes"
+        ]
+      }
+    },
+    "/api/versions/{version_id}/pages/{page}/notes": {
+      "get": {
+        "description": "The notes beside a page, in reading order. Carries no corpus text.",
+        "operationId": "listPageNotes",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "page",
+            "required": true,
+            "schema": {
+              "title": "Page",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/NoteOut"
+                  },
+                  "title": "Response Listpagenotes",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Page Notes",
+        "tags": [
+          "notes"
         ]
       }
     },

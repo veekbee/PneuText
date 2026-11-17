@@ -24,6 +24,7 @@ class ShapeHighlight:
     type_id: int
     start: int
     end: int
+    level: int = 1  # the note's reading level, so a reader can hide level 2
 
 
 @dataclass(frozen=True)

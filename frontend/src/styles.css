@@ -52,6 +52,10 @@ a {
 .shell {
   height: 100vh;
   display: grid;
+  grid-template-rows: auto auto 1fr;
+}
+
+.shell:not(:has(.filter-bar)) {
   grid-template-rows: auto 1fr auto;
 }
 
@@ -80,8 +84,14 @@ a {
 
 .workspace {
   display: grid;
-  grid-template-columns: 13rem 1fr;
+  grid-template-columns: 12rem 1fr 22rem;
   min-height: 0;
+}
+
+.filter-bar {
+  padding: 0.35rem 1rem;
+  border-bottom: 1px solid var(--edge);
+  font-size: 0.85rem;
 }
 
 .sidebar {
@@ -117,11 +127,15 @@ a {
 /* ---- Navigation -------------------------------------------------------- */
 
 .mode-switch {
-  display: flex;
   margin-left: auto;
 }
 
-.mode-switch button {
+/* A row of buttons where one is pressed. */
+.segmented {
+  display: flex;
+}
+
+.segmented button {
   padding: 0.2rem 0.7rem;
   border: 1px solid var(--edge);
   border-radius: 0;
@@ -129,19 +143,59 @@ a {
   color: var(--ink);
 }
 
-.mode-switch button:first-child {
+.segmented button:first-child {
   border-radius: 4px 0 0 4px;
 }
 
-.mode-switch button:last-child {
-  border-left: 0;
+.segmented button:last-child {
   border-radius: 0 4px 4px 0;
 }
 
-.mode-switch button[aria-pressed="true"] {
+.segmented button + button {
+  border-left: 0;
+}
+
+.segmented button[aria-pressed="true"] {
   background: var(--ink);
   border-color: var(--ink);
   color: var(--paper);
+}
+
+.note-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+.type-toggles,
+.popover-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+/* A chip in its note type's color; faded when that type is switched off. */
+.type-toggle {
+  padding: 0.1rem 0.55rem 0.1rem 0.4rem;
+  border: 1px solid var(--edge);
+  border-left: 0.5em solid var(--type-color);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.85em;
+}
+
+.type-toggle[aria-pressed="false"] {
+  border-left-color: transparent;
+  color: var(--ink-quiet);
+  text-decoration: line-through;
+}
+
+.popover-types .type-toggle[aria-pressed="false"] {
+  border-left-color: var(--type-color);
+  color: var(--ink);
+  text-decoration: none;
 }
 
 .page-nav {
@@ -492,4 +546,260 @@ input {
   margin: 0.75rem 0 0;
   padding-left: 1.1rem;
   font-size: 0.9rem;
+}
+
+/* ---- Highlights -------------------------------------------------------- */
+
+.hl {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 82%;
+  cursor: pointer;
+}
+
+.hl.is-active {
+  box-shadow: 0 0.12em 0 var(--ink);
+}
+
+.bar-highlight {
+  cursor: pointer;
+}
+
+.bar-highlight.is-active {
+  outline: 1.5px solid var(--ink);
+}
+
+/* ---- Notes panel ------------------------------------------------------- */
+
+.notes-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-left: 1px solid var(--edge);
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.panel-head h2 {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-quiet);
+}
+
+.status-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--ink-quiet);
+}
+
+.note-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.note-card {
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--edge);
+  border-left: 4px solid var(--type-color);
+  border-radius: 3px;
+  background: var(--paper);
+}
+
+.note-card.is-active {
+  border-color: var(--ink);
+  border-left-color: var(--type-color);
+}
+
+.note-card.is-pending {
+  opacity: 0.6;
+}
+
+.note-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+}
+
+.note-head .quiet-button {
+  margin-left: auto;
+}
+
+.note-type {
+  font-weight: 600;
+}
+
+.badge {
+  padding: 0 0.35rem;
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  color: var(--ink-quiet);
+}
+
+.note-body {
+  font-family: var(--serif);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.note-body > :first-child {
+  margin-top: 0.3rem;
+}
+
+.note-body > :last-child {
+  margin-bottom: 0;
+}
+
+.note-body p,
+.note-body ul,
+.note-body ol,
+.note-body blockquote,
+.note-body pre {
+  margin: 0.45rem 0;
+}
+
+.note-body blockquote {
+  padding-left: 0.7rem;
+  border-left: 2px solid var(--edge);
+  color: var(--ink-quiet);
+}
+
+.note-body code,
+.note-body pre {
+  font-size: 0.85em;
+}
+
+.note-body h3,
+.note-body h4,
+.note-body h5,
+.note-body h6 {
+  margin: 0.6rem 0 0.2rem;
+  font-size: 1em;
+}
+
+.note-empty,
+.note-tags {
+  margin: 0.3rem 0 0;
+  font-size: 0.8rem;
+}
+
+.note-editor {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.5rem;
+}
+
+.note-editor label {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.78rem;
+  color: var(--ink-quiet);
+}
+
+.editor-row {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 0.9fr;
+  gap: 0.4rem;
+}
+
+textarea,
+select {
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--edge);
+  border-radius: 4px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+
+textarea {
+  resize: vertical;
+  font-family: var(--serif);
+}
+
+.note-preview {
+  padding: 0.4rem 0.6rem;
+  border: 1px dashed var(--edge);
+  border-radius: 3px;
+}
+
+.editor-actions,
+.panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.editor-error {
+  margin: 0;
+  color: #a33;
+}
+
+.quiet-button,
+.danger-button {
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--edge);
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.8rem;
+}
+
+.danger-button {
+  border-color: #a33;
+  color: #a33;
+}
+
+/* ---- Selection popover ------------------------------------------------- */
+
+.popover {
+  position: fixed;
+  z-index: 10;
+  transform: translateX(-50%);
+  display: grid;
+  gap: 0.4rem;
+  max-width: 26rem;
+  padding: 0.4rem;
+  border: 1px solid var(--edge);
+  border-radius: 6px;
+  background: var(--paper);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 18%);
+  font-size: 0.85rem;
+}
+
+.popover-actions {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.popover-actions button {
+  padding: 0.2rem 0.6rem;
+  border-color: var(--edge);
+  background: transparent;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.popover-reference {
+  user-select: all;
+}
+
+.stage > .notice {
+  margin-bottom: 0.75rem;
 }

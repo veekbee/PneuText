@@ -93,7 +93,21 @@ def get_page_text(version_id: int, page: int, library: LibraryDep) -> PageTextOu
         prev_page=result.prev_page,
         next_page=result.next_page,
         division=None if result.division is None else _division(result.division),
-        lines=[TextLineOut(**asdict(line.shape), text=line.text) for line in result.lines],
+        lines=[
+            TextLineOut(
+                id=line.shape.id,
+                segment_id=line.shape.segment_id,
+                kind=line.shape.kind,
+                line_no=line.shape.line_no,
+                start_offset=line.shape.start_offset,
+                length=line.shape.length,
+                starts_paragraph=line.shape.starts_paragraph,
+                ends_paragraph=line.shape.ends_paragraph,
+                text=line.text,
+                highlights=[ShapeHighlightOut(**asdict(h)) for h in marks],
+            )
+            for line, marks in zip(result.lines, result.highlights, strict=True)
+        ],
     )
 
 

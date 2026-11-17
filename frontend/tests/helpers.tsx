@@ -3,7 +3,15 @@ import { render } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { vi } from "vitest";
 
-import type { PageShape, PageText, ShapeLine, TextLine, Version } from "../src/api/client";
+import type {
+  Note,
+  NoteType,
+  PageShape,
+  PageText,
+  ShapeLine,
+  TextLine,
+  Version,
+} from "../src/api/client";
 import { resetPrefs } from "../src/lib/prefs";
 
 type Handler = (body: unknown) => { status?: number; body: unknown };
@@ -20,7 +28,8 @@ export function mockApi(handlers: Record<string, Handler>) {
     }
     const sent: unknown = typeof init?.body === "string" ? JSON.parse(init.body) : undefined;
     const { status = 200, body } = handler(sent);
-    return new Response(JSON.stringify(body), { status });
+    // A 204 has no body, and the browser refuses to build one that does.
+    return new Response(status === 204 ? null : JSON.stringify(body), { status });
   });
 }
 
@@ -54,6 +63,7 @@ export function line(text: string, overrides: Partial<TextLine> = {}): TextLine 
     starts_paragraph: false,
     ends_paragraph: false,
     text,
+    highlights: [],
     ...overrides,
   };
 }
@@ -118,4 +128,55 @@ export function shapeOf(page: number): PageShape {
       }),
     ),
   };
+}
+
+export const TYPES: NoteType[] = [
+  { id: 1, name: "Clarification", code: "cl", color: "#7d9bbd", sort: 10, role: "note" },
+  { id: 2, name: "Comment", code: "c", color: "#d9b44a", sort: 20, role: "note" },
+  { id: 8, name: "Chapter summary", code: "cs", color: "#b0b0b0", sort: 90, role: "chapter_summary" },
+];
+
+export function noteOf(id: number, overrides: Partial<Note> = {}): Note {
+  return {
+    id,
+    version_id: 1,
+    type_id: 2,
+    scope: "span",
+    level: 1,
+    status: "draft",
+    body_md: "",
+    body: { type: "document", children: [] },
+    tags: [],
+    legacy_id: null,
+    created_at: "2026-01-01T00:00:00Z",
+    updated_at: "2026-01-01T00:00:00Z",
+    anchor: { start_segment_id: 1, start_offset: 0, end_segment_id: 1, end_offset: 5, status: "ok" },
+    start: { page: 7, line_no: 1 },
+    end: { page: 7, line_no: 1 },
+    ...overrides,
+  };
+}
+
+/** A parsed body holding one plain paragraph. */
+export function bodyOf(text: string): Note["body"] {
+  return {
+    type: "document",
+    children: [{ type: "paragraph", children: [{ type: "text", text }] }],
+  };
+}
+
+/** Select text on the page as a reader would, then release the mouse. */
+export function selectText(
+  startNode: Node,
+  startOffset: number,
+  endNode: Node,
+  endOffset: number,
+): void {
+  const range = document.createRange();
+  range.setStart(startNode, startOffset);
+  range.setEnd(endNode, endOffset);
+  const selection = window.getSelection();
+  selection?.removeAllRanges();
+  selection?.addRange(range);
+  document.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
 }

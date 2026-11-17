@@ -100,8 +100,8 @@ function renderBlank(targetLine: number | null = null) {
       line_no: 2,
       ends_paragraph: true,
       highlights: [
-        { annotation_id: 7, type_id: 2, start: 0, end: 10 },
-        { annotation_id: 8, type_id: 3, start: 5, end: 25 },
+        { annotation_id: 7, type_id: 2, level: 1, start: 0, end: 10 },
+        { annotation_id: 8, type_id: 3, level: 2, start: 5, end: 25 },
       ],
     }),
   ];

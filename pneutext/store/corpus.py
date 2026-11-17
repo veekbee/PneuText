@@ -50,6 +50,7 @@ class LineShapeRow:
 
     id: int
     segment_id: int
+    position: int  # the segment's place in reading order
     kind: str
     page: int
     line_no: int | None
@@ -193,7 +194,7 @@ def neighbouring_pages(
 # Line geometry is derived without reading any text: a line ends where the next line of
 # its segment starts (less the joining space), or at the end of the segment.
 _LINE_SHAPE_SELECT = """
-    SELECT id, segment_id, kind, page, line_no, start_offset,
+    SELECT id, segment_id, position, kind, page, line_no, start_offset,
            COALESCE(next_start - 1, segment_length) - start_offset AS length,
            start_offset = 0 AS starts_paragraph,
            next_start IS NULL AS ends_paragraph
@@ -214,6 +215,7 @@ def _shape_row(row: sqlite3.Row) -> LineShapeRow:
     return LineShapeRow(
         id=row["id"],
         segment_id=row["segment_id"],
+        position=row["position"],
         kind=row["kind"],
         page=row["page"],
         line_no=row["line_no"],
