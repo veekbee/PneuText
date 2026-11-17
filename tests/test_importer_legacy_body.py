@@ -96,8 +96,17 @@ def test_an_xxx_paragraph_becomes_a_todo_paragraph() -> None:
     assert md("XXX: fix") == "TODO: fix"
 
 
-def test_xxx_inside_a_paragraph_is_not_a_remark() -> None:
-    assert md("The mark\nXXX is drawn here.") == "The mark\nXXX is drawn here."
+def test_a_line_starting_xxx_is_always_a_remark_even_straight_after_text() -> None:
+    # A private remark must never be taken for part of the note and published.
+    assert md("The mark is here.\nXXX check this\nand that\n\nMore.") == (
+        "The mark is here.\n\nTODO: check this\nand that\n\nMore."
+    )
+    # Remarks on consecutive lines are separate remarks.
+    assert md("XXX (first)\nXXX (second)") == "TODO: (first)\n\nTODO: (second)"
+
+
+def test_xxx_within_a_line_or_a_longer_word_is_not_a_remark() -> None:
+    assert md("The mark XXX is drawn here.") == "The mark XXX is drawn here."
     assert md("XXXL sizes") == "XXXL sizes"
 
 

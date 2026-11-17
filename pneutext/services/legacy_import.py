@@ -105,11 +105,13 @@ _MESSAGES: dict[str, tuple[str, str]] = {
     ),
     "unknown_type_name": (
         "type_disagreement",
-        "{tag}: {detail} is not a note type; the id's prefix was used.",
+        "{tag}: {detail} is not a note type; the type was taken from the id's prefix, or "
+        "set to the default if that is unknown too. Add the type under Note types to keep it.",
     ),
     "unknown_prefix": (
         "type_disagreement",
-        "{tag}: the id's prefix is not the code of any note type.",
+        "{tag}: the id's prefix is not the code of any note type; add one with that code "
+        "under Note types to keep it.",
     ),
     "bad_level": (
         "type_disagreement",

@@ -87,6 +87,7 @@ def test_a_new_library_is_seeded_with_note_types(client: TestClient) -> None:
         ("Historical", "h", "note"),
         ("Meditation", "m", "note"),
         ("Literary", "l", "note"),
+        ("Interpretation", "i", "note"),
         ("Spanish", "s", "note"),
         ("Definition", "d", "definition"),
         ("Chapter title", "ct", "chapter_title"),

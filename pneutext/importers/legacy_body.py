@@ -80,6 +80,7 @@ def figure_label(file_name: str) -> str:
     return _LABEL_JUNK.sub("-", stem.lower()).strip("-") or "figure"
 
 
+_BREAK_MARK = "\x01"  # marks a remark that must start a paragraph of its own
 _COMMENT_MARK = "\x00"  # marks a line that was a % comment, until it gets its own paragraph
 
 
@@ -98,15 +99,21 @@ def convert(body: str, fmt: BodyFormat) -> ConvertedBody:
 
 
 def _remarks(lines: list[str]) -> list[str]:
-    """Turn ``XXX`` paragraphs and ``%`` comment lines into ``TODO:`` remarks, line for line."""
+    """Turn ``XXX`` remarks and ``%`` comment lines into ``TODO:`` remarks, line for line.
+
+    Any line that starts with ``XXX`` starts a remark, even straight after other text:
+    a private remark must never be taken for part of a note and published. The remark
+    runs to the next blank line, as a paragraph does.
+    """
     out: list[str] = []
     paragraph_start = True
     for line in lines:
         stripped = line.strip()
         if stripped.startswith("%"):
             out.append(_COMMENT_MARK + "TODO: " + stripped.lstrip("%").strip())
-        elif paragraph_start and _REMARK_LEAD.match(stripped):
-            out.append("TODO: " + _REMARK_LEAD.sub("", stripped))
+        elif _REMARK_LEAD.match(stripped):
+            remark = "TODO: " + _REMARK_LEAD.sub("", stripped)
+            out.append(remark if paragraph_start else _BREAK_MARK + remark)
         else:
             out.append(line)
         paragraph_start = stripped == ""
@@ -119,6 +126,8 @@ def _own_paragraphs(lines: list[str]) -> list[str]:
     for line in lines:
         if line.startswith(_COMMENT_MARK):
             out += ["", line[len(_COMMENT_MARK) :], ""]
+        elif line.startswith(_BREAK_MARK):
+            out += ["", line[len(_BREAK_MARK) :]]
         else:
             out.append(line)
     return out

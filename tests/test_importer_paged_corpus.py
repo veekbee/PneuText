@@ -76,6 +76,17 @@ def test_chapter_opening_directives_become_furniture_and_a_division() -> None:
     assert corpus.problems == []
 
 
+def test_a_section_ornament_within_a_page_is_furniture_between_paragraphs() -> None:
+    corpus = parse_pages([page(27, "alpha\nbeta\n\n<<section_decoration>>\n\ngamma\n")])
+    assert [(s.kind, s.text) for s in corpus.segments] == [
+        ("paragraph", "alpha beta"),
+        ("ornament", ""),
+        ("paragraph", "gamma"),
+    ]
+    assert [(line.page, line.line_no) for line in corpus.segments[2].lines] == [(27, 3)]
+    assert corpus.problems == []
+
+
 def test_furniture_has_one_unnumbered_line_and_text_lines_are_numbered_per_page() -> None:
     corpus = parse_pages([page(4, "<<chapter=IV>>\nalpha\nbeta\n"), page(5, "gamma\n")])
     furniture, paragraph = corpus.segments

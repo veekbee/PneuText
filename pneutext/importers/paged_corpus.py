@@ -47,6 +47,7 @@ def _default_directives() -> dict[str, DirectiveRule]:
     return {
         "chapter": DirectiveRule(furniture="chapter_number", division="chapter"),
         "chapter_ornament": DirectiveRule(furniture="ornament"),
+        "section_decoration": DirectiveRule(furniture="ornament"),
         "top_bar": DirectiveRule(furniture="rule", region="open"),
         "bottom_bar": DirectiveRule(furniture="rule", region="close"),
         "my_title": DirectiveRule(commentary=True),
