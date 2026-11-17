@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from pneutext.importers.legacy_commentary import (
+    DEFAULT_FILE_PATTERN,
     CommentaryFormat,
     ParsedPage,
     Position,
     parse_page,
 )
-from pneutext.importers.paged_corpus import PageSource
+from pneutext.importers.paged_corpus import PageSource, read_folder
 
 
 def parse(text: str, page: int = 45, fmt: CommentaryFormat | None = None) -> ParsedPage:
@@ -194,3 +197,37 @@ def test_the_marker_and_chapter_directives_are_configuration() -> None:
     assert [line.text for line in parsed.lines] == ["alpha"]
     assert [(m.role, m.body) for m in parsed.chapter_matter] == [("note", "Words")]
     assert [b.id for b in parsed.blocks] == ["c_p45_a"]
+
+
+def test_older_headers_write_the_type_and_level_as_key_value_fields() -> None:
+    parsed = parse(
+        "{c_p45_a}x{c_p45_a/} {i_p45_b}y{i_p45_b/}\n\n@@ Metatext\n\n"
+        "{c_p45_a}, type=Comment, read=2\nOne.\n{c_p45_a/}\n"
+        "{i_p45_b}, read=1, type=Interpretation, mood=odd\nTwo.\n{i_p45_b/}\n"
+    )
+    assert [(b.id, b.type_name, b.level) for b in parsed.blocks] == [
+        ("c_p45_a", "Comment", 2),
+        ("i_p45_b", "Interpretation", 1),
+    ]
+    assert codes(parsed) == [("odd_header_field", 8, "mood=odd")]
+
+
+def test_a_backslash_typed_for_the_slash_of_a_closing_tag_is_repaired() -> None:
+    parsed = parse(
+        "{c_p45_a}x{c_p45_a\\} y\n\n@@ Metatext\n\n{c_p45_a}, Comment\nBody.\n{c_p45_a\\}\n"
+    )
+    assert [line.text for line in parsed.lines] == ["x y"]
+    assert parsed.spans[0].end == Position(0, 1)
+    assert [(b.id, b.body) for b in parsed.blocks] == [("c_p45_a", "Body.")]
+    assert [r.code for r in parsed.repairs] == ["closing_tag_slash", "closing_tag_slash"]
+    assert parsed.problems == []
+
+
+def test_file_names_may_carry_a_suffix_after_the_page_number(tmp_path: Path) -> None:
+    for name in ("B_comm_p016_ch2.txt", "B_comm_p017.txt", "B_comm_p018_ch3_old.txt"):
+        (tmp_path / name).write_text("x\n", "utf-8")
+    found = read_folder(tmp_path, DEFAULT_FILE_PATTERN)
+    assert [(s.page, s.name) for s in found] == [
+        (16, "B_comm_p016_ch2.txt"),
+        (17, "B_comm_p017.txt"),
+    ]

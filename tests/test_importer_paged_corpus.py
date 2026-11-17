@@ -77,6 +77,7 @@ def test_chapter_opening_directives_become_furniture_and_a_division() -> None:
 
 
 def test_a_section_ornament_within_a_page_is_furniture_between_paragraphs() -> None:
+    assert parse_pages([page(27, "a\n<<section_ornament>>\nb\n")]).problems == []
     corpus = parse_pages([page(27, "alpha\nbeta\n\n<<section_decoration>>\n\ngamma\n")])
     assert [(s.kind, s.text) for s in corpus.segments] == [
         ("paragraph", "alpha beta"),
@@ -166,9 +167,11 @@ def test_summary_counts_pages_text_lines_paragraphs_and_chapters() -> None:
 def test_read_folder_orders_files_by_page_number_from_the_pattern(tmp_path: Path) -> None:
     for name in ("B_corp_p010.txt", "B_corp_p9.txt", "B_comm_p009.txt", "notes.md"):
         (tmp_path / name).write_text("x\n", "utf-8")
+    (tmp_path / "B_corp_p011_ch2.txt").write_text("x\n", "utf-8")  # a suffix after the page
     assert [(s.page, s.name) for s in read_folder(tmp_path)] == [
         (9, "B_corp_p9.txt"),
         (10, "B_corp_p010.txt"),
+        (11, "B_corp_p011_ch2.txt"),
     ]
     custom = read_folder(tmp_path, r"_comm_p(?P<page>\d+)\.txt$")
     assert [s.page for s in custom] == [9]

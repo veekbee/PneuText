@@ -126,3 +126,9 @@ def test_a_definition_is_recognized_only_as_a_whole_body() -> None:
 def test_an_empty_body_stays_empty() -> None:
     result = convert("\n\n", FMT)
     assert (result.markdown, result.figures, result.problems) == ("", [], [])
+
+
+def test_the_older_citation_form_and_a_capitalized_gloss_command() -> None:
+    assert md("As {{bib:smith1999, pp. 12-14}} says.") == "As {{cite:smith1999, pp. 12-14}} says."
+    result = convert(r"\Spanish{camino}{road}", FMT)
+    assert (result.markdown, result.problems) == ("{{gloss:camino|road}}", [])

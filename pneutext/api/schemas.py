@@ -304,6 +304,7 @@ class LegacyReportOut(BaseModel):
     remarks: int
     mentions: int
     new_categories: list[str]
+    new_types: list[str] = Field(description="Note types the files name that will be created.")
     figures: int
     replaced_notes: int = Field(description="Notes from an earlier import that this one replaces.")
     replaced_mentions: int

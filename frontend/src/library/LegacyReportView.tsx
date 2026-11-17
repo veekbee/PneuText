@@ -49,6 +49,11 @@ export function LegacyReportView({ report }: { report: LegacyReport }) {
           {report.new_categories.join(", ")}.
         </p>
       )}
+      {report.new_types.length > 0 && (
+        <p>
+          New note {report.new_types.length === 1 ? "type" : "types"}: {report.new_types.join(", ")}.
+        </p>
+      )}
       {report.replaced_notes + report.replaced_mentions > 0 && (
         <div role="alert" className="notice">
           <p>

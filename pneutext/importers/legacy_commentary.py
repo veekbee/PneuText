@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 
 from pneutext.importers.paged_corpus import PageSource, decode_page
 
-DEFAULT_FILE_PATTERN = r"_comm_p(?P<page>\d+)\.txt$"
+DEFAULT_FILE_PATTERN = r"_comm_p(?P<page>\d+)(?:_[A-Za-z0-9]+)?\.txt$"
 
 _TOKEN = re.compile(
     r"\{(?P<id>[^{}\s/|]+)(?P<slash>/)?\}"  # {id} or {id/}
@@ -43,8 +43,13 @@ class CommentaryFormat:
 
     file_pattern: str = DEFAULT_FILE_PATTERN
     metatext_marker: str = r"@@\s*metatext"
-    # Ids look like "c_p45_slug": a type prefix, the page, a short slug.
-    id_pattern: str = r"(?P<prefix>[A-Za-z]+)_p(?P<page>\d+)_(?P<slug>\S+)"
+    # Ids look like "c_p45_slug": a type prefix, the page, a short slug. Hand-typed ids
+    # sometimes lack the "p" or the slug; the prefix and page are still clear.
+    id_pattern: str = r"(?P<prefix>[A-Za-z]+)_p?(?P<page>\d+)(?:_(?P<slug>\S+))?"
+    # Header fields written as key=value in older files: which key names the type, and
+    # which the reading level.
+    type_keys: tuple[str, ...] = ("type",)
+    level_keys: tuple[str, ...] = ("read", "level")
     # Directives that hold the author's own chapter matter, and the note role each becomes.
     chapter_matter: dict[str, str] = field(
         default_factory=lambda: {"my_title": "chapter_title", "chsum": "chapter_summary"}
@@ -200,6 +205,10 @@ def _parse_text(parsed: ParsedPage, rows: list[str], fmt: CommentaryFormat) -> N
                     # The same opening tag again can only be a closing tag missing its slash.
                     open_spans.pop(span_id).end = here
                     parsed.repairs.append(Problem("closing_tag_slash", page, file_line, tag))
+                elif span_id.endswith("\\") and span_id[:-1] in open_spans:
+                    # A backslash typed for the slash of a closing tag.
+                    open_spans.pop(span_id[:-1]).end = here
+                    parsed.repairs.append(Problem("closing_tag_slash", page, file_line, tag))
                 else:
                     if any(span.id == span_id for span in parsed.spans):
                         parsed.problems.append(Problem("duplicate_id", page, file_line, tag))
@@ -244,21 +253,29 @@ def _parse_text(parsed: ParsedPage, rows: list[str], fmt: CommentaryFormat) -> N
 # ---- The metatext part ------------------------------------------------------
 
 
-def _header_fields(fields: str | None) -> tuple[str | None, int | None, list[str]]:
-    """A block header's optional type name and level, plus anything that is neither."""
+def _header_fields(
+    fields: str | None, fmt: CommentaryFormat
+) -> tuple[str | None, int | None, list[str]]:
+    """A block header's optional type name and level, plus anything that is neither.
+
+    The fields come in any order: ``Comment, 2``; and in older files as ``type=Comment,
+    read=2``.
+    """
     type_name: str | None = None
     level: int | None = None
     odd: list[str] = []
     for item in (fields or "").split(","):
         item = item.strip()
+        key, equals, value = (part.strip() for part in item.partition("="))
         if not item:
             continue
-        if item.isdigit():
-            if level is None:
-                level = int(item)
-            else:
-                odd.append(item)
-        elif type_name is None:
+        if equals and key.lower() in fmt.type_keys and value and type_name is None:
+            type_name = value
+        elif equals and key.lower() in fmt.level_keys and value.isdigit() and level is None:
+            level = int(value)
+        elif item.isdigit() and level is None:
+            level = int(item)
+        elif not equals and not item.isdigit() and type_name is None:
             type_name = item
         else:
             odd.append(item)
@@ -302,7 +319,7 @@ def _parse_metatext(
     def open_block(match: re.Match[str], file_line: int) -> None:
         nonlocal block
         flush_remark()
-        type_name, level, odd = _header_fields(match.group("fields"))
+        type_name, level, odd = _header_fields(match.group("fields"), fmt)
         note_id = match.group("id")
         for item in odd:
             parsed.problems.append(Problem("odd_header_field", page, file_line, item))
@@ -336,7 +353,11 @@ def _parse_metatext(
             close_block()
             if after:
                 remark, remark_line = [after], file_line
-        elif header is not None and header.group("id") == block.id and not header.group("fields"):
+        elif (
+            header is not None
+            and header.group("id").rstrip("\\") == block.id
+            and not header.group("fields")
+        ):
             # The block's own opening tag again can only be a closing tag missing its slash.
             parsed.repairs.append(Problem("closing_tag_slash", page, file_line, row))
             close_block()

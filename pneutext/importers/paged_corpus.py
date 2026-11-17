@@ -26,7 +26,8 @@ from pneutext.core.corpus import (
 from pneutext.core.errors import InvalidInput
 
 SOURCE_FORMAT = "paged-text"
-DEFAULT_FILE_PATTERN = r"_corp_p(?P<page>\d+)\.txt$"
+# The page number may be followed by a suffix, as in ..._corp_p016_ch2.txt.
+DEFAULT_FILE_PATTERN = r"_corp_p(?P<page>\d+)(?:_[A-Za-z0-9]+)?\.txt$"
 
 _DIRECTIVE = re.compile(r"<<\s*([A-Za-z_][A-Za-z0-9_]*)\s*(?:=(.*?))?>>")
 _ONLY_DIRECTIVES = re.compile(r"(?:\s*<<.*?>>\s*)+")
@@ -48,6 +49,7 @@ def _default_directives() -> dict[str, DirectiveRule]:
         "chapter": DirectiveRule(furniture="chapter_number", division="chapter"),
         "chapter_ornament": DirectiveRule(furniture="ornament"),
         "section_decoration": DirectiveRule(furniture="ornament"),
+        "section_ornament": DirectiveRule(furniture="ornament"),
         "top_bar": DirectiveRule(furniture="rule", region="open"),
         "bottom_bar": DirectiveRule(furniture="rule", region="close"),
         "my_title": DirectiveRule(commentary=True),

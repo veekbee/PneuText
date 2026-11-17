@@ -104,6 +104,7 @@ def test_the_dry_run_reports_every_problem_grouped_and_writes_nothing(
         "remarks": 1,
         "mentions": 16,
         "new_categories": ["weather"],
+        "new_types": [],
         "figures": 2,
         "replaced_notes": 0,
         "replaced_mentions": 0,
@@ -434,3 +435,38 @@ def test_bad_requests_are_explained(
 def test_an_unknown_version_is_explained(client: TestClient) -> None:
     response = client.post("/api/versions/999/imports/commentary/preview", json=COMMENTARY)
     assert response.status_code == 404
+
+
+def test_a_type_the_files_name_but_the_library_lacks_is_created(
+    client: TestClient, version_id: int, tmp_path: Path
+) -> None:
+    """Imported as found: the notes keep the type their block names."""
+    text = (BOOK / "FX_corp_p012.txt").read_text("utf-8")
+    marked = text.replace("heron,", "{t_p12_bird}heron{t_p12_bird/},").replace(
+        "a step.", "{q_p12_step}a step{q_p12_step/}.{x_p12_none}x{x_p12_none/}"
+    )
+    assert marked != text
+    (tmp_path / "FX_comm_p012.txt").write_text(
+        marked.replace("{x_p12_none}x{x_p12_none/}", "")
+        + "\n@@ Metatext\n\n{t_p12_bird}, type=Theme, read=2\n"
+        "Birds as witnesses.\n{t_p12_bird/}\n\n"
+        "{q_p12_step}, Question\nWhose step?\n{q_p12_step/}\n",
+        "utf-8",
+    )
+    report = commit(client, version_id, folder=str(tmp_path))
+    assert report["new_types"] == ["Theme", "Question"]
+    assert [(c, p, t) for c, p, _, t in findings(report, "type_disagreement")] == [
+        ("new_note_type", 12, "{t_p12_bird}"),
+        ("new_note_type", 12, "{q_p12_step}"),
+    ]
+    listed = {t["name"]: t for t in client.get("/api/note-types").json()}
+    # Each new type takes the id's prefix as its code, since that code was free.
+    assert (listed["Theme"]["code"], listed["Question"]["code"]) == ("t", "q")
+    notes = {n["legacy_id"]: n for n in page_notes(client, version_id, 12)}
+    assert notes["t_p12_bird"]["type_id"] == listed["Theme"]["id"]
+    assert notes["t_p12_bird"]["level"] == 2  # read=2, the older way of writing the level
+    assert notes["q_p12_step"]["type_id"] == listed["Question"]["id"]
+    # Importing again finds the types already there.
+    again = commit(client, version_id, folder=str(tmp_path))
+    assert again["new_types"] == [] and findings(again, "type_disagreement") == []
+    assert len(client.get("/api/note-types").json()) == len(listed)

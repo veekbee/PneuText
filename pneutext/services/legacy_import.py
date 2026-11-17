@@ -103,15 +103,15 @@ _MESSAGES: dict[str, tuple[str, str]] = {
         "type_disagreement",
         "{tag}: the block says {detail}, which disagrees with the id's prefix; {detail} was used.",
     ),
-    "unknown_type_name": (
+    "new_note_type": (
         "type_disagreement",
-        "{tag}: {detail} is not a note type; the type was taken from the id's prefix, or "
-        "set to the default if that is unknown too. Add the type under Note types to keep it.",
+        "{tag}: {detail} is not a note type yet; it was created. If it is a slip, merge it "
+        "into the right type under Note types.",
     ),
     "unknown_prefix": (
         "type_disagreement",
-        "{tag}: the id's prefix is not the code of any note type; add one with that code "
-        "under Note types to keep it.",
+        "{tag}: the block names no type and the id's prefix is not the code of any; the "
+        "default type was used.",
     ),
     "bad_level": (
         "type_disagreement",
@@ -182,6 +182,7 @@ class LegacyReport:
     remarks: int
     mentions: int
     new_categories: list[str]
+    new_types: list[str]
     figures: int
     replaced_notes: int
     replaced_mentions: int
@@ -226,9 +227,11 @@ class _Plan:
     notes: list[_PlannedNote] = field(default_factory=list)
     mentions: list[_PlannedMention] = field(default_factory=list)
     new_categories: list[str] = field(default_factory=list)
+    new_types: list[str] = field(default_factory=list)
     figures: dict[str, _PlannedFigure] = field(default_factory=dict)
     problems: list[ReportItem] = field(default_factory=list)
     repairs: list[ReportItem] = field(default_factory=list)
+    types: _Types | None = None  # holds the note types this import will create
 
 
 def _item(code: str, page: int, line: int | None, tag: str, detail: str = "") -> ReportItem:
@@ -237,8 +240,16 @@ def _item(code: str, page: int, line: int | None, tag: str, detail: str = "") ->
     return ReportItem(code, page, line, tag, f"{where}: {message}")
 
 
+_NEW_TYPE_COLORS = ("#7f8fa6", "#b08968", "#6d9773", "#a37aa3", "#8c8c6a", "#5f8d96")
+_TYPE_CODE = re.compile(r"[a-z][a-z0-9]*")
+
+
 class _Types:
-    """Note types as the legacy format refers to them: by id prefix and by name."""
+    """Note types as the legacy format refers to them: by id prefix and by name.
+
+    A type a block names that the library does not have yet is planned here (with a
+    negative id until the import commits and creates it), so its notes keep their type.
+    """
 
     def __init__(self, rows: list[NoteTypeRow]) -> None:
         self.by_code = {row.code.lower(): row for row in rows}
@@ -248,6 +259,28 @@ class _Types:
             self.by_role.setdefault(row.role, row)
         fallback = self.by_code.get(DEFAULT_TYPE_CODE) or self.by_role.get("note") or rows[0]
         self.default = fallback
+        self.new: list[NoteTypeRow] = []
+
+    def plan(self, name: str, prefix: str | None) -> NoteTypeRow:
+        """Plan a new type called ``name``, coded by the id's prefix if that is free."""
+        wanted = [prefix.lower()] if prefix else []
+        wanted.append(re.sub(r"[^a-z0-9]", "", name.lower()))
+        code = next((c for c in wanted if _TYPE_CODE.fullmatch(c) and c not in self.by_code), None)
+        if code is None:
+            stem = wanted[-1] if _TYPE_CODE.fullmatch(wanted[-1]) else "type"
+            code = next(f"{stem}{n}" for n in range(2, 10_000) if f"{stem}{n}" not in self.by_code)
+        row = NoteTypeRow(
+            id=-(len(self.new) + 1),
+            name=name,
+            code=code,
+            color=_NEW_TYPE_COLORS[len(self.new) % len(_NEW_TYPE_COLORS)],
+            sort=0,
+            role="note",
+        )
+        self.new.append(row)
+        self.by_name[name.lower()] = row
+        self.by_code[code] = row
+        return row
 
 
 class _PagePlanner:
@@ -455,16 +488,21 @@ class _PagePlanner:
             if int(match.group("page")) != page:
                 self.problem("wrong_page", page, line, tag, match.group("page"))
             from_prefix = self.types.by_code.get(match.group("prefix").lower())
-            if from_prefix is None:
-                self.problem("unknown_prefix", page, line, tag)
 
         from_name: NoteTypeRow | None = None
         if type_name is not None:
             from_name = self.types.by_name.get(type_name.lower())
             if from_name is None:
-                self.problem("unknown_type_name", page, line, tag, type_name)
+                # A type the library does not have yet: it is created, coded by this id's
+                # prefix when that code is free, so the notes of this type keep it.
+                free = match.group("prefix") if match is not None and from_prefix is None else None
+                from_name = self.types.plan(type_name, free)
+                self.plan.new_types.append(from_name.name)
+                self.problem("new_note_type", page, line, tag, type_name)
             elif from_prefix is not None and from_prefix.id != from_name.id:
                 self.problem("type_mismatch", page, line, tag, from_name.name)
+        elif match is not None and from_prefix is None:
+            self.problem("unknown_prefix", page, line, tag)
         return from_name or from_prefix or self.types.default
 
     def _note(
@@ -577,11 +615,13 @@ def _plan(conn: sqlite3.Connection, version: VersionRow, request: LegacyImportRe
         figure_folders.insert(0, Path(request.figures_folder.strip()).expanduser())
 
     plan = _Plan(files=len(sources))
+    types = _Types(notes_store.list_note_types(conn))
+    plan.types = types
     planner = _PagePlanner(
         conn,
         version,
         plan,
-        _Types(notes_store.list_note_types(conn)),
+        types,
         {c.name.lower(): c.name for c in entities.list_categories(conn)},
         fmt,
         body_fmt,
@@ -607,6 +647,7 @@ def _report(conn: sqlite3.Connection, version: VersionRow, plan: _Plan) -> Legac
         remarks=sum(1 for note in plan.notes if note.kind == "remark"),
         mentions=len(plan.mentions),
         new_categories=plan.new_categories,
+        new_types=plan.new_types,
         figures=len(plan.figures),
         replaced_notes=replaced[0],
         replaced_mentions=replaced[1],
@@ -654,12 +695,19 @@ def commit_import(library: Library, version_id: int, request: LegacyImportReques
             entities.insert_category(conn, name)
         category_ids = {c.name: c.id for c in entities.list_categories(conn)}
 
+        # Note types the files name that the library did not have are created first.
+        created: dict[int, int] = {}
+        for new_type in plan.types.new if plan.types is not None else []:
+            created[new_type.id] = notes_store.insert_note_type(
+                conn, new_type.name, new_type.code, new_type.color, new_type.role
+            )
+
         for note in plan.notes:
             anchor_id = _anchor(conn, version.id, note.extent, quoted=note.scope == "span")
             note_id = notes_store.insert_annotation(
                 conn,
                 anchor_id,
-                note.type_id,
+                created.get(note.type_id, note.type_id),
                 note.scope,
                 note.level,
                 "draft",

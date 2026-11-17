@@ -1254,6 +1254,11 @@ export interface components {
             mentions: number;
             /** New Categories */
             new_categories: string[];
+            /**
+             * New Types
+             * @description Note types the files name that will be created.
+             */
+            new_types: string[];
             /** Notes */
             notes: number;
             /** Pages */

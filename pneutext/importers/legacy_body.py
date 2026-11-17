@@ -36,7 +36,9 @@ class BodyFormat:
 
     work_code: str = ""
     page_ref_commands: tuple[str, ...] = ()  # e.g. a macro that cites a page of the work
-    gloss_commands: tuple[str, ...] = ("spanish",)
+    gloss_commands: tuple[str, ...] = ("spanish", "Spanish")
+    # Older names for the citation form, each rewritten to {{cite:key}}.
+    citation_forms: tuple[str, ...] = ("bib",)
     figure_ref_commands: tuple[str, ...] = ("reffig",)
     latex: dict[str, tuple[int, str]] = field(default_factory=_default_latex)
     figure_extensions: tuple[str, ...] = ("png", "jpg", "jpeg", "gif", "webp", "svg", "tif", "tiff")
@@ -90,6 +92,8 @@ def convert(body: str, fmt: BodyFormat) -> ConvertedBody:
     text = "\n".join(_remarks(body.strip("\n").split("\n")))
     problems: list[BodyProblem] = []
     figures: list[FigureUse] = []
+    for name in fmt.citation_forms:
+        text = re.sub(r"\{\{\s*" + re.escape(name) + r"\s*:", "{{cite:", text)
     text = _figures(text, fmt, figures)
     text = _latex(text, fmt.commands(), problems)
     text = text.replace("``", "\u201c").replace("''", "\u201d")

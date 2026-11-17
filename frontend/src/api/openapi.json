@@ -1137,6 +1137,14 @@
             "title": "New Categories",
             "type": "array"
           },
+          "new_types": {
+            "description": "Note types the files name that will be created.",
+            "items": {
+              "type": "string"
+            },
+            "title": "New Types",
+            "type": "array"
+          },
           "notes": {
             "title": "Notes",
             "type": "integer"
@@ -1178,6 +1186,7 @@
           "remarks",
           "mentions",
           "new_categories",
+          "new_types",
           "figures",
           "replaced_notes",
           "replaced_mentions",

@@ -17,6 +17,7 @@ const REPORT: LegacyReport = {
   remarks: 1,
   mentions: 16,
   new_categories: ["weather"],
+  new_types: ["Theme"],
   figures: 2,
   replaced_notes: 0,
   replaced_mentions: 0,
@@ -89,6 +90,7 @@ describe("Import old commentary", () => {
     const repairs = within(report).getByRole("region", { name: "Repairs" });
     expect(within(repairs).getByText(/\|times\| was read as the category time/)).toBeTruthy();
     expect(within(report).getByText("New category: weather.")).toBeTruthy();
+    expect(within(report).getByText("New note type: Theme.")).toBeTruthy();
 
     expect(sent).toEqual([
       {
