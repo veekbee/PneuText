@@ -14,16 +14,29 @@ export interface Prefs {
   hiddenTypes: number[];
   /** Whether entity mentions are underlined on the page. */
   showMentions: boolean;
+  /** Whether the chapter sidebar and the notes panel are open. */
+  sidebarOpen: boolean;
+  notesOpen: boolean;
 }
 
 const KEY = "pneutext.prefs";
-const DEFAULTS: Prefs = { mode: "text", level: "all", hiddenTypes: [], showMentions: true };
+const DEFAULTS: Prefs = {
+  mode: "text",
+  level: "all",
+  hiddenTypes: [],
+  showMentions: true,
+  sidebarOpen: true,
+  notesOpen: true,
+};
 
 function load(): Prefs {
   try {
     const stored: unknown = JSON.parse(window.localStorage.getItem(KEY) ?? "{}");
     if (typeof stored === "object" && stored !== null) {
-      const { mode, level, hiddenTypes, showMentions } = stored as Record<string, unknown>;
+      const { mode, level, hiddenTypes, showMentions, sidebarOpen, notesOpen } = stored as Record<
+        string,
+        unknown
+      >;
       return {
         mode: mode === "blank" ? "blank" : "text",
         level: level === "first" ? "first" : "all",
@@ -31,6 +44,8 @@ function load(): Prefs {
           ? hiddenTypes.filter((id): id is number => typeof id === "number")
           : [],
         showMentions: showMentions !== false,
+        sidebarOpen: sidebarOpen !== false,
+        notesOpen: notesOpen !== false,
       };
     }
   } catch {

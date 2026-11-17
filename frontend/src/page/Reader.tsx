@@ -91,7 +91,7 @@ function ModeSwitch({ mode }: { mode: Mode }) {
 }
 
 export function Reader({ versionId, page, line }: ReaderProps) {
-  const { mode, level, hiddenTypes, showMentions } = usePrefs();
+  const { mode, level, hiddenTypes, showMentions, sidebarOpen, notesOpen } = usePrefs();
   const queryClient = useQueryClient();
   const version = useVersion(versionId);
   const editSeq = version.data?.edit_seq;
@@ -565,6 +565,24 @@ export function Reader({ versionId, page, line }: ReaderProps) {
           onLevel={(value) => setPrefs({ level: value })}
           onHiddenTypes={(value) => setPrefs({ hiddenTypes: value })}
         />
+        <div className="pane-toggles" role="group" aria-label="Panes">
+          <button
+            type="button"
+            className="quiet-button"
+            aria-pressed={sidebarOpen}
+            onClick={() => setPrefs({ sidebarOpen: !sidebarOpen })}
+          >
+            Chapters
+          </button>
+          <button
+            type="button"
+            className="quiet-button"
+            aria-pressed={notesOpen}
+            onClick={() => setPrefs({ notesOpen: !notesOpen })}
+          >
+            Notes
+          </button>
+        </div>
         <label className="mention-toggle">
           <input
             type="checkbox"
@@ -585,8 +603,12 @@ export function Reader({ versionId, page, line }: ReaderProps) {
           </div>
         )}
       </div>
-      <div className="workspace">
-        <Sidebar version={version.data} currentDivision={division} />
+      <div
+        className="workspace"
+        data-sidebar={sidebarOpen ? "open" : "closed"}
+        data-notes={notesOpen ? "open" : "closed"}
+      >
+        {sidebarOpen && <Sidebar version={version.data} currentDivision={division} />}
         <main className="stage" ref={stage}>
           {message !== null && (
             <div role="alert" className="notice">
@@ -638,6 +660,7 @@ export function Reader({ versionId, page, line }: ReaderProps) {
             <p className="quiet">Opening the page…</p>
           )}
         </main>
+        {notesOpen && (
         <NotesPanel
           notes={visibleNotes}
           hiddenCount={allNotes.length - visibleNotes.length}
@@ -675,6 +698,7 @@ export function Reader({ versionId, page, line }: ReaderProps) {
           onNewPageNote={() => addUnitNote("page")}
           onNewChapterNote={division ? () => addUnitNote("chapter", division.id) : null}
         />
+        )}
       </div>
       {selected !== null && version.data && (
         <SelectionPopover

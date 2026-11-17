@@ -181,3 +181,29 @@ describe("Reader in blank mode", () => {
     expect(await screen.findByText("seventh page words")).toBeTruthy();
   });
 });
+
+describe("the side panes", () => {
+  it("collapse and reopen, and stay as they were left", async () => {
+    mockBook();
+    setUrl("/v/1/p/7");
+    const first = renderWithQuery(<App />);
+    await screen.findByText("seventh page words");
+    const panes = screen.getByRole("group", { name: "Panes" });
+    expect(screen.getByRole("complementary", { name: "Chapters and views" })).toBeTruthy();
+    expect(screen.getByRole("complementary", { name: "Notes" })).toBeTruthy();
+
+    fireEvent.click(within(panes).getByRole("button", { name: "Chapters" }));
+    fireEvent.click(within(panes).getByRole("button", { name: "Notes" }));
+    expect(screen.queryByRole("complementary", { name: "Chapters and views" })).toBeNull();
+    expect(screen.queryByRole("complementary", { name: "Notes" })).toBeNull();
+    // The page keeps the center either way.
+    expect(screen.getByLabelText("Page 7")).toBeTruthy();
+
+    first.unmount();
+    renderWithQuery(<App />);
+    await screen.findByText("seventh page words");
+    expect(screen.queryByRole("complementary", { name: "Notes" })).toBeNull();
+    fireEvent.click(within(screen.getByRole("group", { name: "Panes" })).getByRole("button", { name: "Notes" }));
+    expect(screen.getByRole("complementary", { name: "Notes" })).toBeTruthy();
+  });
+});
