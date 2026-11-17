@@ -10,6 +10,7 @@ import type { RowMark } from "../lib/selection";
 import {
   api,
   type CorpusImportInput,
+  type LegacyImportInput,
   type Note,
   type NoteCreateInput,
   type NoteUpdateInput,
@@ -209,6 +210,22 @@ export function useDeleteNote(versionId: number) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (noteId: number) => api.deleteNote(noteId),
+    onSuccess: () => invalidateNotes(queryClient, versionId),
+  });
+}
+
+// ---- Legacy commentary import -------------------------------------------------
+
+export function usePreviewCommentaryImport(versionId: number) {
+  return useMutation({
+    mutationFn: (input: LegacyImportInput) => api.previewCommentaryImport(versionId, input),
+  });
+}
+
+export function useImportCommentary(versionId: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: LegacyImportInput) => api.importCommentary(versionId, input),
     onSuccess: () => invalidateNotes(queryClient, versionId),
   });
 }

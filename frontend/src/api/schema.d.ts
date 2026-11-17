@@ -148,6 +148,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/versions/{version_id}/imports/commentary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Import Commentary */
+        post: operations["importCommentary"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/versions/{version_id}/imports/commentary/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview Commentary Import
+         * @description The dry run: check a folder of legacy commentary files and report, writing nothing.
+         */
+        post: operations["previewCommentaryImport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/versions/{version_id}/notes": {
         parameters: {
             query?: never;
@@ -348,6 +385,53 @@ export interface components {
             /** Page */
             page: number | null;
         };
+        /** LegacyImportIn */
+        LegacyImportIn: {
+            /** Figures Folder */
+            figures_folder?: string | null;
+            /** File Pattern */
+            file_pattern?: string | null;
+            /** Folder */
+            folder: string;
+            /**
+             * Page Ref Commands
+             * @description LaTeX commands in the old notes that cite a page of the work.
+             * @default []
+             */
+            page_ref_commands: string[];
+        };
+        /** LegacyReportOut */
+        LegacyReportOut: {
+            /** Chapter Notes */
+            chapter_notes: number;
+            /** Figures */
+            figures: number;
+            /** Files */
+            files: number;
+            /** Flagged Notes */
+            flagged_notes: number;
+            /** Groups */
+            groups: components["schemas"]["ReportGroupOut"][];
+            /** Mentions */
+            mentions: number;
+            /** New Categories */
+            new_categories: string[];
+            /** Notes */
+            notes: number;
+            /** Pages */
+            pages: number[];
+            /** Remarks */
+            remarks: number;
+            /** Repairs */
+            repairs: components["schemas"]["ReportItemOut"][];
+            /** Replaced Mentions */
+            replaced_mentions: number;
+            /**
+             * Replaced Notes
+             * @description Notes from an earlier import that this one replaces.
+             */
+            replaced_notes: number;
+        };
         /**
          * LibraryOut
          * @description What the app shows about the open library.
@@ -537,6 +621,31 @@ export interface components {
         RenderOut: {
             /** @description The body parsed into a syntax tree. */
             body: components["schemas"]["NoteNode"];
+        };
+        /** ReportGroupOut */
+        ReportGroupOut: {
+            /** Code */
+            code: string;
+            /** Items */
+            items: components["schemas"]["ReportItemOut"][];
+            /** Title */
+            title: string;
+        };
+        /**
+         * ReportItemOut
+         * @description One finding. Names the offending tag with its page and line; never quotes the text.
+         */
+        ReportItemOut: {
+            /** Code */
+            code: string;
+            /** Line */
+            line: number | null;
+            /** Message */
+            message: string;
+            /** Page */
+            page: number;
+            /** Tag */
+            tag: string;
         };
         /**
          * ShapeHighlightOut
@@ -994,6 +1103,76 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["VersionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    importCommentary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LegacyImportIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LegacyReportOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    previewCommentaryImport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LegacyImportIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LegacyReportOut"];
                 };
             };
             /** @description Validation Error */

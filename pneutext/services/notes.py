@@ -133,6 +133,33 @@ def _require_note(conn: sqlite3.Connection, note_id: int) -> NoteRow:
     return note
 
 
+WHOLE_UNIT = AnchorQuote(exact="", prefix="", suffix="")
+"""A page or chapter note's anchor quotes nothing: a whole unit is not re-located by quotation."""
+
+Extent = tuple[int, int, int, int]
+"""Start segment, start offset, end segment, end offset."""
+
+
+def page_extent(conn: sqlite3.Connection, version: VersionRow, page: int) -> Extent | None:
+    """The stretch of text a page covers, for a page note's anchor."""
+    lines = corpus_store.page_line_shapes(conn, version.pagination_id, page)
+    if not lines:
+        return None
+    first, last = lines[0], lines[-1]
+    return first.segment_id, first.start_offset, last.segment_id, last.start_offset + last.length
+
+
+def chapter_extent(
+    conn: sqlite3.Connection, version: VersionRow, division_id: int
+) -> Extent | None:
+    """The stretch of text a chapter covers, for a chapter note's anchor."""
+    extent = notes_store.division_extent(conn, version.id, division_id)
+    if extent is None:
+        return None
+    first_id, last_id, last_length = extent
+    return first_id, 0, last_id, last_length
+
+
 def list_note_types(library: Library) -> list[NoteTypeRow]:
     with db.transaction(library.db_path) as conn:
         return notes_store.list_note_types(conn)
@@ -149,7 +176,6 @@ def create_note(library: Library, version_id: int, new: NewNote) -> NoteView:
         _check_fields(conn, new.type_id, new.level, new.status)
         if not notes_store.note_type_exists(conn, new.type_id):
             raise InvalidInput("That note type does not exist.")
-        whole_unit = AnchorQuote(exact="", prefix="", suffix="")  # not re-located by quotation
 
         if new.scope == "span":
             if new.span is None:
@@ -165,35 +191,17 @@ def create_note(library: Library, version_id: int, new: NewNote) -> NoteView:
                 _validated_span(conn, version.id, span),
             )
         elif new.scope == "page":
-            lines = (
-                []
-                if new.page is None
-                else corpus_store.page_line_shapes(conn, version.pagination_id, new.page)
-            )
-            if not lines:
+            extent = None if new.page is None else page_extent(conn, version, new.page)
+            if extent is None:
                 raise InvalidInput("Say which page the note is about.")
-            first, last = lines[0], lines[-1]
-            anchor_id = notes_store.insert_anchor(
-                conn,
-                version.id,
-                first.segment_id,
-                first.start_offset,
-                last.segment_id,
-                last.start_offset + last.length,
-                whole_unit,
-            )
+            anchor_id = notes_store.insert_anchor(conn, version.id, *extent, WHOLE_UNIT)
         elif new.scope == "chapter":
             extent = (
-                None
-                if new.division_id is None
-                else notes_store.division_extent(conn, version.id, new.division_id)
+                None if new.division_id is None else chapter_extent(conn, version, new.division_id)
             )
             if extent is None:
                 raise InvalidInput("Say which chapter the note is about.")
-            first_id, last_id, last_length = extent
-            anchor_id = notes_store.insert_anchor(
-                conn, version.id, first_id, 0, last_id, last_length, whole_unit
-            )
+            anchor_id = notes_store.insert_anchor(conn, version.id, *extent, WHOLE_UNIT)
         else:
             raise InvalidInput("A note attaches to a passage, a page or a chapter.")
 

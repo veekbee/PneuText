@@ -237,3 +237,44 @@ class RenderIn(BaseModel):
 
 class RenderOut(BaseModel):
     body: NoteNode
+
+
+class LegacyImportIn(BaseModel):
+    folder: str
+    file_pattern: str | None = None
+    page_ref_commands: list[str] = Field(
+        default=[], description="LaTeX commands in the old notes that cite a page of the work."
+    )
+    figures_folder: str | None = None
+
+
+class ReportItemOut(BaseModel):
+    """One finding. Names the offending tag with its page and line; never quotes the text."""
+
+    code: str
+    page: int
+    line: int | None
+    tag: str
+    message: str
+
+
+class ReportGroupOut(BaseModel):
+    code: str
+    title: str
+    items: list[ReportItemOut]
+
+
+class LegacyReportOut(BaseModel):
+    files: int
+    pages: list[int]
+    notes: int
+    flagged_notes: int
+    chapter_notes: int
+    remarks: int
+    mentions: int
+    new_categories: list[str]
+    figures: int
+    replaced_notes: int = Field(description="Notes from an earlier import that this one replaces.")
+    replaced_mentions: int
+    groups: list[ReportGroupOut]
+    repairs: list[ReportItemOut]

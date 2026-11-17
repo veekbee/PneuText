@@ -10,6 +10,7 @@ const PAGES = [7, 8, 9, 10, 11, 12];
 /** Every line of running text in the fixture book. */
 function bookLines(): string[] {
   return readdirSync(BOOK)
+    .filter((name) => name.includes("_corp_"))
     .flatMap((name) => readFileSync(join(BOOK, name), "utf-8").split("\n"))
     .map((line) => line.trim())
     .filter((line) => line !== "" && !line.startsWith("<<"));

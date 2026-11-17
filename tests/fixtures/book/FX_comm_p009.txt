@@ -1,0 +1,27 @@
+They went out at first light{c_p9_none/} with the chain and the
+poles. The boy walked {c_p9_ahead ahead, testing the ground with a
+|plants|willow|| switch, and where the switch sank he said {s_p9_cuidado}cuidado{s_p9_cuidado/}
+without turning round. By noon they had fixed |numbers=46|forty-six||
+stations and lost one boot. The wind brought salt, and
+under the salt the smell of something older, as if the
+|weather|sea|| had left its cellar door open.
+
+That night she inked the {c_p7_sheet}first sheet{c_p7_sheet/}. She wrote Low
+Harbor in the corner and under it, smaller, the date,
+and then sat for a long while looking at the {m_p9_white}white part
+of the paper, which was most of it!
+
+@@ Metatext
+
+{s_p9_cuidado}, Historical, 1
+\spanish{cuidado}{careful, watch out}
+{s_p9_cuidado/}
+
+{c_p7_sheet}, Comment, 5
+The first of three sheets. \sidenote{check}
+
+[A survey chain](chain.png)
+{c_p7_sheet/}
+
+{m_p9_white}, Meditation, 2
+What the map leaves out.

@@ -1,0 +1,28 @@
+She took a room above the chandler’s, where the window
+faced the marsh. |plants|Reeds|| ran out to the horizon and a
+single |animal|heron|| stood in them, patient as a fence post. By
+evening she had drawn the room, the stair, and the
+street as far as the pump, because drawing a place was
+the only way she knew of arriving in it.
+
+On the |times|third day|| a boy came to the door and said he
+could carry things. His name was Tomás and he was
+|numbers=11|eleven||, or would be at {h_p8_candle}Candlemas{h_p8_candle}. His mother sold |animals|eels||
+from a barrow and called every stranger {s_p8_senora}señora{s_p8_senora/}
+regardless of evidence. Ada hired him for |numbers=2|two|| pence a
+day and a share of whatever the {c_p8_marsh}marsh turned out to
+contain.{c_p8_marsh/}
+
+@@ Metatext
+
+{h_p8_candle}, Historical
+Candlemas falls on the second of February.
+{h_p8_candle/}
+
+{s_p8_senora}, Spanish
+\spanish{señora}{madam, lady}
+{s_p8_senora/}
+
+{c_p8_barrow}, Comment
+The barrow comes back in the second chapter.
+{c_p8_barrow/}

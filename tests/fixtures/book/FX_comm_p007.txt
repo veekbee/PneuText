@@ -1,0 +1,49 @@
+<<chapter=I>>
+<<my_title=Arrival by Water>>
+<<chsum=Ada Quill reaches Low Harbor and learns that her employer is gone.>>
+<<top_bar>>
+The ferry at |places|Low Harbor|| – A debt of |numbers=9|nine|| crowns – The
+cartographer hires a boy – Salt on the wind.
+<<bottom_bar>>
+
+The ferry came into |places|Low Harbor|| on the {h_p7_tide}last tide of
+|time|October, 1871||{h_p7_tide/}, riding so low that the |animals|gulls|| walked its
+rail like inspectors. Ada Quill stepped off with a {c_p7_brass}brass
+{cl_p7_theo}theodolite{cl_p7_theo/} in one hand{c_p7_brass/} and a letter of credit in the
+other, and neither was worth what she had been promised.
+
+The harbormaster was a narrow man named Osric Penn who
+{l_p7_tin}kept his ledgers in a {m_p7_biscuit}biscuit tin{l_p7_tin/}. He told her{m_p7_biscuit/} the
+survey office had closed in the spring and that the |numbers=9|nine||
+crowns owed to her were owed, in turn, by a man who had
+drowned. She thanked him. It was, she said, the most
+complete account of a debt she had ever received.
+
+@@ Metatext
+
+{h_p7_tide}, Historical
+Tide tables for the period survive; see {{fx:10}} and \pref{12}.
+{h_p7_tide/}
+
+{c_p7_brass}, Comment, 2
+The instrument returns at the end. \textbf{Watch} the brass.
+
+XXX check the make of the theodolite
+{c_p7_brass/}
+
+{cl_p7_theo}
+**theodolite** - a surveying instrument for measuring angles
+{cl_p7_theo/}
+
+{l_p7_tin}, Literary
+(The harbor at low water)[harbor.png]
+
+The tin is the first container in the story; see \reffig{harbor}.
+{l_p7_tin/}
+
+{m_p7_biscuit}, Meditation
+Debt as inheritance\textemdash a theme.
+% compare the second sheet
+{m_p7_biscuit/}
+
+XXX whole page needs a second pass

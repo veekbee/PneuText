@@ -307,6 +307,136 @@
         "title": "ImportProblemOut",
         "type": "object"
       },
+      "LegacyImportIn": {
+        "properties": {
+          "figures_folder": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Figures Folder"
+          },
+          "file_pattern": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Pattern"
+          },
+          "folder": {
+            "title": "Folder",
+            "type": "string"
+          },
+          "page_ref_commands": {
+            "default": [],
+            "description": "LaTeX commands in the old notes that cite a page of the work.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Page Ref Commands",
+            "type": "array"
+          }
+        },
+        "required": [
+          "folder"
+        ],
+        "title": "LegacyImportIn",
+        "type": "object"
+      },
+      "LegacyReportOut": {
+        "properties": {
+          "chapter_notes": {
+            "title": "Chapter Notes",
+            "type": "integer"
+          },
+          "figures": {
+            "title": "Figures",
+            "type": "integer"
+          },
+          "files": {
+            "title": "Files",
+            "type": "integer"
+          },
+          "flagged_notes": {
+            "title": "Flagged Notes",
+            "type": "integer"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/ReportGroupOut"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "mentions": {
+            "title": "Mentions",
+            "type": "integer"
+          },
+          "new_categories": {
+            "items": {
+              "type": "string"
+            },
+            "title": "New Categories",
+            "type": "array"
+          },
+          "notes": {
+            "title": "Notes",
+            "type": "integer"
+          },
+          "pages": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Pages",
+            "type": "array"
+          },
+          "remarks": {
+            "title": "Remarks",
+            "type": "integer"
+          },
+          "repairs": {
+            "items": {
+              "$ref": "#/components/schemas/ReportItemOut"
+            },
+            "title": "Repairs",
+            "type": "array"
+          },
+          "replaced_mentions": {
+            "title": "Replaced Mentions",
+            "type": "integer"
+          },
+          "replaced_notes": {
+            "description": "Notes from an earlier import that this one replaces.",
+            "title": "Replaced Notes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "files",
+          "pages",
+          "notes",
+          "flagged_notes",
+          "chapter_notes",
+          "remarks",
+          "mentions",
+          "new_categories",
+          "figures",
+          "replaced_notes",
+          "replaced_mentions",
+          "groups",
+          "repairs"
+        ],
+        "title": "LegacyReportOut",
+        "type": "object"
+      },
       "LibraryOut": {
         "description": "What the app shows about the open library.",
         "properties": {
@@ -896,6 +1026,73 @@
           "body"
         ],
         "title": "RenderOut",
+        "type": "object"
+      },
+      "ReportGroupOut": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ReportItemOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "title",
+          "items"
+        ],
+        "title": "ReportGroupOut",
+        "type": "object"
+      },
+      "ReportItemOut": {
+        "description": "One finding. Names the offending tag with its page and line; never quotes the text.",
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "line": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "tag": {
+            "title": "Tag",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "page",
+          "line",
+          "tag",
+          "message"
+        ],
+        "title": "ReportItemOut",
         "type": "object"
       },
       "ShapeHighlightOut": {
@@ -1699,6 +1896,111 @@
         "summary": "Get Version",
         "tags": [
           "corpus"
+        ]
+      }
+    },
+    "/api/versions/{version_id}/imports/commentary": {
+      "post": {
+        "operationId": "importCommentary",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegacyImportIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegacyReportOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Import Commentary",
+        "tags": [
+          "legacy import"
+        ]
+      }
+    },
+    "/api/versions/{version_id}/imports/commentary/preview": {
+      "post": {
+        "description": "The dry run: check a folder of legacy commentary files and report, writing nothing.",
+        "operationId": "previewCommentaryImport",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegacyImportIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegacyReportOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview Commentary Import",
+        "tags": [
+          "legacy import"
         ]
       }
     },

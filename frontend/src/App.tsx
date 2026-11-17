@@ -1,3 +1,4 @@
+import { ImportCommentary } from "./library/ImportCommentary";
 import { ImportCorpus } from "./library/ImportCorpus";
 import { LibraryHome } from "./library/LibraryHome";
 import { Reader } from "./page/Reader";
@@ -10,6 +11,8 @@ export function App() {
       return <LibraryHome />;
     case "import":
       return <ImportCorpus />;
+    case "import-commentary":
+      return <ImportCommentary versionId={route.versionId} />;
     case "page":
       return <Reader versionId={route.versionId} page={route.page} line={route.line} />;
     case "not-found":

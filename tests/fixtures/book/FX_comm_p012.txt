@@ -1,0 +1,13 @@
+heron, or another like it, on a stone that had once been
+a step.
+
+She fixed the stone as station |numbers=47|forty-seven||. It was the
+first mark on her sheet that she had not made herself,
+and she inked it in red and drew 𝄞 {c_p12_sign}beside it{c_p12_sign/}, a private
+sign, meaning: here the map begins to answer back.
+
+@@ Metatext
+
+{c_p12_sign}, Comment
+A span that follows a character outside the Basic Multilingual Plane.
+{c_p12_sign/}

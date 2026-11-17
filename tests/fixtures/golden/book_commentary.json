@@ -1,0 +1,493 @@
+{
+  "mentions": [
+    {
+      "category": "places",
+      "entity": "Low Harbor",
+      "value": null,
+      "words": "Low Harbor"
+    },
+    {
+      "category": "numbers",
+      "entity": "nine",
+      "value": "9",
+      "words": "nine"
+    },
+    {
+      "category": "places",
+      "entity": "Low Harbor",
+      "value": null,
+      "words": "Low Harbor"
+    },
+    {
+      "category": "time",
+      "entity": null,
+      "value": null,
+      "words": "October, 1871"
+    },
+    {
+      "category": "animals",
+      "entity": "gulls",
+      "value": null,
+      "words": "gulls"
+    },
+    {
+      "category": "numbers",
+      "entity": "nine",
+      "value": "9",
+      "words": "nine"
+    },
+    {
+      "category": "plants",
+      "entity": "Reeds",
+      "value": null,
+      "words": "Reeds"
+    },
+    {
+      "category": "animals",
+      "entity": "heron",
+      "value": null,
+      "words": "heron"
+    },
+    {
+      "category": "time",
+      "entity": null,
+      "value": null,
+      "words": "third day"
+    },
+    {
+      "category": "numbers",
+      "entity": "eleven",
+      "value": "11",
+      "words": "eleven"
+    },
+    {
+      "category": "animals",
+      "entity": "eels",
+      "value": null,
+      "words": "eels"
+    },
+    {
+      "category": "numbers",
+      "entity": "two",
+      "value": "2",
+      "words": "two"
+    },
+    {
+      "category": "plants",
+      "entity": "willow",
+      "value": null,
+      "words": "willow"
+    },
+    {
+      "category": "numbers",
+      "entity": "forty-six",
+      "value": "46",
+      "words": "forty-six"
+    },
+    {
+      "category": "weather",
+      "entity": "sea",
+      "value": null,
+      "words": "sea"
+    },
+    {
+      "category": "numbers",
+      "entity": "forty-seven",
+      "value": "47",
+      "words": "forty-seven"
+    }
+  ],
+  "notes": [
+    {
+      "body_md": "Arrival by Water",
+      "legacy_id": null,
+      "level": 1,
+      "page": 7,
+      "scope": "chapter",
+      "span_on_this_page": [],
+      "status": "draft",
+      "type": "Chapter title"
+    },
+    {
+      "body_md": "Ada Quill reaches Low Harbor and learns that her employer is gone.",
+      "legacy_id": null,
+      "level": 1,
+      "page": 7,
+      "scope": "chapter",
+      "span_on_this_page": [],
+      "status": "draft",
+      "type": "Chapter summary"
+    },
+    {
+      "body_md": "TODO: whole page needs a second pass",
+      "legacy_id": null,
+      "level": 1,
+      "page": 7,
+      "scope": "page",
+      "span_on_this_page": [],
+      "status": "draft",
+      "type": "Comment"
+    },
+    {
+      "body_md": "Tide tables for the period survive; see {{fx:10}} and {{fx:12}}.",
+      "legacy_id": "h_p7_tide",
+      "level": 1,
+      "page": 7,
+      "scope": "span",
+      "span_on_this_page": [
+        "last tide of",
+        "October, 1871"
+      ],
+      "status": "draft",
+      "type": "Historical"
+    },
+    {
+      "body_md": "The instrument returns at the end. **Watch** the brass.\n\nTODO: check the make of the theodolite",
+      "legacy_id": "c_p7_brass",
+      "level": 2,
+      "page": 7,
+      "scope": "span",
+      "span_on_this_page": [
+        "brass",
+        "theodolite in one hand"
+      ],
+      "status": "draft",
+      "type": "Comment"
+    },
+    {
+      "body_md": "**theodolite** - a surveying instrument for measuring angles",
+      "legacy_id": "cl_p7_theo",
+      "level": 1,
+      "page": 7,
+      "scope": "span",
+      "span_on_this_page": [
+        "theodolite"
+      ],
+      "status": "draft",
+      "type": "Definition"
+    },
+    {
+      "body_md": "![The harbor at low water](fig:harbor)\n\nThe tin is the first container in the story; see {{fig:harbor}}.",
+      "legacy_id": "l_p7_tin",
+      "level": 1,
+      "page": 7,
+      "scope": "span",
+      "span_on_this_page": [
+        "kept his ledgers in a biscuit tin"
+      ],
+      "status": "draft",
+      "type": "Literary"
+    },
+    {
+      "body_md": "Debt as inheritance—a theme.\n\nTODO: compare the second sheet",
+      "legacy_id": "m_p7_biscuit",
+      "level": 1,
+      "page": 7,
+      "scope": "span",
+      "span_on_this_page": [
+        "biscuit tin. He told her"
+      ],
+      "status": "draft",
+      "type": "Meditation"
+    },
+    {
+      "body_md": "TODO: Imported without a span. Attach this note to its passage.\n\nThe barrow comes back in the second chapter.",
+      "legacy_id": "c_p8_barrow",
+      "level": 1,
+      "page": 8,
+      "scope": "page",
+      "span_on_this_page": [],
+      "status": "draft",
+      "type": "Comment"
+    },
+    {
+      "body_md": "Candlemas falls on the second of February.",
+      "legacy_id": "h_p8_candle",
+      "level": 1,
+      "page": 8,
+      "scope": "span",
+      "span_on_this_page": [
+        "Candlemas"
+      ],
+      "status": "draft",
+      "type": "Historical"
+    },
+    {
+      "body_md": "{{gloss:señora|madam, lady}}",
+      "legacy_id": "s_p8_senora",
+      "level": 1,
+      "page": 8,
+      "scope": "span",
+      "span_on_this_page": [
+        "señora"
+      ],
+      "status": "draft",
+      "type": "Spanish"
+    },
+    {
+      "body_md": "TODO: Imported span with no note. Write the note, or delete this highlight.",
+      "legacy_id": "c_p8_marsh",
+      "level": 1,
+      "page": 8,
+      "scope": "span",
+      "span_on_this_page": [
+        "marsh turned out to",
+        "contain."
+      ],
+      "status": "draft",
+      "type": "Comment"
+    },
+    {
+      "body_md": "{{gloss:cuidado|careful, watch out}}",
+      "legacy_id": "s_p9_cuidado",
+      "level": 1,
+      "page": 9,
+      "scope": "span",
+      "span_on_this_page": [
+        "cuidado"
+      ],
+      "status": "draft",
+      "type": "Historical"
+    },
+    {
+      "body_md": "The first of three sheets. \\sidenote{check}\n\n![A survey chain](fig:chain)",
+      "legacy_id": "c_p7_sheet",
+      "level": 1,
+      "page": 9,
+      "scope": "span",
+      "span_on_this_page": [
+        "first sheet"
+      ],
+      "status": "draft",
+      "type": "Comment"
+    },
+    {
+      "body_md": "TODO: Imported from a span that was never closed. Check where the passage ends.\n\nWhat the map leaves out.",
+      "legacy_id": "m_p9_white",
+      "level": 2,
+      "page": 9,
+      "scope": "span",
+      "span_on_this_page": [
+        "white part"
+      ],
+      "status": "draft",
+      "type": "Meditation"
+    },
+    {
+      "body_md": "A span that follows a character outside the Basic Multilingual Plane.",
+      "legacy_id": "c_p12_sign",
+      "level": 1,
+      "page": 12,
+      "scope": "span",
+      "span_on_this_page": [
+        "beside it"
+      ],
+      "status": "draft",
+      "type": "Comment"
+    }
+  ],
+  "report": {
+    "chapter_notes": 2,
+    "figures": 2,
+    "files": 5,
+    "flagged_notes": 3,
+    "groups": [
+      {
+        "code": "malformed_tags",
+        "items": [
+          {
+            "code": "stray_closing_tag",
+            "line": 1,
+            "message": "Page 9, line 1: {c_p9_none/} closes something that was never opened; it was ignored.",
+            "page": 9,
+            "tag": "{c_p9_none/}"
+          },
+          {
+            "code": "malformed_tag",
+            "line": 2,
+            "message": "Page 9, line 2: {c_p9_ahead is not a complete tag; it was left in the text.",
+            "page": 9,
+            "tag": "{c_p9_ahead"
+          },
+          {
+            "code": "unclosed_span",
+            "line": 11,
+            "message": "Page 9, line 11: {m_p9_white} is never closed; it was taken to end with its line, and its note is flagged.",
+            "page": 9,
+            "tag": "{m_p9_white}"
+          },
+          {
+            "code": "unclosed_block",
+            "line": 26,
+            "message": "Page 9, line 26: The note block {m_p9_white} is never closed; it was taken to end where the next begins.",
+            "page": 9,
+            "tag": "{m_p9_white}"
+          }
+        ],
+        "title": "Unclosed or malformed tags"
+      },
+      {
+        "code": "span_without_note",
+        "items": [
+          {
+            "code": "span_without_note",
+            "line": 13,
+            "message": "Page 8, line 13: {c_p8_marsh} has no note block; it was imported as a flagged highlight.",
+            "page": 8,
+            "tag": "{c_p8_marsh}"
+          }
+        ],
+        "title": "Spans without a note"
+      },
+      {
+        "code": "note_without_span",
+        "items": [
+          {
+            "code": "note_without_span",
+            "line": 26,
+            "message": "Page 8, line 26: The note {c_p8_barrow} has no span in the text; it was attached to the page and flagged.",
+            "page": 8,
+            "tag": "{c_p8_barrow}"
+          }
+        ],
+        "title": "Notes without a span"
+      },
+      {
+        "code": "type_disagreement",
+        "items": [
+          {
+            "code": "type_mismatch",
+            "line": 16,
+            "message": "Page 9, line 16: {s_p9_cuidado}: the block says Historical, which disagrees with the id's prefix; Historical was used.",
+            "page": 9,
+            "tag": "{s_p9_cuidado}"
+          },
+          {
+            "code": "bad_level",
+            "line": 20,
+            "message": "Page 9, line 20: {c_p7_sheet}: 5 is not a reading level (1 or 2); level 1 was used.",
+            "page": 9,
+            "tag": "{c_p7_sheet}"
+          }
+        ],
+        "title": "Types that do not agree"
+      },
+      {
+        "code": "wrong_page",
+        "items": [
+          {
+            "code": "wrong_page",
+            "line": 20,
+            "message": "Page 9, line 20: {c_p7_sheet} names page 7, not the page of the file it is in.",
+            "page": 9,
+            "tag": "{c_p7_sheet}"
+          }
+        ],
+        "title": "Ids naming another page"
+      },
+      {
+        "code": "unknown_category",
+        "items": [
+          {
+            "code": "unknown_category",
+            "line": 7,
+            "message": "Page 9, line 7: |weather| is not a known category; the category was created.",
+            "page": 9,
+            "tag": "|weather|"
+          }
+        ],
+        "title": "Entity categories"
+      },
+      {
+        "code": "missing_figure",
+        "items": [
+          {
+            "code": "missing_figure",
+            "line": 23,
+            "message": "Page 9, line 23: The figure file chain.png was not found; its figure has no image yet.",
+            "page": 9,
+            "tag": "chain.png"
+          }
+        ],
+        "title": "Figure files"
+      },
+      {
+        "code": "text_differs",
+        "items": [
+          {
+            "code": "text_differs",
+            "line": 2,
+            "message": "Page 9, line 2: The text differs from the corpus here (corpus line 2).",
+            "page": 9,
+            "tag": "corpus line 2"
+          },
+          {
+            "code": "text_differs",
+            "line": 12,
+            "message": "Page 9, line 12: The text differs from the corpus here (corpus line 11).",
+            "page": 9,
+            "tag": "corpus line 11"
+          },
+          {
+            "code": "page_not_in_corpus",
+            "line": null,
+            "message": "Page 99: The corpus has no such page; nothing in FX_comm_p099.txt was imported.",
+            "page": 99,
+            "tag": "FX_comm_p099.txt"
+          }
+        ],
+        "title": "Text that differs from the corpus"
+      },
+      {
+        "code": "unknown_latex",
+        "items": [
+          {
+            "code": "unknown_latex",
+            "line": 21,
+            "message": "Page 9, line 21: \\sidenote is not a known LaTeX command; it was left in place.",
+            "page": 9,
+            "tag": "\\sidenote"
+          }
+        ],
+        "title": "LaTeX commands left in place"
+      }
+    ],
+    "mentions": 16,
+    "new_categories": [
+      "weather"
+    ],
+    "notes": 13,
+    "pages": [
+      7,
+      8,
+      9,
+      12
+    ],
+    "remarks": 1,
+    "repairs": [
+      {
+        "code": "closing_tag_slash",
+        "line": 10,
+        "message": "Page 8, line 10: {h_p8_candle} was read as a closing tag missing its slash.",
+        "page": 8,
+        "tag": "{h_p8_candle}"
+      },
+      {
+        "code": "category_name",
+        "line": 3,
+        "message": "Page 8, line 3: |animal| was read as the category animals.",
+        "page": 8,
+        "tag": "|animal|"
+      },
+      {
+        "code": "category_name",
+        "line": 8,
+        "message": "Page 8, line 8: |times| was read as the category time.",
+        "page": 8,
+        "tag": "|times|"
+      }
+    ],
+    "replaced_mentions": 0,
+    "replaced_notes": 0
+  }
+}

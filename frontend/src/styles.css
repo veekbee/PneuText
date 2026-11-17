@@ -803,3 +803,22 @@ textarea {
 .stage > .notice {
   margin-bottom: 0.75rem;
 }
+
+/* ---- Import reports ---------------------------------------------------- */
+
+.report-group h3 {
+  margin: 1rem 0 0.2rem;
+  font-size: 0.9rem;
+}
+
+.report-group .problems {
+  margin-top: 0.2rem;
+}
+
+.version-action {
+  font-size: 0.85rem;
+}
+
+.form details label + label {
+  margin-top: 0.7rem;
+}

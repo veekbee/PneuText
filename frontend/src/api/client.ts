@@ -22,6 +22,9 @@ export type NoteCreateInput = Schemas["NoteCreateIn"];
 export type NoteUpdateInput = Schemas["NoteUpdateIn"];
 export type SpanInput = Schemas["SpanIn"];
 export type Highlight = Schemas["ShapeHighlightOut"];
+export type LegacyImportInput = Schemas["LegacyImportIn"];
+export type LegacyReport = Schemas["LegacyReportOut"];
+export type ReportItem = Schemas["ReportItemOut"];
 
 export class ApiError extends Error {
   readonly status: number;
@@ -84,6 +87,10 @@ export const api = {
     post<CorpusImportPreview>("/api/imports/corpus/preview", input),
   importCorpus: (input: CorpusImportInput) =>
     post<CorpusImportResult>("/api/imports/corpus", input),
+  previewCommentaryImport: (versionId: number, input: LegacyImportInput) =>
+    post<LegacyReport>(`/api/versions/${versionId}/imports/commentary/preview`, input),
+  importCommentary: (versionId: number, input: LegacyImportInput) =>
+    post<LegacyReport>(`/api/versions/${versionId}/imports/commentary`, input),
   listNoteTypes: () => request<NoteType[]>("/api/note-types"),
   listPageNotes: (versionId: number, page: number) =>
     request<Note[]>(`/api/versions/${versionId}/pages/${page}/notes`),

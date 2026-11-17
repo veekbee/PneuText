@@ -5,14 +5,18 @@ export type Route =
   | { name: "home" }
   | { name: "import" }
   | { name: "page"; versionId: number; page: number; line: number | null }
+  | { name: "import-commentary"; versionId: number }
   | { name: "not-found" };
 
 const PAGE_PATH = /^\/v\/(\d+)\/p\/(\d+)\/?$/;
+const COMMENTARY_PATH = /^\/v\/(\d+)\/import-commentary\/?$/;
 const LINE_HASH = /^#l(\d+)$/;
 
 export function parseRoute(pathname: string, hash = ""): Route {
   if (pathname === "/" || pathname === "") return { name: "home" };
   if (pathname === "/import" || pathname === "/import/") return { name: "import" };
+  const commentary = COMMENTARY_PATH.exec(pathname);
+  if (commentary !== null) return { name: "import-commentary", versionId: Number(commentary[1]) };
   const match = PAGE_PATH.exec(pathname);
   if (match !== null) {
     const line = LINE_HASH.exec(hash);
@@ -24,6 +28,10 @@ export function parseRoute(pathname: string, hash = ""): Route {
     };
   }
   return { name: "not-found" };
+}
+
+export function commentaryImportPath(versionId: number): string {
+  return `/v/${versionId}/import-commentary`;
 }
 
 export function pagePath(versionId: number, page: number, line?: number | null): string {

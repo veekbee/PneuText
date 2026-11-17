@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { pagePath, parseRoute } from "../src/lib/route";
+import { commentaryImportPath, pagePath, parseRoute } from "../src/lib/route";
 
 describe("routes", () => {
   it("parses the home and import addresses", () => {
@@ -10,6 +10,11 @@ describe("routes", () => {
 
   it("parses a page address", () => {
     expect(parseRoute("/v/3/p/45")).toEqual({ name: "page", versionId: 3, page: 45, line: null });
+  });
+
+  it("parses the commentary import address of a text", () => {
+    expect(parseRoute("/v/3/import-commentary")).toEqual({ name: "import-commentary", versionId: 3 });
+    expect(commentaryImportPath(3)).toBe("/v/3/import-commentary");
   });
 
   it("parses a line address", () => {
