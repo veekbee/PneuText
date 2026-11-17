@@ -39,6 +39,118 @@
         "title": "AnchorOut",
         "type": "object"
       },
+      "BacklinkOut": {
+        "description": "A note that refers to a page, a passage or another note.",
+        "properties": {
+          "level": {
+            "title": "Level",
+            "type": "integer"
+          },
+          "line_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line No"
+          },
+          "note_id": {
+            "title": "Note Id",
+            "type": "integer"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Where the referring note sits.",
+            "title": "Page"
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "ready"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "target": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "What it cites, such as 'p. 45.12'.",
+            "title": "Target"
+          },
+          "type_id": {
+            "title": "Type Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "note_id",
+          "type_id",
+          "level",
+          "status",
+          "page",
+          "line_no",
+          "target"
+        ],
+        "title": "BacklinkOut",
+        "type": "object"
+      },
+      "CorpusHitOut": {
+        "description": "A place in the text where the query was found, with its print line.",
+        "properties": {
+          "after": {
+            "title": "After",
+            "type": "string"
+          },
+          "before": {
+            "title": "Before",
+            "type": "string"
+          },
+          "line_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line No"
+          },
+          "match": {
+            "title": "Match",
+            "type": "string"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "page",
+          "line_no",
+          "before",
+          "match",
+          "after"
+        ],
+        "title": "CorpusHitOut",
+        "type": "object"
+      },
       "CorpusImportIn": {
         "properties": {
           "allow_duplicate": {
@@ -250,6 +362,44 @@
           "page"
         ],
         "title": "DivisionOut",
+        "type": "object"
+      },
+      "FigureOut": {
+        "properties": {
+          "caption": {
+            "title": "Caption",
+            "type": "string"
+          },
+          "credit": {
+            "title": "Credit",
+            "type": "string"
+          },
+          "file": {
+            "title": "File",
+            "type": "string"
+          },
+          "has_file": {
+            "title": "Has File",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "file",
+          "caption",
+          "credit",
+          "has_file"
+        ],
+        "title": "FigureOut",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -543,6 +693,67 @@
         "title": "NoteCreateIn",
         "type": "object"
       },
+      "NoteHitOut": {
+        "properties": {
+          "excerpt": {
+            "title": "Excerpt",
+            "type": "string"
+          },
+          "level": {
+            "title": "Level",
+            "type": "integer"
+          },
+          "line_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line No"
+          },
+          "note_id": {
+            "title": "Note Id",
+            "type": "integer"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "ready"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "type_id": {
+            "title": "Type Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "note_id",
+          "type_id",
+          "level",
+          "status",
+          "page",
+          "line_no",
+          "excerpt"
+        ],
+        "title": "NoteHitOut",
+        "type": "object"
+      },
       "NoteNode": {
         "description": "One node of a parsed note body.",
         "properties": {
@@ -552,10 +763,13 @@
                 "additionalProperties": {
                   "anyOf": [
                     {
-                      "type": "string"
+                      "type": "boolean"
                     },
                     {
                       "type": "integer"
+                    },
+                    {
+                      "type": "string"
                     },
                     {
                       "type": "null"
@@ -610,6 +824,14 @@
         "properties": {
           "anchor": {
             "$ref": "#/components/schemas/AnchorOut"
+          },
+          "backlinks": {
+            "description": "The notes that refer to this one.",
+            "items": {
+              "$ref": "#/components/schemas/BacklinkOut"
+            },
+            "title": "Backlinks",
+            "type": "array"
           },
           "body": {
             "$ref": "#/components/schemas/NoteNode",
@@ -716,7 +938,8 @@
           "updated_at",
           "anchor",
           "start",
-          "end"
+          "end",
+          "backlinks"
         ],
         "title": "NoteOut",
         "type": "object"
@@ -842,6 +1065,32 @@
           }
         },
         "title": "NoteUpdateIn",
+        "type": "object"
+      },
+      "PageLinksOut": {
+        "properties": {
+          "backlinks": {
+            "description": "Notes that refer to this page.",
+            "items": {
+              "$ref": "#/components/schemas/BacklinkOut"
+            },
+            "title": "Backlinks",
+            "type": "array"
+          },
+          "passages": {
+            "description": "Passage links touching this page.",
+            "items": {
+              "$ref": "#/components/schemas/PassageLinkOut"
+            },
+            "title": "Passages",
+            "type": "array"
+          }
+        },
+        "required": [
+          "backlinks",
+          "passages"
+        ],
+        "title": "PageLinksOut",
         "type": "object"
       },
       "PageShapeOut": {
@@ -977,6 +1226,111 @@
         "title": "PageTextOut",
         "type": "object"
       },
+      "PassageEndOut": {
+        "properties": {
+          "end_line_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Line No"
+          },
+          "end_page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Page"
+          },
+          "here": {
+            "description": "Whether this end lies on the page being shown.",
+            "title": "Here",
+            "type": "boolean"
+          },
+          "line_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line No"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          }
+        },
+        "required": [
+          "page",
+          "line_no",
+          "end_page",
+          "end_line_no",
+          "here"
+        ],
+        "title": "PassageEndOut",
+        "type": "object"
+      },
+      "PassageLinkIn": {
+        "properties": {
+          "source": {
+            "$ref": "#/components/schemas/SpanIn"
+          },
+          "target": {
+            "$ref": "#/components/schemas/SpanIn"
+          }
+        },
+        "required": [
+          "source",
+          "target"
+        ],
+        "title": "PassageLinkIn",
+        "type": "object"
+      },
+      "PassageLinkOut": {
+        "description": "A link made passage to passage.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "relation": {
+            "title": "Relation",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/PassageEndOut"
+          },
+          "target": {
+            "$ref": "#/components/schemas/PassageEndOut"
+          }
+        },
+        "required": [
+          "id",
+          "relation",
+          "source",
+          "target"
+        ],
+        "title": "PassageLinkOut",
+        "type": "object"
+      },
       "PlaceOut": {
         "properties": {
           "line_no": {
@@ -1002,11 +1356,48 @@
         "title": "PlaceOut",
         "type": "object"
       },
+      "ReferenceHitOut": {
+        "properties": {
+          "line_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line No"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "page",
+          "line_no"
+        ],
+        "title": "ReferenceHitOut",
+        "type": "object"
+      },
       "RenderIn": {
         "properties": {
           "body_md": {
             "title": "Body Md",
             "type": "string"
+          },
+          "version_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The text the note belongs to, so its references resolve.",
+            "title": "Version Id"
           }
         },
         "required": [
@@ -1093,6 +1484,55 @@
           "message"
         ],
         "title": "ReportItemOut",
+        "type": "object"
+      },
+      "SearchOut": {
+        "properties": {
+          "corpus": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/CorpusHitOut"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Hits in the text; null when the text was not searched, as in blank mode.",
+            "title": "Corpus"
+          },
+          "notes": {
+            "items": {
+              "$ref": "#/components/schemas/NoteHitOut"
+            },
+            "title": "Notes",
+            "type": "array"
+          },
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReferenceHitOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Set when the query names a place."
+          }
+        },
+        "required": [
+          "query",
+          "reference",
+          "corpus",
+          "notes"
+        ],
+        "title": "SearchOut",
         "type": "object"
       },
       "ShapeHighlightOut": {
@@ -1536,6 +1976,72 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/figures": {
+      "get": {
+        "operationId": "listFigures",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FigureOut"
+                  },
+                  "title": "Response Listfigures",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Figures",
+        "tags": [
+          "figures"
+        ]
+      }
+    },
+    "/api/figures/{label}/file": {
+      "get": {
+        "description": "The image of a figure, from the library's figures folder.",
+        "operationId": "getFigureFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "label",
+            "required": true,
+            "schema": {
+              "title": "Label",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Figure File",
+        "tags": [
+          "figures"
+        ]
+      }
+    },
     "/api/imports/corpus": {
       "post": {
         "operationId": "importCorpus",
@@ -1637,6 +2143,41 @@
         "summary": "Get Library Info",
         "tags": [
           "library"
+        ]
+      }
+    },
+    "/api/links/{link_id}": {
+      "delete": {
+        "operationId": "deletePassageLink",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "link_id",
+            "required": true,
+            "schema": {
+              "title": "Link Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Passage Link",
+        "tags": [
+          "links"
         ]
       }
     },
@@ -2004,6 +2545,63 @@
         ]
       }
     },
+    "/api/versions/{version_id}/links": {
+      "post": {
+        "description": "Link one passage to another. Both passages are checked against the text.",
+        "operationId": "createPassageLink",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PassageLinkIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "integer"
+                  },
+                  "title": "Response Createpassagelink",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Passage Link",
+        "tags": [
+          "links"
+        ]
+      }
+    },
     "/api/versions/{version_id}/notes": {
       "post": {
         "operationId": "createNote",
@@ -2053,6 +2651,58 @@
         "summary": "Create Note",
         "tags": [
           "notes"
+        ]
+      }
+    },
+    "/api/versions/{version_id}/pages/{page}/links": {
+      "get": {
+        "description": "What points at a page: notes that refer to it, and passage links that touch it.",
+        "operationId": "listPageLinks",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "page",
+            "required": true,
+            "schema": {
+              "title": "Page",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageLinksOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Page Links",
+        "tags": [
+          "links"
         ]
       }
     },
@@ -2213,6 +2863,68 @@
         "summary": "Get Page Text",
         "tags": [
           "corpus"
+        ]
+      }
+    },
+    "/api/versions/{version_id}/search": {
+      "get": {
+        "description": "Search a text. The corpus is searched only when `corpus` is true: never in blank mode.",
+        "operationId": "search",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "title": "Q",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "corpus",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Corpus",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Search",
+        "tags": [
+          "search"
         ]
       }
     }

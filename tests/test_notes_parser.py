@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+import pytest
+
 from pneutext.notes import parse
 
 
@@ -100,3 +102,100 @@ def test_every_node_uses_only_the_documented_keys() -> None:
             check(child)
 
     check(parse("# H\n\n- *a* [b](c) `d`\n\n> ![e](f)\n\n```\ng\n```"))
+
+
+def form(source: str) -> dict[str, Any]:
+    (node,) = body(source)
+    (only,) = node["children"]
+    return only
+
+
+def test_references_to_pages_lines_and_ranges() -> None:
+    assert form("{{bn:292}}") == {
+        "type": "reference",
+        "attrs": {"work": "bn", "target": "292"},
+        "text": "{{bn:292}}",
+    }
+    assert form("{{bn:292-293}}")["attrs"]["target"] == "292-293"
+    assert form("{{bn:45.12}}")["attrs"]["target"] == "45.12"
+    assert form("{{ bn : 45.12-46.3 }}")["attrs"] == {"work": "bn", "target": "45.12-46.3"}
+
+
+def test_references_to_notes_and_figures() -> None:
+    assert form("{{note:123}}")["attrs"] == {"id": 123}
+    assert form("{{note:123}}")["type"] == "note_ref"
+    assert form("{{fig:tang}}") == {
+        "type": "figure_ref",
+        "attrs": {"label": "tang"},
+        "text": "{{fig:tang}}",
+    }
+
+
+def test_a_placed_figure() -> None:
+    assert form("![A *fine* map](fig:tang)") == {
+        "type": "figure",
+        "attrs": {"label": "tang", "caption": "A fine map"},
+    }
+
+
+def test_a_gloss_has_a_word_and_a_meaning() -> None:
+    assert form("{{gloss:camino|road, way}}")["attrs"] == {"word": "camino", "meaning": "road, way"}
+    assert form("{{gloss:camino|a | b}}")["attrs"]["meaning"] == "a | b"
+
+
+def test_forms_sit_inside_running_text_and_formatting() -> None:
+    (node,) = body("See *{{bn:45}}* and {{note:7}}.")
+    kinds = [child["type"] for child in node["children"]]
+    assert kinds == ["text", "emphasis", "text", "note_ref", "text"]
+    assert node["children"][1]["children"][0]["type"] == "reference"
+
+
+def test_a_citation_is_reserved_and_reported_as_unsupported() -> None:
+    assert form("{{cite:smith1999}}") == {
+        "type": "unsupported",
+        "attrs": {"form": "cite", "key": "smith1999"},
+        "text": "{{cite:smith1999}}",
+    }
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "{{nope}}",
+        "{{bn:9-2}}",
+        "{{bn:}}",
+        "{{note:abc}}",
+        "{{gloss:|meaning}}",
+        "{{BN:45}}",
+        "{{fig:}}",
+    ],
+)
+def test_a_form_that_is_not_understood_is_kept_and_marked_broken(source: str) -> None:
+    assert form(source) == {"type": "broken", "text": source}
+
+
+def test_unclosed_or_multi_line_braces_are_ordinary_text() -> None:
+    assert body("{{bn:45 and more") == [paragraph(text("{{bn:45 and more"))]
+    assert body("a {single} brace") == [paragraph(text("a {single} brace"))]
+
+
+def test_a_paragraph_starting_todo_is_an_editorial_remark() -> None:
+    assert body("A note.\n\nTODO: check *this*\nand that\n\nMore.") == [
+        paragraph(text("A note.")),
+        {
+            "type": "todo",
+            "children": [
+                text("check "),
+                {"type": "emphasis", "children": [text("this")]},
+                {"type": "softbreak"},
+                text("and that"),
+            ],
+        },
+        paragraph(text("More.")),
+    ]
+    assert body("TODO:") == [{"type": "todo", "children": []}]
+
+
+def test_todo_elsewhere_in_a_paragraph_is_not_a_remark() -> None:
+    assert body("Not a TODO: here")[0]["type"] == "paragraph"
+    assert body("todo: lower case")[0]["type"] == "paragraph"

@@ -11,8 +11,12 @@ from pneutext.core.anchors import AnchorQuote, LineGeometry
 from pneutext.core.corpus import TEXT_KINDS
 from pneutext.core.errors import InvalidInput, NotFound
 from pneutext.core.shape import ShapeHighlight
+from pneutext.services import links as links_service
+from pneutext.services.extents import WHOLE_UNIT, chapter_extent, page_extent
+from pneutext.services.links import Backlink
 from pneutext.store import corpus as corpus_store
 from pneutext.store import db
+from pneutext.store import links as links_store
 from pneutext.store import notes as notes_store
 from pneutext.store.corpus import LineShapeRow, VersionRow
 from pneutext.store.library import Library
@@ -70,9 +74,10 @@ class Place:
 @dataclass(frozen=True)
 class NoteView:
     note: NoteRow
-    body: note_parser.Node
+    body: note_parser.Node  # parsed, with each reference resolved against the library
     start: Place | None
     end: Place | None
+    backlinks: list[Backlink]  # the notes that refer to this one
 
 
 def _require_version(conn: sqlite3.Connection, version_id: int) -> VersionRow:
@@ -119,10 +124,11 @@ def _view(conn: sqlite3.Connection, note: NoteRow) -> NoteView:
 
     return NoteView(
         note=note,
-        body=note_parser.parse(note.body_md),
+        body=links_service.resolve_tree(conn, version, note_parser.parse(note.body_md)),
         start=place(anchor.start_segment_id, anchor.start_offset),
         # The end is exclusive, so the last character covered is one before it.
         end=place(anchor.end_segment_id, max(anchor.end_offset - 1, 0)),
+        backlinks=links_service.backlinks_to_note(conn, version, note.id),
     )
 
 
@@ -133,41 +139,18 @@ def _require_note(conn: sqlite3.Connection, note_id: int) -> NoteRow:
     return note
 
 
-WHOLE_UNIT = AnchorQuote(exact="", prefix="", suffix="")
-"""A page or chapter note's anchor quotes nothing: a whole unit is not re-located by quotation."""
-
-Extent = tuple[int, int, int, int]
-"""Start segment, start offset, end segment, end offset."""
-
-
-def page_extent(conn: sqlite3.Connection, version: VersionRow, page: int) -> Extent | None:
-    """The stretch of text a page covers, for a page note's anchor."""
-    lines = corpus_store.page_line_shapes(conn, version.pagination_id, page)
-    if not lines:
-        return None
-    first, last = lines[0], lines[-1]
-    return first.segment_id, first.start_offset, last.segment_id, last.start_offset + last.length
-
-
-def chapter_extent(
-    conn: sqlite3.Connection, version: VersionRow, division_id: int
-) -> Extent | None:
-    """The stretch of text a chapter covers, for a chapter note's anchor."""
-    extent = notes_store.division_extent(conn, version.id, division_id)
-    if extent is None:
-        return None
-    first_id, last_id, last_length = extent
-    return first_id, 0, last_id, last_length
-
-
 def list_note_types(library: Library) -> list[NoteTypeRow]:
     with db.transaction(library.db_path) as conn:
         return notes_store.list_note_types(conn)
 
 
-def render_body(body_md: str) -> note_parser.Node:
-    """Parse a note body for the editor's live preview."""
-    return note_parser.parse(body_md)
+def render_body(library: Library, body_md: str, version_id: int | None) -> note_parser.Node:
+    """Parse a note body for the editor's live preview, resolving its references."""
+    tree = note_parser.parse(body_md)
+    if version_id is None:
+        return tree
+    with db.transaction(library.db_path) as conn:
+        return links_service.resolve_tree(conn, _require_version(conn, version_id), tree)
 
 
 def create_note(library: Library, version_id: int, new: NewNote) -> NoteView:
@@ -209,6 +192,7 @@ def create_note(library: Library, version_id: int, new: NewNote) -> NoteView:
             conn, anchor_id, new.type_id, new.scope, new.level, new.status, new.body_md
         )
         notes_store.set_tags(conn, note_id, _clean_tags(new.tags))
+        links_service.refresh_inline_links(conn, version, note_id, new.body_md)
         return _view(conn, _require_note(conn, note_id))
 
 
@@ -237,13 +221,21 @@ def update_note(library: Library, note_id: int, changes: NoteChanges) -> NoteVie
         notes_store.update_annotation(conn, note_id, fields)
         if changes.tags is not None:
             notes_store.set_tags(conn, note_id, _clean_tags(changes.tags))
+        if changes.body_md is not None:
+            # Inline links are derived: saving re-parses the body and replaces them, so
+            # backlinks never go stale.
+            version = _require_version(conn, note.anchor.version_id)
+            links_service.refresh_inline_links(conn, version, note_id, changes.body_md)
         return _view(conn, _require_note(conn, note_id))
 
 
 def delete_note(library: Library, note_id: int) -> None:
     with db.transaction(library.db_path) as conn:
         _require_note(conn, note_id)
+        # Its links go with it. A note that referred to this one keeps its reference,
+        # which now shows as broken.
         notes_store.delete_annotation(conn, note_id)
+        links_store.delete_unowned_anchors(conn)
 
 
 def get_note(library: Library, note_id: int) -> NoteView:

@@ -258,6 +258,26 @@ def page_line_texts(conn: sqlite3.Connection, pagination_id: int, page: int) -> 
     ]
 
 
+def line_at_offset(
+    conn: sqlite3.Connection, pagination_id: int, segment_id: int, offset: int
+) -> LineShapeRow | None:
+    """The print line of a segment that an offset falls on (the last line at or before it)."""
+    scope = "AND l.segment_id = :segment_id"
+    rows = conn.execute(
+        _LINE_SHAPE_SELECT.format(scope=scope)
+        + " WHERE start_offset <= :offset ORDER BY start_offset DESC LIMIT 1",
+        {"pagination_id": pagination_id, "segment_id": segment_id, "offset": offset},
+    ).fetchall()
+    return _shape_row(rows[0]) if rows else None
+
+
+def newest_version_of_work(conn: sqlite3.Connection, work_code: str) -> VersionRow | None:
+    row = conn.execute(
+        _VERSION_SELECT + " WHERE w.code = ? ORDER BY v.id DESC LIMIT 1", (work_code,)
+    ).fetchone()
+    return None if row is None else VersionRow(**dict(row))
+
+
 def text_line_lengths(conn: sqlite3.Connection, pagination_id: int) -> list[int]:
     """The length of every line of running text in a pagination (for the measure)."""
     kinds = ",".join(f"'{kind}'" for kind in sorted(TEXT_KINDS))

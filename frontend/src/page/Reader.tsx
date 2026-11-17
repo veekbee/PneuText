@@ -11,8 +11,12 @@ import {
 } from "../api/client";
 import {
   useCreateNote,
+  useCreatePassageLink,
   useDeleteNote,
+  useDeletePassageLink,
+  useFigures,
   useNoteTypes,
+  usePageLinks,
   usePageNotes,
   usePageShape,
   usePageText,
@@ -20,18 +24,22 @@ import {
   useVersion,
 } from "../api/queries";
 import { isVisible, type NoteFilter } from "../lib/filters";
+import { cancelLink, startLink, useLinkInProgress } from "../lib/linkTray";
 import { type Mode, setPrefs, usePrefs } from "../lib/prefs";
 import { pagePath } from "../lib/route";
 import {
+  citationFor,
   readSelection,
   referenceFor,
   type RowPoint,
   spanFromRows,
   type SpanSelection,
 } from "../lib/selection";
+import { APP_ENV } from "../notes/env";
 import { NoteFilters } from "../notes/NoteFilters";
 import { NotesPanel } from "../notes/NotesPanel";
 import { Link, navigate } from "../router";
+import { SearchBox } from "../search/SearchBox";
 import { PageView } from "./PageView";
 import { SelectionPopover } from "./SelectionPopover";
 
@@ -110,12 +118,20 @@ export function Reader({ versionId, page, line }: ReaderProps) {
   const active = mode === "text" ? pageText : pageShape;
   const noteTypes = useNoteTypes();
   const pageNotes = usePageNotes(versionId, page);
+  const pageLinks = usePageLinks(versionId, page);
+  const figures = useFigures();
   const createNote = useCreateNote(versionId);
   const updateNote = useUpdateNote(versionId);
   const deleteNote = useDeleteNote(versionId);
+  const createLink = useCreatePassageLink(versionId);
+  const deleteLink = useDeletePassageLink(versionId);
+  // A link in progress is held outside this page, so it survives turning pages.
+  const inProgress = useLinkInProgress();
+  const linking = inProgress !== null && inProgress.versionId === versionId ? inProgress : null;
 
   const stage = useRef<HTMLElement>(null);
   const goToRef = useRef<HTMLInputElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
   const [goTo, setGoTo] = useState("");
   const [statusFilter, setStatusFilter] = useState<"draft" | "ready" | null>(null);
   const [selection, setSelected] = useState<Selected | null>(null);
@@ -159,6 +175,11 @@ export function Reader({ versionId, page, line }: ReaderProps) {
   const statusOf = useMemo(
     () => new Map(allNotes.map((note) => [note.id, note.status])),
     [allNotes],
+  );
+  // First reading hides a level 2 note and with it any backlink that comes from it.
+  const showBacklink = useCallback(
+    (backlink: { type_id: number; level: number; status: string }) => isVisible(backlink, filter),
+    [filter],
   );
   const filterLines = useCallback(
     <T extends TextLine | ShapeLine>(lines: T[]): T[] =>
@@ -342,6 +363,30 @@ export function Reader({ versionId, page, line }: ReaderProps) {
     });
   }
 
+  /** Start a passage-to-passage link from the selection, or complete the one in progress. */
+  const linkSelection = useCallback(() => {
+    if (selected === null) return;
+    const { selection, startPage } = selected;
+    if (linking === null) {
+      startLink({
+        versionId,
+        span: selection.span,
+        label: citationFor(
+          { page: startPage, line_no: selection.first.line_no },
+          { page, line_no: selection.last.line_no },
+        ),
+      });
+    } else {
+      setMessage(null);
+      createLink.mutate(
+        { source: linking.span, target: selection.span },
+        { onSuccess: cancelLink, onError: (error) => setMessage(error.message) },
+      );
+    }
+    setCarried(null);
+    clearSelection();
+  }, [selected, linking, versionId, page, createLink, clearSelection]);
+
   function continueOnNextPage(): void {
     if (selected === null || next === null) return;
     setCarried({ page: selected.startPage, from: selected.from });
@@ -353,7 +398,9 @@ export function Reader({ versionId, page, line }: ReaderProps) {
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent): void {
       if (event.key === "Escape") {
-        clearSelection();
+        // Esc dismisses the popover first; with nothing selected it cancels a link.
+        if (selected !== null) clearSelection();
+        else cancelLink();
         setCarried(null);
         setReselecting(null);
         return;
@@ -364,6 +411,12 @@ export function Reader({ versionId, page, line }: ReaderProps) {
       else if (event.key === "g") {
         event.preventDefault();
         goToRef.current?.focus();
+      } else if (event.key === "/") {
+        event.preventDefault();
+        searchRef.current?.focus();
+      } else if (event.key === "l" && selected) {
+        event.preventDefault();
+        linkSelection();
       } else if (event.key === "b") {
         setPrefs({ mode: mode === "text" ? "blank" : "text" });
       } else if ((event.key === "n" || event.key === "h") && selected && defaultType !== null) {
@@ -373,7 +426,7 @@ export function Reader({ versionId, page, line }: ReaderProps) {
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [versionId, prev, next, mode, selected, defaultType, addNote, clearSelection]);
+  }, [versionId, prev, next, mode, selected, defaultType, addNote, clearSelection, linkSelection]);
 
   useEffect(() => {
     if (line === null || shown?.page !== page) return;
@@ -434,6 +487,14 @@ export function Reader({ versionId, page, line }: ReaderProps) {
             )}
           </span>
         )}
+        <SearchBox
+          versionId={versionId}
+          searchCorpus={mode === "text"}
+          types={types}
+          filter={filter}
+          inputRef={searchRef}
+          onOpenNote={(note) => setScrollTo({ note, tick: Date.now() })}
+        />
         <ModeSwitch mode={mode} />
         <nav className="page-nav" aria-label="Pages">
           {prev === null ? (
@@ -476,6 +537,17 @@ export function Reader({ versionId, page, line }: ReaderProps) {
           onLevel={(value) => setPrefs({ level: value })}
           onHiddenTypes={(value) => setPrefs({ hiddenTypes: value })}
         />
+        {linking !== null && (
+          <div className="link-tray" role="status" aria-label="Link in progress">
+            <span>
+              Linking from <strong>{linking.label}</strong>. Select the passage to link it to,
+              then choose Link here.
+            </span>
+            <button type="button" className="quiet-button" onClick={cancelLink}>
+              Cancel
+            </button>
+          </div>
+        )}
       </div>
       <div className="workspace">
         <aside className="sidebar" aria-label="Chapters">
@@ -537,7 +609,17 @@ export function Reader({ versionId, page, line }: ReaderProps) {
           notes={visibleNotes}
           hiddenCount={allNotes.length - visibleNotes.length}
           types={types}
+          versionId={versionId}
+          workCode={version.data?.work.code ?? ""}
+          figures={figures.data ?? []}
+          env={APP_ENV}
           page={page}
+          backlinks={(pageLinks.data?.backlinks ?? []).filter(showBacklink)}
+          passageLinks={pageLinks.data?.passages ?? []}
+          showBacklink={showBacklink}
+          onDeleteLink={(linkId) =>
+            deleteLink.mutate(linkId, { onError: (error) => setMessage(error.message) })
+          }
           readOnly={mode === "blank"}
           activeNotes={hovered}
           editingNote={editing}
@@ -572,6 +654,8 @@ export function Reader({ versionId, page, line }: ReaderProps) {
             { page, line_no: selected.selection.last.line_no },
           )}
           canContinue={next !== null}
+          linking={linking !== null}
+          onLink={linkSelection}
           onNote={(typeId) => addNote(typeId, true)}
           onHighlight={(typeId) => addNote(typeId, false)}
           onCopied={clearSelection}

@@ -1,8 +1,9 @@
 // The page's notes, in reading order of their spans. Each note expands in place to edit.
 import { type CSSProperties, useEffect, useRef } from "react";
 
-import type { Note, NoteType, NoteUpdateInput } from "../api/client";
-import { isEmptyBody, NoteBody } from "./NoteBody";
+import type { Backlink, Figure, Note, NoteType, NoteUpdateInput, PassageLink } from "../api/client";
+import { BacklinkList, PassageLinkList } from "../links/PageLinksList";
+import { isEmptyBody, NoteBody, type NoteEnv } from "./NoteBody";
 import { NoteEditor } from "./NoteEditor";
 
 export interface NotesPanelProps {
@@ -10,7 +11,17 @@ export interface NotesPanelProps {
   /** How many notes the filters are hiding on this page. */
   hiddenCount: number;
   types: NoteType[];
+  versionId: number;
+  workCode: string;
+  figures: Figure[];
+  env: NoteEnv;
   page: number;
+  /** Notes that refer to this page, and passages linked to it (already filtered). */
+  backlinks: Backlink[];
+  passageLinks: PassageLink[];
+  /** Whether a backlink is one the reader's filters let through. */
+  showBacklink: (backlink: Backlink) => boolean;
+  onDeleteLink: (linkId: number) => void;
   /** In blank mode notes are read-only. */
   readOnly: boolean;
   activeNotes: number[];
@@ -85,6 +96,10 @@ function NoteCard({
         <NoteEditor
           note={note}
           types={props.types}
+          env={props.env}
+          workCode={props.workCode}
+          otherNotes={props.notes.filter((other) => other.id !== note.id && other.id > 0)}
+          figures={props.figures}
           saving={props.saving}
           error={props.error}
           onSave={(changes) => props.onSave(note.id, changes)}
@@ -95,10 +110,20 @@ function NoteCard({
       ) : isEmptyBody(note.body) ? (
         <p className="quiet note-empty">Highlight only.</p>
       ) : (
-        <NoteBody body={note.body} />
+        <NoteBody body={note.body} env={props.env} />
       )}
       {!editing && note.tags.length > 0 && (
         <p className="note-tags quiet">{note.tags.map((tag) => `#${tag}`).join(" ")}</p>
+      )}
+      {!editing && note.backlinks.some(props.showBacklink) && (
+        <section className="note-backlinks" aria-label="Referred to by">
+          <h3>Referred to by</h3>
+          <BacklinkList
+            versionId={props.versionId}
+            backlinks={note.backlinks.filter(props.showBacklink)}
+            types={props.types}
+          />
+        </section>
       )}
     </li>
   );
@@ -148,6 +173,23 @@ export function NotesPanel(props: NotesPanelProps) {
           {props.hiddenCount} more {props.hiddenCount === 1 ? "note is" : "notes are"} hidden by
           the filters.
         </p>
+      )}
+      {props.backlinks.length > 0 && (
+        <section className="panel-section" aria-label="Referred to from">
+          <h2>Referred to from</h2>
+          <BacklinkList versionId={props.versionId} backlinks={props.backlinks} types={props.types} />
+        </section>
+      )}
+      {props.passageLinks.length > 0 && (
+        <section className="panel-section" aria-label="Linked passages">
+          <h2>Linked passages</h2>
+          <PassageLinkList
+            versionId={props.versionId}
+            links={props.passageLinks}
+            readOnly={props.readOnly}
+            onDelete={props.onDeleteLink}
+          />
+        </section>
       )}
       {!props.readOnly && (
         <div className="panel-actions">

@@ -1,12 +1,18 @@
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 
-import type { Note, NoteNode, NoteType, NoteUpdateInput } from "../api/client";
+import type { Figure, Note, NoteNode, NoteType, NoteUpdateInput } from "../api/client";
 import { useRenderedBody } from "../api/queries";
-import { NoteBody } from "./NoteBody";
+import { NoteBody, type NoteEnv } from "./NoteBody";
+import { ReferencePicker } from "./ReferencePicker";
 
 interface NoteEditorProps {
   note: Note;
   types: NoteType[];
+  env: NoteEnv;
+  /** For the reference picker: the work's short code, other notes here, and figures. */
+  workCode: string;
+  otherNotes: Note[];
+  figures: Figure[];
   saving: boolean;
   error: string | null;
   onSave: (changes: NoteUpdateInput) => void;
@@ -37,7 +43,20 @@ export function NoteEditor(props: NoteEditorProps) {
   // The preview is drawn from the server's parse of what is typed, the same tree the
   // saved note and the export use.
   const settledBody = useDebounced(body, 250);
-  const rendered = useRenderedBody(settledBody, settledBody !== note.body_md);
+  const rendered = useRenderedBody(settledBody, note.version_id, settledBody !== note.body_md);
+  const textarea = useRef<HTMLTextAreaElement>(null);
+
+  /** Put a reference where the cursor is (or over what is selected) in the note. */
+  function insert(text: string): void {
+    const field = textarea.current;
+    const start = field?.selectionStart ?? body.length;
+    const end = field?.selectionEnd ?? body.length;
+    setBody(body.slice(0, start) + text + body.slice(end));
+    window.requestAnimationFrame(() => {
+      field?.focus();
+      field?.setSelectionRange(start + text.length, start + text.length);
+    });
+  }
   const preview: NoteNode = settledBody === note.body_md ? note.body : (rendered.data ?? note.body);
 
   function onSubmit(event: FormEvent): void {
@@ -85,6 +104,7 @@ export function NoteEditor(props: NoteEditorProps) {
       <label>
         Note
         <textarea
+          ref={textarea}
           value={body}
           rows={6}
           autoFocus
@@ -100,9 +120,16 @@ export function NoteEditor(props: NoteEditorProps) {
           onChange={(event) => setTags(event.target.value)}
         />
       </label>
+      <ReferencePicker
+        workCode={props.workCode}
+        notes={props.otherNotes}
+        types={types}
+        figures={props.figures}
+        onInsert={insert}
+      />
       {body.trim() !== "" && (
         <section className="note-preview" aria-label="Preview">
-          <NoteBody body={preview} />
+          <NoteBody body={preview} env={props.env} />
         </section>
       )}
       {error !== null && (

@@ -34,6 +34,13 @@ def upsert_figure(conn: sqlite3.Connection, label: str, file: str, caption: str)
     return False
 
 
+def get_figure(conn: sqlite3.Connection, label: str) -> FigureRow | None:
+    row = conn.execute(
+        "SELECT id, label, file, caption, credit FROM figure WHERE label = ?", (label,)
+    ).fetchone()
+    return None if row is None else FigureRow(**dict(row))
+
+
 def list_figures(conn: sqlite3.Connection) -> list[FigureRow]:
     rows = conn.execute(
         "SELECT id, label, file, caption, credit FROM figure ORDER BY label"

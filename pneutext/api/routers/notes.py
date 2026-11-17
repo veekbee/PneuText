@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+from dataclasses import asdict
+
 from fastapi import APIRouter, Response
 
 from pneutext.api.deps import LibraryDep
 from pneutext.api.schemas import (
     AnchorOut,
+    BacklinkOut,
     NoteCreateIn,
     NoteNode,
     NoteOut,
@@ -53,6 +56,7 @@ def _note(view: NoteView) -> NoteOut:
         ),
         start=_place(view.start),
         end=_place(view.end),
+        backlinks=[BacklinkOut(**asdict(backlink)) for backlink in view.backlinks],
     )
 
 
@@ -87,9 +91,10 @@ def create_note(version_id: int, body: NoteCreateIn, library: LibraryDep) -> Not
 
 
 @router.post("/notes/render", operation_id="renderNoteBody")
-def render_note_body(body: RenderIn) -> RenderOut:
+def render_note_body(body: RenderIn, library: LibraryDep) -> RenderOut:
     """Parse a note body into its syntax tree, for the editor's live preview."""
-    return RenderOut(body=NoteNode.model_validate(notes_service.render_body(body.body_md)))
+    tree = notes_service.render_body(library, body.body_md, body.version_id)
+    return RenderOut(body=NoteNode.model_validate(tree))
 
 
 @router.get("/notes/{note_id}", operation_id="getNote")

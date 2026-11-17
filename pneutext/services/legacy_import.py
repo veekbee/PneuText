@@ -23,7 +23,8 @@ from pneutext.core.errors import InvalidInput, NotFound
 from pneutext.importers import legacy_body, legacy_commentary, paged_corpus
 from pneutext.importers.legacy_body import BodyFormat
 from pneutext.importers.legacy_commentary import CommentaryFormat, ParsedPage, Position
-from pneutext.services.notes import WHOLE_UNIT, Extent, chapter_extent, page_extent
+from pneutext.services import links as links_service
+from pneutext.services.extents import WHOLE_UNIT, Extent, chapter_extent, page_extent
 from pneutext.store import corpus as corpus_store
 from pneutext.store import db, entities, figures, legacy
 from pneutext.store import notes as notes_store
@@ -664,6 +665,7 @@ def commit_import(library: Library, version_id: int, request: LegacyImportReques
                 note.legacy_id,
             )
             legacy.record_annotation(conn, version.id, note.page, note_id)
+            links_service.refresh_inline_links(conn, version, note_id, note.body_md)
 
         for mention in plan.mentions:
             category_id = category_ids[mention.category]

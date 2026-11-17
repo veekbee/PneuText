@@ -15,6 +15,7 @@ import {
   type NoteCreateInput,
   type NoteUpdateInput,
   type PageText,
+  type SpanInput,
 } from "./client";
 
 export function useLibrary() {
@@ -93,10 +94,10 @@ export function usePageNotes(versionId: number, page: number) {
 }
 
 /** The server's parse of a note body, for the editor's live preview. */
-export function useRenderedBody(bodyMd: string, enabled: boolean) {
+export function useRenderedBody(bodyMd: string, versionId: number, enabled: boolean) {
   return useQuery({
-    queryKey: ["note-render", bodyMd],
-    queryFn: async () => (await api.renderNoteBody(bodyMd)).body,
+    queryKey: ["note-render", versionId, bodyMd],
+    queryFn: async () => (await api.renderNoteBody(bodyMd, versionId)).body,
     enabled,
     placeholderData: keepPreviousData,
     staleTime: Infinity,
@@ -106,7 +107,7 @@ export function useRenderedBody(bodyMd: string, enabled: boolean) {
 /** Everything drawn from notes: refetch it for this version after a change. */
 function invalidateNotes(queryClient: QueryClient, versionId: number) {
   return Promise.all(
-    ["page-text", "page-shape", "page-notes"].map((name) =>
+    ["page-text", "page-shape", "page-notes", "page-links"].map((name) =>
       queryClient.invalidateQueries({ queryKey: [name, versionId] }),
     ),
   );
@@ -184,6 +185,7 @@ export function useCreateNote(versionId: number) {
         },
         start,
         end,
+        backlinks: [],
       };
       queryClient.setQueryData<Note[]>(notesKey, [...(previousNotes ?? []), pending]);
       return { textKey, notesKey, previousText, previousNotes };
@@ -228,4 +230,47 @@ export function useImportCommentary(versionId: number) {
     mutationFn: (input: LegacyImportInput) => api.importCommentary(versionId, input),
     onSuccess: () => invalidateNotes(queryClient, versionId),
   });
+}
+
+// ---- Links, search, figures ---------------------------------------------------
+
+/** What points at a page: notes that refer to it, and passage links that touch it. */
+export function usePageLinks(versionId: number, page: number) {
+  return useQuery({
+    queryKey: ["page-links", versionId, page],
+    queryFn: () => api.listPageLinks(versionId, page),
+    retry: false,
+  });
+}
+
+export function useCreatePassageLink(versionId: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ source, target }: { source: SpanInput; target: SpanInput }) =>
+      api.createPassageLink(versionId, source, target),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["page-links", versionId] }),
+  });
+}
+
+export function useDeletePassageLink(versionId: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (linkId: number) => api.deletePassageLink(linkId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["page-links", versionId] }),
+  });
+}
+
+/** Search one text. The corpus is searched only in text mode. */
+export function useSearch(versionId: number, query: string, corpus: boolean) {
+  return useQuery({
+    queryKey: ["search", versionId, query, corpus],
+    queryFn: () => api.search(versionId, query, corpus),
+    enabled: query.trim() !== "",
+    placeholderData: keepPreviousData,
+    staleTime: 0,
+  });
+}
+
+export function useFigures() {
+  return useQuery({ queryKey: ["figures"], queryFn: api.listFigures });
 }

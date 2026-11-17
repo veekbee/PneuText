@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import sqlite3
 
+from pneutext.store.links import delete_unowned_anchors
+
 
 def count_items(conn: sqlite3.Connection, version_id: int, pages: list[int]) -> tuple[int, int]:
     """How many notes and mentions earlier imports of these pages left behind."""
@@ -35,6 +37,7 @@ def delete_items(conn: sqlite3.Connection, version_id: int, pages: list[int]) ->
         (*params, *params),
     )
     conn.execute("DELETE FROM tag WHERE id NOT IN (SELECT tag_id FROM annotation_tag)")
+    delete_unowned_anchors(conn)
 
 
 def record_annotation(

@@ -22,6 +22,11 @@ export type NoteCreateInput = Schemas["NoteCreateIn"];
 export type NoteUpdateInput = Schemas["NoteUpdateIn"];
 export type SpanInput = Schemas["SpanIn"];
 export type Highlight = Schemas["ShapeHighlightOut"];
+export type Backlink = Schemas["BacklinkOut"];
+export type PageLinks = Schemas["PageLinksOut"];
+export type PassageLink = Schemas["PassageLinkOut"];
+export type SearchResults = Schemas["SearchOut"];
+export type Figure = Schemas["FigureOut"];
 export type LegacyImportInput = Schemas["LegacyImportIn"];
 export type LegacyReport = Schemas["LegacyReportOut"];
 export type ReportItem = Schemas["ReportItemOut"];
@@ -99,6 +104,22 @@ export const api = {
   updateNote: (noteId: number, input: NoteUpdateInput) =>
     send<Note>("PATCH", `/api/notes/${noteId}`, input),
   deleteNote: (noteId: number) => request<undefined>(`/api/notes/${noteId}`, { method: "DELETE" }),
-  renderNoteBody: (bodyMd: string) =>
-    post<{ body: NoteNode }>("/api/notes/render", { body_md: bodyMd }),
+  renderNoteBody: (bodyMd: string, versionId: number | null) =>
+    post<{ body: NoteNode }>("/api/notes/render", { body_md: bodyMd, version_id: versionId }),
+  listPageLinks: (versionId: number, page: number) =>
+    request<PageLinks>(`/api/versions/${versionId}/pages/${page}/links`),
+  createPassageLink: (versionId: number, source: SpanInput, target: SpanInput) =>
+    post<{ id: number }>(`/api/versions/${versionId}/links`, { source, target }),
+  deletePassageLink: (linkId: number) =>
+    request<undefined>(`/api/links/${linkId}`, { method: "DELETE" }),
+  search: (versionId: number, query: string, corpus: boolean) =>
+    request<SearchResults>(
+      `/api/versions/${versionId}/search?q=${encodeURIComponent(query)}&corpus=${corpus}`,
+    ),
+  listFigures: () => request<Figure[]>("/api/figures"),
 };
+
+/** Where a figure's image is served from (the local library, never the network). */
+export function figureFileUrl(label: string): string {
+  return `/api/figures/${encodeURIComponent(label)}/file`;
+}

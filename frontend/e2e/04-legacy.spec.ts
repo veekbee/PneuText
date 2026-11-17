@@ -59,7 +59,10 @@ test("import the old commentary: dry run, report, import, and import again", asy
   await expect(page.locator("#l9 .hl")).toHaveText(["kept his ledgers in a ", "biscuit tin", ". He told her"]);
   await expect(page.locator("#l4 .hl")).toHaveText(["October, 1871"]);
   await expect(page.locator(".note-card").nth(4)).toContainText("Have read");
-  await expect(page.locator(".note-card").nth(4).locator("strong")).toHaveText("Watch");
+  await expect(page.locator(".note-card").nth(4).locator("p strong")).toHaveText("Watch");
+  await expect(page.locator(".note-card").nth(4).locator(".todo")).toContainText(
+    "check the make of the theodolite",
+  );
 
   // Importing again replaces the imported notes instead of doubling them.
   await page.goto(`/v/${version}/import-commentary`);

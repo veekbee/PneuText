@@ -153,6 +153,7 @@ export function noteOf(id: number, overrides: Partial<Note> = {}): Note {
     anchor: { start_segment_id: 1, start_offset: 0, end_segment_id: 1, end_offset: 5, status: "ok" },
     start: { page: 7, line_no: 1 },
     end: { page: 7, line_no: 1 },
+    backlinks: [],
     ...overrides,
   };
 }

@@ -4,6 +4,43 @@
  */
 
 export interface paths {
+    "/api/figures": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Figures */
+        get: operations["listFigures"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/figures/{label}/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Figure File
+         * @description The image of a figure, from the library's figures folder.
+         */
+        get: operations["getFigureFile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/imports/corpus": {
         parameters: {
             query?: never;
@@ -53,6 +90,23 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/links/{link_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Passage Link */
+        delete: operations["deletePassageLink"];
         options?: never;
         head?: never;
         patch?: never;
@@ -185,6 +239,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/versions/{version_id}/links": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create Passage Link
+         * @description Link one passage to another. Both passages are checked against the text.
+         */
+        post: operations["createPassageLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/versions/{version_id}/notes": {
         parameters: {
             query?: never;
@@ -196,6 +270,26 @@ export interface paths {
         put?: never;
         /** Create Note */
         post: operations["createNote"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/versions/{version_id}/pages/{page}/links": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Page Links
+         * @description What points at a page: notes that refer to it, and passage links that touch it.
+         */
+        get: operations["listPageLinks"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -262,6 +356,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/versions/{version_id}/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search
+         * @description Search a text. The corpus is searched only when `corpus` is true: never in blank mode.
+         */
+        get: operations["search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -284,6 +398,51 @@ export interface components {
              * @enum {string}
              */
             status: "ok" | "orphaned";
+        };
+        /**
+         * BacklinkOut
+         * @description A note that refers to a page, a passage or another note.
+         */
+        BacklinkOut: {
+            /** Level */
+            level: number;
+            /** Line No */
+            line_no: number | null;
+            /** Note Id */
+            note_id: number;
+            /**
+             * Page
+             * @description Where the referring note sits.
+             */
+            page: number | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "ready";
+            /**
+             * Target
+             * @description What it cites, such as 'p. 45.12'.
+             */
+            target: string | null;
+            /** Type Id */
+            type_id: number;
+        };
+        /**
+         * CorpusHitOut
+         * @description A place in the text where the query was found, with its print line.
+         */
+        CorpusHitOut: {
+            /** After */
+            after: string;
+            /** Before */
+            before: string;
+            /** Line No */
+            line_no: number | null;
+            /** Match */
+            match: string;
+            /** Page */
+            page: number;
         };
         /** CorpusImportIn */
         CorpusImportIn: {
@@ -368,6 +527,21 @@ export interface components {
              * @description The page this division opens on.
              */
             page: number | null;
+        };
+        /** FigureOut */
+        FigureOut: {
+            /** Caption */
+            caption: string;
+            /** Credit */
+            credit: string;
+            /** File */
+            file: string;
+            /** Has File */
+            has_file: boolean;
+            /** Id */
+            id: number;
+            /** Label */
+            label: string;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -481,6 +655,26 @@ export interface components {
             /** Type Id */
             type_id: number;
         };
+        /** NoteHitOut */
+        NoteHitOut: {
+            /** Excerpt */
+            excerpt: string;
+            /** Level */
+            level: number;
+            /** Line No */
+            line_no: number | null;
+            /** Note Id */
+            note_id: number;
+            /** Page */
+            page: number | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "ready";
+            /** Type Id */
+            type_id: number;
+        };
         /**
          * NoteNode
          * @description One node of a parsed note body.
@@ -488,7 +682,7 @@ export interface components {
         NoteNode: {
             /** Attrs */
             attrs?: {
-                [key: string]: string | number | null;
+                [key: string]: boolean | number | string | null;
             } | null;
             /** Children */
             children?: components["schemas"]["NoteNode"][] | null;
@@ -500,6 +694,11 @@ export interface components {
         /** NoteOut */
         NoteOut: {
             anchor: components["schemas"]["AnchorOut"];
+            /**
+             * Backlinks
+             * @description The notes that refer to this one.
+             */
+            backlinks: components["schemas"]["BacklinkOut"][];
             /** @description The body parsed into a syntax tree. */
             body: components["schemas"]["NoteNode"];
             /** Body Md */
@@ -570,6 +769,19 @@ export interface components {
             /** Type Id */
             type_id?: number | null;
         };
+        /** PageLinksOut */
+        PageLinksOut: {
+            /**
+             * Backlinks
+             * @description Notes that refer to this page.
+             */
+            backlinks: components["schemas"]["BacklinkOut"][];
+            /**
+             * Passages
+             * @description Passage links touching this page.
+             */
+            passages: components["schemas"]["PassageLinkOut"][];
+        };
         /**
          * PageShapeOut
          * @description The shape projection: all that blank mode and publishable exports may see.
@@ -605,8 +817,48 @@ export interface components {
             /** Version Id */
             version_id: number;
         };
+        /** PassageEndOut */
+        PassageEndOut: {
+            /** End Line No */
+            end_line_no: number | null;
+            /** End Page */
+            end_page: number | null;
+            /**
+             * Here
+             * @description Whether this end lies on the page being shown.
+             */
+            here: boolean;
+            /** Line No */
+            line_no: number | null;
+            /** Page */
+            page: number | null;
+        };
+        /** PassageLinkIn */
+        PassageLinkIn: {
+            source: components["schemas"]["SpanIn"];
+            target: components["schemas"]["SpanIn"];
+        };
+        /**
+         * PassageLinkOut
+         * @description A link made passage to passage.
+         */
+        PassageLinkOut: {
+            /** Id */
+            id: number;
+            /** Relation */
+            relation: string;
+            source: components["schemas"]["PassageEndOut"];
+            target: components["schemas"]["PassageEndOut"];
+        };
         /** PlaceOut */
         PlaceOut: {
+            /** Line No */
+            line_no: number | null;
+            /** Page */
+            page: number;
+        };
+        /** ReferenceHitOut */
+        ReferenceHitOut: {
             /** Line No */
             line_no: number | null;
             /** Page */
@@ -616,6 +868,11 @@ export interface components {
         RenderIn: {
             /** Body Md */
             body_md: string;
+            /**
+             * Version Id
+             * @description The text the note belongs to, so its references resolve.
+             */
+            version_id?: number | null;
         };
         /** RenderOut */
         RenderOut: {
@@ -646,6 +903,20 @@ export interface components {
             page: number;
             /** Tag */
             tag: string;
+        };
+        /** SearchOut */
+        SearchOut: {
+            /**
+             * Corpus
+             * @description Hits in the text; null when the text was not searched, as in blank mode.
+             */
+            corpus: components["schemas"]["CorpusHitOut"][] | null;
+            /** Notes */
+            notes: components["schemas"]["NoteHitOut"][];
+            /** Query */
+            query: string;
+            /** @description Set when the query names a place. */
+            reference: components["schemas"]["ReferenceHitOut"] | null;
         };
         /**
          * ShapeHighlightOut
@@ -831,6 +1102,57 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    listFigures: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FigureOut"][];
+                };
+            };
+        };
+    };
+    getFigureFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                label: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     importCorpus: {
         parameters: {
             query?: never;
@@ -913,6 +1235,35 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LibraryOut"];
+                };
+            };
+        };
+    };
+    deletePassageLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                link_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -1186,6 +1537,43 @@ export interface operations {
             };
         };
     };
+    createPassageLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PassageLinkIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: number;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     createNote: {
         parameters: {
             query?: never;
@@ -1208,6 +1596,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["NoteOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listPageLinks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+                page: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageLinksOut"];
                 };
             };
             /** @description Validation Error */
@@ -1304,6 +1724,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PageTextOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    search: {
+        parameters: {
+            query: {
+                q: string;
+                corpus?: boolean;
+            };
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchOut"];
                 };
             };
             /** @description Validation Error */

@@ -186,8 +186,20 @@ class NoteNode(BaseModel):
 
     type: str
     text: str | None = None
-    attrs: dict[str, str | int | None] | None = None
+    attrs: dict[str, bool | int | str | None] | None = None
     children: list[NoteNode] | None = None
+
+
+class BacklinkOut(BaseModel):
+    """A note that refers to a page, a passage or another note."""
+
+    note_id: int
+    type_id: int
+    level: int
+    status: Literal["draft", "ready"]
+    page: int | None = Field(description="Where the referring note sits.")
+    line_no: int | None
+    target: str | None = Field(description="What it cites, such as 'p. 45.12'.")
 
 
 class NoteOut(BaseModel):
@@ -206,6 +218,7 @@ class NoteOut(BaseModel):
     anchor: AnchorOut
     start: PlaceOut | None = Field(description="Where the passage begins in print.")
     end: PlaceOut | None = Field(description="Where it ends.")
+    backlinks: list[BacklinkOut] = Field(description="The notes that refer to this one.")
 
 
 class NoteCreateIn(BaseModel):
@@ -233,6 +246,9 @@ class NoteUpdateIn(BaseModel):
 
 class RenderIn(BaseModel):
     body_md: str
+    version_id: int | None = Field(
+        default=None, description="The text the note belongs to, so its references resolve."
+    )
 
 
 class RenderOut(BaseModel):
@@ -278,3 +294,73 @@ class LegacyReportOut(BaseModel):
     replaced_mentions: int
     groups: list[ReportGroupOut]
     repairs: list[ReportItemOut]
+
+
+class PassageEndOut(BaseModel):
+    page: int | None
+    line_no: int | None
+    end_page: int | None
+    end_line_no: int | None
+    here: bool = Field(description="Whether this end lies on the page being shown.")
+
+
+class PassageLinkOut(BaseModel):
+    """A link made passage to passage."""
+
+    id: int
+    relation: str
+    source: PassageEndOut
+    target: PassageEndOut
+
+
+class PassageLinkIn(BaseModel):
+    source: SpanIn
+    target: SpanIn
+
+
+class PageLinksOut(BaseModel):
+    backlinks: list[BacklinkOut] = Field(description="Notes that refer to this page.")
+    passages: list[PassageLinkOut] = Field(description="Passage links touching this page.")
+
+
+class ReferenceHitOut(BaseModel):
+    page: int
+    line_no: int | None
+
+
+class CorpusHitOut(BaseModel):
+    """A place in the text where the query was found, with its print line."""
+
+    page: int
+    line_no: int | None
+    before: str
+    match: str
+    after: str
+
+
+class NoteHitOut(BaseModel):
+    note_id: int
+    type_id: int
+    level: int
+    status: Literal["draft", "ready"]
+    page: int | None
+    line_no: int | None
+    excerpt: str
+
+
+class SearchOut(BaseModel):
+    query: str
+    reference: ReferenceHitOut | None = Field(description="Set when the query names a place.")
+    corpus: list[CorpusHitOut] | None = Field(
+        description="Hits in the text; null when the text was not searched, as in blank mode."
+    )
+    notes: list[NoteHitOut]
+
+
+class FigureOut(BaseModel):
+    id: int
+    label: str
+    file: str
+    caption: str
+    credit: str
+    has_file: bool

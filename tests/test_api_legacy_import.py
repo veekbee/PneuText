@@ -383,7 +383,10 @@ def test_importing_again_replaces_what_came_from_the_files_and_nothing_else(
     with db.transaction(library.db_path) as conn:
         assert conn.execute("SELECT COUNT(*) FROM entity_category").fetchone()[0] == 6
         assert conn.execute("SELECT COUNT(*) FROM figure").fetchone()[0] == 2
-        assert conn.execute("SELECT COUNT(*) FROM anchor").fetchone()[0] == 16 + 16 + 1
+        # 16 notes, 16 mentions, the app's note, and the two passages one note refers
+        # to. Importing twice has left no anchor behind.
+        total = conn.execute("SELECT COUNT(*) FROM anchor").fetchone()[0]
+        assert total == 16 + 16 + 1 + 2
 
 
 def test_the_dry_run_says_what_a_second_import_would_replace(

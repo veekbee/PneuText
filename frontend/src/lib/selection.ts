@@ -106,6 +106,18 @@ export function referenceFor(
   return start === end ? `{{${workCode}:${start}}}` : `{{${workCode}:${start}-${end}}}`;
 }
 
+/** How a passage is cited in running text: "p. 45.12" or "p. 45.12-46.3". */
+export function citationFor(
+  from: { page: number; line_no: number | null },
+  to: { page: number; line_no: number | null },
+): string {
+  const place = (at: { page: number; line_no: number | null }): string =>
+    at.line_no === null ? String(at.page) : `${at.page}.${at.line_no}`;
+  const start = place(from);
+  const end = place(to);
+  return start === end ? `p. ${start}` : `p. ${start}-${end}`;
+}
+
 /**
  * Read the browser's selection as two points among the page's rows. Rows are the
  * elements carrying `data-row`, the index of their line. Returns null when the selection

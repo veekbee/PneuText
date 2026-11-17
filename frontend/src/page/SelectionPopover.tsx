@@ -11,6 +11,9 @@ interface SelectionPopoverProps {
   defaultType: number | null;
   reference: string;
   canContinue: boolean;
+  /** Whether a link is already in progress, waiting for its second passage. */
+  linking: boolean;
+  onLink: () => void;
   onNote: (typeId: number) => void;
   onHighlight: (typeId: number) => void;
   onCopied: () => void;
@@ -55,6 +58,13 @@ export function SelectionPopover(props: SelectionPopoverProps) {
           </button>
           <button type="button" onClick={() => setChoosing("highlight")} title="Highlight only (h)">
             Highlight
+          </button>
+          <button
+            type="button"
+            onClick={props.onLink}
+            title={props.linking ? "Link the first passage to this one (l)" : "Start a link from here (l)"}
+          >
+            {props.linking ? "Link here" : "Link"}
           </button>
           <button type="button" onClick={() => void copy()}>
             Copy reference
