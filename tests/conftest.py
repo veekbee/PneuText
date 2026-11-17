@@ -9,6 +9,8 @@ from fastapi.testclient import TestClient
 from pneutext.api.app import create_app
 from pneutext.store.library import Library, open_library
 
+BASE_URL = "http://127.0.0.1"
+
 
 @pytest.fixture
 def library(tmp_path: Path) -> Library:
@@ -17,5 +19,5 @@ def library(tmp_path: Path) -> Library:
 
 @pytest.fixture
 def client(library: Library) -> Iterator[TestClient]:
-    with TestClient(create_app(library, web_dist=None)) as test_client:
+    with TestClient(create_app(library, web_dist=None), base_url=BASE_URL) as test_client:
         yield test_client

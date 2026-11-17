@@ -2,7 +2,17 @@
 // typed by schema.d.ts, which is generated from the server's OpenAPI schema.
 import type { components } from "./schema";
 
-export type LibraryInfo = components["schemas"]["LibraryOut"];
+type Schemas = components["schemas"];
+export type LibraryInfo = Schemas["LibraryOut"];
+export type VersionSummary = Schemas["VersionSummaryOut"];
+export type Version = Schemas["VersionOut"];
+export type Division = Schemas["DivisionOut"];
+export type PageText = Schemas["PageTextOut"];
+export type TextLine = Schemas["TextLineOut"];
+export type CorpusImportInput = Schemas["CorpusImportIn"];
+export type CorpusImportPreview = Schemas["CorpusImportPreviewOut"];
+export type CorpusImportResult = Schemas["CorpusImportOut"];
+export type ImportProblem = Schemas["ImportProblemOut"];
 
 export class ApiError extends Error {
   readonly status: number;
@@ -40,6 +50,22 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T;
 }
 
+function post<T>(path: string, body: unknown): Promise<T> {
+  return request<T>(path, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
 export const api = {
-  getLibrary: (): Promise<LibraryInfo> => request<LibraryInfo>("/api/library"),
+  getLibrary: () => request<LibraryInfo>("/api/library"),
+  listVersions: () => request<VersionSummary[]>("/api/versions"),
+  getVersion: (versionId: number) => request<Version>(`/api/versions/${versionId}`),
+  getPageText: (versionId: number, page: number) =>
+    request<PageText>(`/api/versions/${versionId}/pages/${page}/text`),
+  previewCorpusImport: (input: CorpusImportInput) =>
+    post<CorpusImportPreview>("/api/imports/corpus/preview", input),
+  importCorpus: (input: CorpusImportInput) =>
+    post<CorpusImportResult>("/api/imports/corpus", input),
 };

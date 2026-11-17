@@ -13,3 +13,7 @@ node_modules/
 pneutext/web/dist/
 
 .DS_Store
+
+# Playwright
+frontend/test-results/
+frontend/playwright-report/

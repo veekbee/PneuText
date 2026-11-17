@@ -9,6 +9,7 @@ from pneutext.api.app import create_app
 from pneutext.api.openapi import render_schema
 from pneutext.store import db
 from pneutext.store.library import Library
+from tests.conftest import BASE_URL
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -39,7 +40,7 @@ def test_front_end_files_and_page_urls_are_served(library: Library, tmp_path: Pa
     (dist / "index.html").write_text("<!doctype html><title>index</title>", "utf-8")
     (dist / "assets" / "app.js").write_text("console.log(1)", "utf-8")
     (tmp_path / "secret.txt").write_text("outside the front end", "utf-8")
-    with TestClient(create_app(library, web_dist=dist)) as client:
+    with TestClient(create_app(library, web_dist=dist), base_url=BASE_URL) as client:
         assert "index" in client.get("/").text
         assert client.get("/assets/app.js").text == "console.log(1)"
         # A page URL is a client-side route: the server answers with the app shell.
@@ -53,7 +54,7 @@ def test_front_end_files_and_page_urls_are_served(library: Library, tmp_path: Pa
 
 
 def test_unbuilt_front_end_is_explained(library: Library, tmp_path: Path) -> None:
-    with TestClient(create_app(library, web_dist=tmp_path / "absent")) as client:
+    with TestClient(create_app(library, web_dist=tmp_path / "absent"), base_url=BASE_URL) as client:
         response = client.get("/")
         assert response.status_code == 503
         assert "npm run build" in response.json()["detail"]

@@ -4,17 +4,23 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse, JSONResponse
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 import pneutext
-from pneutext.api.routes import router
+from pneutext.api.routers import corpus, library
+from pneutext.core.errors import PneuTextError
 from pneutext.store.library import Library
 
 WEB_DIST = Path(__file__).resolve().parent.parent / "web" / "dist"
 
+# Requests must name this machine. A page on another site that points a look-alike host
+# name at 127.0.0.1 is refused, so it cannot read the library through the browser.
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
-def create_app(library: Library, web_dist: Path | None = WEB_DIST) -> FastAPI:
+
+def create_app(library_: Library, web_dist: Path | None = WEB_DIST) -> FastAPI:
     app = FastAPI(
         title="PneuText",
         version=pneutext.__version__,
@@ -22,8 +28,15 @@ def create_app(library: Library, web_dist: Path | None = WEB_DIST) -> FastAPI:
         docs_url="/api/docs",
         redoc_url=None,
     )
-    app.state.library = library
-    app.include_router(router)
+    app.state.library = library_
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
+
+    @app.exception_handler(PneuTextError)
+    def explain(_: Request, error: PneuTextError) -> JSONResponse:
+        return JSONResponse(status_code=error.status, content={"detail": error.message})
+
+    app.include_router(library.router)
+    app.include_router(corpus.router)
     if web_dist is not None:
         _serve_front_end(app, web_dist)
     return app

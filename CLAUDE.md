@@ -14,6 +14,8 @@ server with a React/TypeScript front end. The design brief is `claude/pneutext-d
 | Backend lint | `uv run ruff check .` and `uv run ruff format --check .` |
 | Front-end tests | `cd frontend && npm test` |
 | Front-end lint and types | `cd frontend && npm run lint && npm run typecheck` |
+| End-to-end tests | `cd frontend && npm run e2e` (builds, then drives the real server with a throwaway library) |
+| Update golden files | `PNEUTEXT_UPDATE_GOLDEN=1 uv run pytest`, then review the diff |
 | Regenerate API types | `cd frontend && npm run gen:api` (after any route or schema change) |
 
 ## Rules that are easy to break
@@ -34,4 +36,6 @@ server with a React/TypeScript front end. The design brief is `claude/pneutext-d
 ## Toolchain notes
 
 - TypeScript is pinned to 5.9 because `openapi-typescript` 7 requires TypeScript 5.
-- Playwright is not set up yet; it arrives with the first end-to-end test.
+- Playwright needs its browser once: `cd frontend && npx playwright install chromium`.
+- The fixture book in `tests/fixtures/book/` is invented prose; the golden files in
+  `tests/fixtures/golden/` are derived from it.

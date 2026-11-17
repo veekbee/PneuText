@@ -1,24 +1,13 @@
-"""API routers. Routers call services and never touch SQL."""
-
 from __future__ import annotations
 
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter
 
 import pneutext
+from pneutext.api.deps import LibraryDep
 from pneutext.api.schemas import LibraryOut
 from pneutext.services import library as library_service
-from pneutext.store.library import Library
 
-router = APIRouter(prefix="/api")
-
-
-def get_library(request: Request) -> Library:
-    return request.app.state.library
-
-
-LibraryDep = Annotated[Library, Depends(get_library)]
+router = APIRouter(prefix="/api", tags=["library"])
 
 
 @router.get("/library", operation_id="getLibrary")

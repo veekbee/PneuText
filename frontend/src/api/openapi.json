@@ -1,6 +1,274 @@
 {
   "components": {
     "schemas": {
+      "CorpusImportIn": {
+        "properties": {
+          "allow_duplicate": {
+            "default": false,
+            "title": "Allow Duplicate",
+            "type": "boolean"
+          },
+          "author": {
+            "default": "",
+            "title": "Author",
+            "type": "string"
+          },
+          "file_pattern": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Pattern"
+          },
+          "folder": {
+            "title": "Folder",
+            "type": "string"
+          },
+          "label": {
+            "default": "",
+            "title": "Label",
+            "type": "string"
+          },
+          "language": {
+            "default": "",
+            "title": "Language",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "work_code": {
+            "title": "Work Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "folder",
+          "work_code",
+          "title"
+        ],
+        "title": "CorpusImportIn",
+        "type": "object"
+      },
+      "CorpusImportOut": {
+        "properties": {
+          "existing_version_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Set when these exact files were imported before.",
+            "title": "Existing Version Id"
+          },
+          "problems": {
+            "items": {
+              "$ref": "#/components/schemas/ImportProblemOut"
+            },
+            "title": "Problems",
+            "type": "array"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/CorpusSummaryOut"
+          },
+          "version_id": {
+            "title": "Version Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "summary",
+          "problems",
+          "existing_version_id",
+          "version_id"
+        ],
+        "title": "CorpusImportOut",
+        "type": "object"
+      },
+      "CorpusImportPreviewOut": {
+        "properties": {
+          "existing_version_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Set when these exact files were imported before.",
+            "title": "Existing Version Id"
+          },
+          "problems": {
+            "items": {
+              "$ref": "#/components/schemas/ImportProblemOut"
+            },
+            "title": "Problems",
+            "type": "array"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/CorpusSummaryOut"
+          }
+        },
+        "required": [
+          "summary",
+          "problems",
+          "existing_version_id"
+        ],
+        "title": "CorpusImportPreviewOut",
+        "type": "object"
+      },
+      "CorpusSummaryOut": {
+        "properties": {
+          "chapters": {
+            "title": "Chapters",
+            "type": "integer"
+          },
+          "first_page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Page"
+          },
+          "last_page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Page"
+          },
+          "lines": {
+            "title": "Lines",
+            "type": "integer"
+          },
+          "pages": {
+            "title": "Pages",
+            "type": "integer"
+          },
+          "paragraphs": {
+            "title": "Paragraphs",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "pages",
+          "lines",
+          "paragraphs",
+          "chapters",
+          "first_page",
+          "last_page"
+        ],
+        "title": "CorpusSummaryOut",
+        "type": "object"
+      },
+      "DivisionOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The page this division opens on.",
+            "title": "Page"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "label",
+          "page"
+        ],
+        "title": "DivisionOut",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "ImportProblemOut": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "line": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          }
+        },
+        "required": [
+          "code",
+          "page",
+          "line",
+          "message"
+        ],
+        "title": "ImportProblemOut",
+        "type": "object"
+      },
       "LibraryOut": {
         "description": "What the app shows about the open library.",
         "properties": {
@@ -24,6 +292,359 @@
         ],
         "title": "LibraryOut",
         "type": "object"
+      },
+      "PageTextOut": {
+        "properties": {
+          "division": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DivisionOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "edit_seq": {
+            "title": "Edit Seq",
+            "type": "integer"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/TextLineOut"
+            },
+            "title": "Lines",
+            "type": "array"
+          },
+          "next_page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Page"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "prev_page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prev Page"
+          },
+          "version_id": {
+            "title": "Version Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version_id",
+          "edit_seq",
+          "page",
+          "prev_page",
+          "next_page",
+          "division",
+          "lines"
+        ],
+        "title": "PageTextOut",
+        "type": "object"
+      },
+      "TextLineOut": {
+        "description": "One print line with its words. Only the text projection carries this.",
+        "properties": {
+          "ends_paragraph": {
+            "title": "Ends Paragraph",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "paragraph",
+              "synopsis",
+              "chapter_number",
+              "ornament",
+              "rule"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "length": {
+            "title": "Length",
+            "type": "integer"
+          },
+          "line_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line No"
+          },
+          "segment_id": {
+            "title": "Segment Id",
+            "type": "integer"
+          },
+          "start_offset": {
+            "description": "Offset of the line within its segment, in code points.",
+            "title": "Start Offset",
+            "type": "integer"
+          },
+          "starts_paragraph": {
+            "title": "Starts Paragraph",
+            "type": "boolean"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "segment_id",
+          "kind",
+          "line_no",
+          "start_offset",
+          "length",
+          "starts_paragraph",
+          "ends_paragraph",
+          "text"
+        ],
+        "title": "TextLineOut",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "VersionOut": {
+        "properties": {
+          "divisions": {
+            "items": {
+              "$ref": "#/components/schemas/DivisionOut"
+            },
+            "title": "Divisions",
+            "type": "array"
+          },
+          "edit_seq": {
+            "title": "Edit Seq",
+            "type": "integer"
+          },
+          "first_page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Page"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "imported_at": {
+            "title": "Imported At",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "language": {
+            "title": "Language",
+            "type": "string"
+          },
+          "last_page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Page"
+          },
+          "measure": {
+            "description": "95th-percentile line length, in code points.",
+            "title": "Measure",
+            "type": "integer"
+          },
+          "page_count": {
+            "title": "Page Count",
+            "type": "integer"
+          },
+          "pages": {
+            "description": "Every page number, in order.",
+            "items": {
+              "type": "integer"
+            },
+            "title": "Pages",
+            "type": "array"
+          },
+          "work": {
+            "$ref": "#/components/schemas/WorkOut"
+          }
+        },
+        "required": [
+          "id",
+          "work",
+          "label",
+          "language",
+          "imported_at",
+          "edit_seq",
+          "first_page",
+          "last_page",
+          "page_count",
+          "measure",
+          "pages",
+          "divisions"
+        ],
+        "title": "VersionOut",
+        "type": "object"
+      },
+      "VersionSummaryOut": {
+        "properties": {
+          "edit_seq": {
+            "title": "Edit Seq",
+            "type": "integer"
+          },
+          "first_page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Page"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "imported_at": {
+            "title": "Imported At",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "language": {
+            "title": "Language",
+            "type": "string"
+          },
+          "last_page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Page"
+          },
+          "page_count": {
+            "title": "Page Count",
+            "type": "integer"
+          },
+          "work": {
+            "$ref": "#/components/schemas/WorkOut"
+          }
+        },
+        "required": [
+          "id",
+          "work",
+          "label",
+          "language",
+          "imported_at",
+          "edit_seq",
+          "first_page",
+          "last_page",
+          "page_count"
+        ],
+        "title": "VersionSummaryOut",
+        "type": "object"
+      },
+      "WorkOut": {
+        "properties": {
+          "author": {
+            "title": "Author",
+            "type": "string"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "title",
+          "author"
+        ],
+        "title": "WorkOut",
+        "type": "object"
       }
     }
   },
@@ -33,6 +654,89 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/imports/corpus": {
+      "post": {
+        "operationId": "importCorpus",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CorpusImportIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CorpusImportOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Import Corpus",
+        "tags": [
+          "corpus"
+        ]
+      }
+    },
+    "/api/imports/corpus/preview": {
+      "post": {
+        "description": "Read and check a folder of page files without writing anything.",
+        "operationId": "previewCorpusImport",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CorpusImportIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CorpusImportPreviewOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview Corpus Import",
+        "tags": [
+          "corpus"
+        ]
+      }
+    },
     "/api/library": {
       "get": {
         "operationId": "getLibrary",
@@ -48,7 +752,129 @@
             "description": "Successful Response"
           }
         },
-        "summary": "Get Library Info"
+        "summary": "Get Library Info",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/api/versions": {
+      "get": {
+        "operationId": "listVersions",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/VersionSummaryOut"
+                  },
+                  "title": "Response Listversions",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Versions",
+        "tags": [
+          "corpus"
+        ]
+      }
+    },
+    "/api/versions/{version_id}": {
+      "get": {
+        "operationId": "getVersion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Version",
+        "tags": [
+          "corpus"
+        ]
+      }
+    },
+    "/api/versions/{version_id}/pages/{page}/text": {
+      "get": {
+        "description": "The text projection of a page. Blank mode never requests this.",
+        "operationId": "getPageText",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "page",
+            "required": true,
+            "schema": {
+              "title": "Page",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageTextOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Page Text",
+        "tags": [
+          "corpus"
+        ]
       }
     }
   }

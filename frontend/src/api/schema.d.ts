@@ -4,6 +4,43 @@
  */
 
 export interface paths {
+    "/api/imports/corpus": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Import Corpus */
+        post: operations["importCorpus"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/imports/corpus/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview Corpus Import
+         * @description Read and check a folder of page files without writing anything.
+         */
+        post: operations["previewCorpusImport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/library": {
         parameters: {
             query?: never;
@@ -21,10 +58,164 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Versions */
+        get: operations["listVersions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/versions/{version_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Version */
+        get: operations["getVersion"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/versions/{version_id}/pages/{page}/text": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Page Text
+         * @description The text projection of a page. Blank mode never requests this.
+         */
+        get: operations["getPageText"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** CorpusImportIn */
+        CorpusImportIn: {
+            /**
+             * Allow Duplicate
+             * @default false
+             */
+            allow_duplicate: boolean;
+            /**
+             * Author
+             * @default
+             */
+            author: string;
+            /** File Pattern */
+            file_pattern?: string | null;
+            /** Folder */
+            folder: string;
+            /**
+             * Label
+             * @default
+             */
+            label: string;
+            /**
+             * Language
+             * @default
+             */
+            language: string;
+            /** Title */
+            title: string;
+            /** Work Code */
+            work_code: string;
+        };
+        /** CorpusImportOut */
+        CorpusImportOut: {
+            /**
+             * Existing Version Id
+             * @description Set when these exact files were imported before.
+             */
+            existing_version_id: number | null;
+            /** Problems */
+            problems: components["schemas"]["ImportProblemOut"][];
+            summary: components["schemas"]["CorpusSummaryOut"];
+            /** Version Id */
+            version_id: number;
+        };
+        /** CorpusImportPreviewOut */
+        CorpusImportPreviewOut: {
+            /**
+             * Existing Version Id
+             * @description Set when these exact files were imported before.
+             */
+            existing_version_id: number | null;
+            /** Problems */
+            problems: components["schemas"]["ImportProblemOut"][];
+            summary: components["schemas"]["CorpusSummaryOut"];
+        };
+        /** CorpusSummaryOut */
+        CorpusSummaryOut: {
+            /** Chapters */
+            chapters: number;
+            /** First Page */
+            first_page: number | null;
+            /** Last Page */
+            last_page: number | null;
+            /** Lines */
+            lines: number;
+            /** Pages */
+            pages: number;
+            /** Paragraphs */
+            paragraphs: number;
+        };
+        /** DivisionOut */
+        DivisionOut: {
+            /** Id */
+            id: number;
+            /** Kind */
+            kind: string;
+            /** Label */
+            label: string;
+            /**
+             * Page
+             * @description The page this division opens on.
+             */
+            page: number | null;
+        };
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
+        };
+        /** ImportProblemOut */
+        ImportProblemOut: {
+            /** Code */
+            code: string;
+            /** Line */
+            line: number | null;
+            /** Message */
+            message: string;
+            /** Page */
+            page: number | null;
+        };
         /**
          * LibraryOut
          * @description What the app shows about the open library.
@@ -37,6 +228,126 @@ export interface components {
             /** Schema Version */
             schema_version: number;
         };
+        /** PageTextOut */
+        PageTextOut: {
+            division: components["schemas"]["DivisionOut"] | null;
+            /** Edit Seq */
+            edit_seq: number;
+            /** Lines */
+            lines: components["schemas"]["TextLineOut"][];
+            /** Next Page */
+            next_page: number | null;
+            /** Page */
+            page: number;
+            /** Prev Page */
+            prev_page: number | null;
+            /** Version Id */
+            version_id: number;
+        };
+        /**
+         * TextLineOut
+         * @description One print line with its words. Only the text projection carries this.
+         */
+        TextLineOut: {
+            /** Ends Paragraph */
+            ends_paragraph: boolean;
+            /** Id */
+            id: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "paragraph" | "synopsis" | "chapter_number" | "ornament" | "rule";
+            /** Length */
+            length: number;
+            /** Line No */
+            line_no: number | null;
+            /** Segment Id */
+            segment_id: number;
+            /**
+             * Start Offset
+             * @description Offset of the line within its segment, in code points.
+             */
+            start_offset: number;
+            /** Starts Paragraph */
+            starts_paragraph: boolean;
+            /** Text */
+            text: string;
+        };
+        /** ValidationError */
+        ValidationError: {
+            /** Context */
+            ctx?: Record<string, never>;
+            /** Input */
+            input?: unknown;
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
+        };
+        /** VersionOut */
+        VersionOut: {
+            /** Divisions */
+            divisions: components["schemas"]["DivisionOut"][];
+            /** Edit Seq */
+            edit_seq: number;
+            /** First Page */
+            first_page: number | null;
+            /** Id */
+            id: number;
+            /** Imported At */
+            imported_at: string;
+            /** Label */
+            label: string;
+            /** Language */
+            language: string;
+            /** Last Page */
+            last_page: number | null;
+            /**
+             * Measure
+             * @description 95th-percentile line length, in code points.
+             */
+            measure: number;
+            /** Page Count */
+            page_count: number;
+            /**
+             * Pages
+             * @description Every page number, in order.
+             */
+            pages: number[];
+            work: components["schemas"]["WorkOut"];
+        };
+        /** VersionSummaryOut */
+        VersionSummaryOut: {
+            /** Edit Seq */
+            edit_seq: number;
+            /** First Page */
+            first_page: number | null;
+            /** Id */
+            id: number;
+            /** Imported At */
+            imported_at: string;
+            /** Label */
+            label: string;
+            /** Language */
+            language: string;
+            /** Last Page */
+            last_page: number | null;
+            /** Page Count */
+            page_count: number;
+            work: components["schemas"]["WorkOut"];
+        };
+        /** WorkOut */
+        WorkOut: {
+            /** Author */
+            author: string;
+            /** Code */
+            code: string;
+            /** Title */
+            title: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -46,6 +357,72 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    importCorpus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorpusImportIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CorpusImportOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    previewCorpusImport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorpusImportIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CorpusImportPreviewOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     getLibrary: {
         parameters: {
             query?: never;
@@ -62,6 +439,89 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LibraryOut"];
+                };
+            };
+        };
+    };
+    listVersions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VersionSummaryOut"][];
+                };
+            };
+        };
+    };
+    getVersion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VersionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    getPageText: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+                page: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageTextOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
