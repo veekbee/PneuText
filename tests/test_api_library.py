@@ -41,7 +41,10 @@ def test_front_end_files_and_page_urls_are_served(library: Library, tmp_path: Pa
     (dist / "assets" / "app.js").write_text("console.log(1)", "utf-8")
     (tmp_path / "secret.txt").write_text("outside the front end", "utf-8")
     with TestClient(create_app(library, web_dist=dist), base_url=BASE_URL) as client:
-        assert "index" in client.get("/").text
+        shell = client.get("/")
+        assert "index" in shell.text
+        # The shell is checked with the server on every visit, so a rebuild shows at once.
+        assert shell.headers["cache-control"] == "no-cache"
         assert client.get("/assets/app.js").text == "console.log(1)"
         # A page URL is a client-side route: the server answers with the app shell.
         assert "index" in client.get("/v/1/p/45").text

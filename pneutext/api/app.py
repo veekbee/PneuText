@@ -78,4 +78,6 @@ def _serve_front_end(app: FastAPI, web_dist: Path) -> None:
         candidate = (root / path).resolve()
         if path and candidate.is_relative_to(root) and candidate.is_file():
             return FileResponse(candidate)
-        return FileResponse(index)
+        # The shell names the current build's files, so the browser must ask for it
+        # each time; otherwise a rebuilt front end stays hidden behind a cached copy.
+        return FileResponse(index, headers={"Cache-Control": "no-cache"})
