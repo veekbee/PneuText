@@ -49,12 +49,6 @@ names carry the page number (by default `…_corp_p045.txt`); the pattern can be
 in the form. Blank lines separate paragraphs. A file that does not end with a blank line
 runs its last paragraph on to the next page.
 
-A whole text in **one tagged file** can be imported instead: a paragraph per line, a
-marker such as `{p25}` wherever a print page ends, `<chapter>…</chapter>` and
-`<chapter_sections>…</chapter_sections>` at chapter openings, and `{section_break}` on a
-line of its own. Such a file records pages but not print lines, so lines are estimated at
-a width you give: page numbers match the print edition, line numbers do not.
-
 ## Keys
 
 | Key | Action |

@@ -1397,23 +1397,3 @@ input[type="color"] {
 .workspace[data-sidebar="closed"][data-notes="closed"] {
   grid-template-columns: 1fr;
 }
-
-.form .choice {
-  display: flex;
-  gap: 1.25rem;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.form .choice legend {
-  padding: 0;
-  font-size: 0.9rem;
-}
-
-.form .choice label {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  width: auto;
-}

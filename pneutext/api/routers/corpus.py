@@ -56,10 +56,6 @@ def _request(body: CorpusImportIn) -> CorpusImportRequest:
         label=body.label,
         language=body.language,
         file_pattern=body.file_pattern,
-        source_format=body.source_format,
-        first_page=body.first_page,
-        page_break=body.page_break,
-        line_width=body.line_width,
     )
 
 

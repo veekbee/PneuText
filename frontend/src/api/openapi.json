@@ -519,12 +519,6 @@
             ],
             "title": "File Pattern"
           },
-          "first_page": {
-            "default": 1,
-            "description": "Tagged: the page the file begins on.",
-            "title": "First Page",
-            "type": "integer"
-          },
           "folder": {
             "title": "Folder",
             "type": "string"
@@ -537,40 +531,6 @@
           "language": {
             "default": "",
             "title": "Language",
-            "type": "string"
-          },
-          "line_width": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Tagged: characters per estimated print line.",
-            "title": "Line Width"
-          },
-          "page_break": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Tagged: a pattern matching the end-of-page marker.",
-            "title": "Page Break"
-          },
-          "source_format": {
-            "default": "paged",
-            "description": "A folder of page files, or the whole text in one tagged file.",
-            "enum": [
-              "paged",
-              "tagged"
-            ],
-            "title": "Source Format",
             "type": "string"
           },
           "title": {
