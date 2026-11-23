@@ -14,11 +14,6 @@ const REPORT: CorpusUpdateReport = {
   new_pages: [13, 14, 15],
   changed_paragraphs: 2,
   new_paragraphs: 6,
-  moved_passages: 4,
-  reworded_passages: 1,
-  reworded_pages: [8],
-  lost_passages: 1,
-  lost_pages: [9],
   problems: [],
 };
 
@@ -51,9 +46,6 @@ describe("Update the text", () => {
     const report = await screen.findByRole("region", { name: "What differs" });
     expect(report.textContent).toContain("Changes on pages 8, 9, in 2 paragraphs.");
     expect(report.textContent).toContain("3 new pages: 13 to 15.");
-    expect(report.textContent).toContain("4 marked passages will be shifted");
-    expect(report.textContent).toContain("1 marked passage will read differently");
-    expect(report.textContent).toContain("1 marked passage will lose its words");
     expect(within(report).getAllByRole("link", { name: "8" })[0]?.getAttribute("href")).toBe(
       "/v/1/p/8",
     );
@@ -84,15 +76,24 @@ describe("Update the text", () => {
           up_to_date: true,
           changed_pages: [],
           new_pages: [],
-          moved_passages: 0,
-          reworded_passages: 0,
-          lost_passages: 0,
         },
       }),
     });
     check();
     const report = await screen.findByRole("region", { name: "What differs" });
     expect(report.textContent).toContain("There is nothing to update.");
+    expect(screen.queryByRole("button", { name: "Update" })).toBeNull();
+  });
+
+  it("explains that a text with notes cannot be updated, and offers no update", async () => {
+    open({
+      "POST /api/versions/1/update/preview": () => ({
+        status: 409,
+        body: { detail: "This text has 3 marked passages (notes, mentions or links)." },
+      }),
+    });
+    check();
+    expect((await screen.findByRole("alert")).textContent).toContain("3 marked passages");
     expect(screen.queryByRole("button", { name: "Update" })).toBeNull();
   });
 

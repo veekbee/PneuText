@@ -7,7 +7,7 @@ import { expect, test } from "@playwright/test";
 
 const BOOK = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "tests", "fixtures", "book");
 
-test("correct a page file and update the text; the note stays on its words", async ({ page }) => {
+test("correct a page file and update the text; once a note exists, updating is closed", async ({ page }) => {
   // A private copy of the fixture pages, so that one of them can be corrected.
   const folder = mkdtempSync(join(tmpdir(), "pneutext-pages-"));
   for (const name of readdirSync(BOOK).filter((file) => file.includes("_corp_"))) {
@@ -17,6 +17,21 @@ test("correct a page file and update the text; the note stays on its words", asy
     data: { folder, work_code: "fx", title: "The Fixture Book", label: "To be corrected", allow_duplicate: true },
   });
   const version = ((await created.json()) as { version_id: number }).version_id;
+
+  const file = join(folder, "FX_corp_p008.txt");
+  writeFileSync(file, readFileSync(file, "utf8").replace("single heron", "solitary gray heron"));
+
+  await page.goto(`/v/${version}/update-text`);
+  await page.getByLabel("Folder of page files").fill(folder);
+  await page.getByRole("button", { name: "Check the folder" }).click();
+  const report = page.getByRole("region", { name: "What differs" });
+  await expect(report).toContainText("Changes on page 8, in 1 paragraph.");
+  await page.getByRole("button", { name: "Update", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Updated.");
+
+  await report.getByRole("link", { name: "8" }).click();
+  await expect(page.locator("main")).toContainText("solitary gray heron");
+  await expect(page.locator("main")).not.toContainText("single heron");
 
   // Mark "heron" on page 8 through the API, as the reader would by selecting it.
   const text = (await (await page.request.get(`/api/versions/${version}/pages/8/text`)).json()) as {
@@ -41,22 +56,9 @@ test("correct a page file and update the text; the note stays on its words", asy
   });
   expect(noted.status()).toBe(201);
 
-  const file = join(folder, "FX_corp_p008.txt");
-  writeFileSync(file, readFileSync(file, "utf8").replace("single heron", "solitary gray heron"));
-
   await page.goto(`/v/${version}/update-text`);
   await page.getByLabel("Folder of page files").fill(folder);
   await page.getByRole("button", { name: "Check the folder" }).click();
-  const report = page.getByRole("region", { name: "What differs" });
-  await expect(report).toContainText("Changes on page 8, in 1 paragraph.");
-  await expect(report).toContainText("1 marked passage will be shifted");
-  await page.getByRole("button", { name: "Update", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Updated.");
-
-  await report.getByRole("link", { name: "8" }).click();
-  // The highlight cuts the line into pieces, so look for the words either side of it.
-  await expect(page.locator("main")).toContainText("solitary gray");
-  await expect(page.locator("main")).not.toContainText("single");
-  await expect(page.getByText("A bird worth watching.")).toBeVisible();
-  await expect(page.locator(".hl")).toHaveText("heron");
+  await expect(page.getByRole("alert")).toContainText("1 marked passage");
+  await expect(page.getByRole("button", { name: "Update", exact: true })).toHaveCount(0);
 });

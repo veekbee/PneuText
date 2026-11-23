@@ -1135,31 +1135,12 @@ export interface components {
             changed_pages: number[];
             /** Changed Paragraphs */
             changed_paragraphs: number;
-            /** Lost Pages */
-            lost_pages: number[];
-            /**
-             * Lost Passages
-             * @description Marked passages whose words are gone.
-             */
-            lost_passages: number;
-            /**
-             * Moved Passages
-             * @description Marked passages that shifted but read the same.
-             */
-            moved_passages: number;
             /** New Pages */
             new_pages: number[];
             /** New Paragraphs */
             new_paragraphs: number;
             /** Problems */
             problems: components["schemas"]["ImportProblemOut"][];
-            /** Reworded Pages */
-            reworded_pages: number[];
-            /**
-             * Reworded Passages
-             * @description Marked passages whose own words changed.
-             */
-            reworded_passages: number;
             /** Up To Date */
             up_to_date: boolean;
         };

@@ -51,10 +51,11 @@ runs its last paragraph on to the next page.
 
 When you correct a page file, or add pages at the end, choose **Update the text** beside
 the work on the library page and give the same folder. The files are compared with the
-stored text and only what differs is changed; notes, links and mentions stay with their
-words. The check comes first and lists the pages affected. Paragraphs must stay the same
-in number and order: to add, remove, split or join paragraphs, import the folder again as
-a new text.
+stored text and only what differs is changed. The check comes first and lists the pages
+affected. This works only while the text has no notes, mentions or links: once something
+is marked on it, a change made outside PneuText could move it unseen, so the update is
+refused. Paragraphs must stay the same in number and order: to add, remove, split or
+join paragraphs, import the folder again as a new text.
 
 ## Keys
 

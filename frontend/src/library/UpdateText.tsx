@@ -40,7 +40,6 @@ function Report({
       </section>
     );
   }
-  const will = done ? "" : "will be ";
   return (
     <section className="report" aria-label="What differs">
       <ul>
@@ -58,30 +57,6 @@ function Report({
             {count(report.new_pages.length, "new page", "new pages")}:{" "}
             {report.new_pages[0]}
             {report.new_pages.length > 1 && ` to ${report.new_pages[report.new_pages.length - 1]}`}.
-          </li>
-        )}
-        {report.moved_passages > 0 && (
-          <li>
-            {count(report.moved_passages, "marked passage", "marked passages")} {will}shifted
-            along with {report.moved_passages === 1 ? "its" : "their"} words, reading the same
-            as before.
-          </li>
-        )}
-        {report.reworded_passages > 0 && (
-          <li>
-            {count(report.reworded_passages, "marked passage", "marked passages")}{" "}
-            {done ? "now read" : "will read"} differently, because the correction falls inside{" "}
-            {report.reworded_passages === 1 ? "it" : "them"}. Worth a look: page{" "}
-            <PageLinks versionId={versionId} pages={report.reworded_pages} />.
-          </li>
-        )}
-        {report.lost_passages > 0 && (
-          <li>
-            {count(report.lost_passages, "marked passage", "marked passages")}{" "}
-            {done ? "lost" : "will lose"} {report.lost_passages === 1 ? "its" : "their"} words
-            entirely, on page <PageLinks versionId={versionId} pages={report.lost_pages} />.{" "}
-            {report.lost_passages === 1 ? "Its note is" : "Their notes are"} kept and listed
-            in the to-do list to be placed again.
           </li>
         )}
       </ul>
@@ -134,10 +109,11 @@ export function UpdateText({ versionId }: { versionId: number }) {
           <h1 id="update-title">Update the text</h1>
           <p className="quiet">
             For when you have corrected a page file, or added pages at the end. The folder is
-            read again and compared with the text as stored; only what differs is changed,
-            and notes, links and mentions stay with their words. Paragraphs must stay the
-            same in number and order. The folder is checked first and nothing is written
-            until you choose to update.
+            read again and compared with the text as stored, and only what differs is changed.
+            This works only while the text has no notes, mentions or links: once something
+            is marked on it, a change made outside PneuText could move it unseen. Paragraphs
+            must stay the same in number and order. The folder is checked first and nothing
+            is written until you choose to update.
           </p>
           <form onSubmit={onCheck} className="form">
             <label>

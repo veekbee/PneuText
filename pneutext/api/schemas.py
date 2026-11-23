@@ -151,11 +151,6 @@ class CorpusUpdateOut(BaseModel):
     new_pages: list[int]
     changed_paragraphs: int
     new_paragraphs: int
-    moved_passages: int = Field(description="Marked passages that shifted but read the same.")
-    reworded_passages: int = Field(description="Marked passages whose own words changed.")
-    reworded_pages: list[int]
-    lost_passages: int = Field(description="Marked passages whose words are gone.")
-    lost_pages: list[int]
     problems: list[ImportProblemOut]
 
 

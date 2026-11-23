@@ -711,23 +711,6 @@
             "title": "Changed Paragraphs",
             "type": "integer"
           },
-          "lost_pages": {
-            "items": {
-              "type": "integer"
-            },
-            "title": "Lost Pages",
-            "type": "array"
-          },
-          "lost_passages": {
-            "description": "Marked passages whose words are gone.",
-            "title": "Lost Passages",
-            "type": "integer"
-          },
-          "moved_passages": {
-            "description": "Marked passages that shifted but read the same.",
-            "title": "Moved Passages",
-            "type": "integer"
-          },
           "new_pages": {
             "items": {
               "type": "integer"
@@ -746,18 +729,6 @@
             "title": "Problems",
             "type": "array"
           },
-          "reworded_pages": {
-            "items": {
-              "type": "integer"
-            },
-            "title": "Reworded Pages",
-            "type": "array"
-          },
-          "reworded_passages": {
-            "description": "Marked passages whose own words changed.",
-            "title": "Reworded Passages",
-            "type": "integer"
-          },
           "up_to_date": {
             "title": "Up To Date",
             "type": "boolean"
@@ -769,11 +740,6 @@
           "new_pages",
           "changed_paragraphs",
           "new_paragraphs",
-          "moved_passages",
-          "reworded_passages",
-          "reworded_pages",
-          "lost_passages",
-          "lost_pages",
           "problems"
         ],
         "title": "CorpusUpdateOut",
