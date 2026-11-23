@@ -10,6 +10,8 @@ from pneutext.api.schemas import (
     CorpusImportOut,
     CorpusImportPreviewOut,
     CorpusSummaryOut,
+    CorpusUpdateIn,
+    CorpusUpdateOut,
     DivisionOut,
     ImportProblemOut,
     MentionMarkOut,
@@ -23,7 +25,9 @@ from pneutext.api.schemas import (
     WorkOut,
 )
 from pneutext.services import corpus as corpus_service
+from pneutext.services import corpus_update
 from pneutext.services.corpus import CorpusImportPreview, CorpusImportRequest
+from pneutext.services.corpus_update import CorpusUpdateRequest
 from pneutext.store.corpus import DivisionRow, VersionRow
 
 router = APIRouter(prefix="/api", tags=["corpus"])
@@ -160,3 +164,21 @@ def import_corpus(body: CorpusImportIn, library: LibraryDep) -> CorpusImportOut:
         library, _request(body), allow_duplicate=body.allow_duplicate
     )
     return CorpusImportOut(version_id=version_id, **_preview_fields(preview))
+
+
+@router.post("/versions/{version_id}/update/preview", operation_id="previewCorpusUpdate")
+def preview_corpus_update(
+    version_id: int, body: CorpusUpdateIn, library: LibraryDep
+) -> CorpusUpdateOut:
+    """Compare corrected page files with the stored text, writing nothing."""
+    request = CorpusUpdateRequest(body.folder, body.file_pattern)
+    report = corpus_update.preview_update(library, version_id, request)
+    return CorpusUpdateOut.model_validate(asdict(report))
+
+
+@router.post("/versions/{version_id}/update", operation_id="updateCorpus")
+def update_corpus(version_id: int, body: CorpusUpdateIn, library: LibraryDep) -> CorpusUpdateOut:
+    """Bring the stored text into line with corrected page files; notes follow their words."""
+    request = CorpusUpdateRequest(body.folder, body.file_pattern)
+    report = corpus_update.commit_update(library, version_id, request)
+    return CorpusUpdateOut.model_validate(asdict(report))

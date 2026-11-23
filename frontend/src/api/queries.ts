@@ -10,6 +10,7 @@ import type { RowMark } from "../lib/selection";
 import {
   api,
   type CorpusImportInput,
+  type CorpusUpdateInput,
   type LegacyImportInput,
   type Note,
   type NoteCreateInput,
@@ -234,6 +235,23 @@ export function useImportCommentary(versionId: number) {
   return useMutation({
     mutationFn: (input: LegacyImportInput) => api.importCommentary(versionId, input),
     onSuccess: () => invalidateNotes(queryClient, versionId),
+  });
+}
+
+// ---- Updating the text from corrected page files -----------------------------
+
+export function usePreviewCorpusUpdate(versionId: number) {
+  return useMutation({
+    mutationFn: (input: CorpusUpdateInput) => api.previewCorpusUpdate(versionId, input),
+  });
+}
+
+export function useUpdateCorpus(versionId: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CorpusUpdateInput) => api.updateCorpus(versionId, input),
+    // The text itself moved: nothing fetched before can be trusted.
+    onSuccess: () => queryClient.invalidateQueries(),
   });
 }
 

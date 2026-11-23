@@ -1,6 +1,6 @@
 import type { VersionSummary } from "../api/client";
 import { useLibrary, useVersions } from "../api/queries";
-import { commentaryImportPath, pagePath } from "../lib/route";
+import { commentaryImportPath, pagePath, textUpdatePath } from "../lib/route";
 import { Link } from "../router";
 
 function pageRange(version: VersionSummary): string {
@@ -27,6 +27,9 @@ export function VersionList({ versions }: { versions: VersionSummary[] }) {
           </span>
           <Link className="version-action" to={commentaryImportPath(version.id)}>
             Import old commentary
+          </Link>
+          <Link className="version-action" to={textUpdatePath(version.id)}>
+            Update the text
           </Link>
         </li>
       ))}

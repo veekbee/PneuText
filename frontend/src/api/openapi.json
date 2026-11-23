@@ -673,6 +673,112 @@
         "title": "CorpusSummaryOut",
         "type": "object"
       },
+      "CorpusUpdateIn": {
+        "properties": {
+          "file_pattern": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Pattern"
+          },
+          "folder": {
+            "title": "Folder",
+            "type": "string"
+          }
+        },
+        "required": [
+          "folder"
+        ],
+        "title": "CorpusUpdateIn",
+        "type": "object"
+      },
+      "CorpusUpdateOut": {
+        "description": "What an update of the text changes. Pages and counts only, never the text.",
+        "properties": {
+          "changed_pages": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Changed Pages",
+            "type": "array"
+          },
+          "changed_paragraphs": {
+            "title": "Changed Paragraphs",
+            "type": "integer"
+          },
+          "lost_pages": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Lost Pages",
+            "type": "array"
+          },
+          "lost_passages": {
+            "description": "Marked passages whose words are gone.",
+            "title": "Lost Passages",
+            "type": "integer"
+          },
+          "moved_passages": {
+            "description": "Marked passages that shifted but read the same.",
+            "title": "Moved Passages",
+            "type": "integer"
+          },
+          "new_pages": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "New Pages",
+            "type": "array"
+          },
+          "new_paragraphs": {
+            "title": "New Paragraphs",
+            "type": "integer"
+          },
+          "problems": {
+            "items": {
+              "$ref": "#/components/schemas/ImportProblemOut"
+            },
+            "title": "Problems",
+            "type": "array"
+          },
+          "reworded_pages": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Reworded Pages",
+            "type": "array"
+          },
+          "reworded_passages": {
+            "description": "Marked passages whose own words changed.",
+            "title": "Reworded Passages",
+            "type": "integer"
+          },
+          "up_to_date": {
+            "title": "Up To Date",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "up_to_date",
+          "changed_pages",
+          "new_pages",
+          "changed_paragraphs",
+          "new_paragraphs",
+          "moved_passages",
+          "reworded_passages",
+          "reworded_pages",
+          "lost_passages",
+          "lost_pages",
+          "problems"
+        ],
+        "title": "CorpusUpdateOut",
+        "type": "object"
+      },
       "DivisionOut": {
         "properties": {
           "id": {
@@ -5703,6 +5809,112 @@
         "summary": "Get Todo List",
         "tags": [
           "review"
+        ]
+      }
+    },
+    "/api/versions/{version_id}/update": {
+      "post": {
+        "description": "Bring the stored text into line with corrected page files; notes follow their words.",
+        "operationId": "updateCorpus",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CorpusUpdateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CorpusUpdateOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Corpus",
+        "tags": [
+          "corpus"
+        ]
+      }
+    },
+    "/api/versions/{version_id}/update/preview": {
+      "post": {
+        "description": "Compare corrected page files with the stored text, writing nothing.",
+        "operationId": "previewCorpusUpdate",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CorpusUpdateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CorpusUpdateOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview Corpus Update",
+        "tags": [
+          "corpus"
         ]
       }
     }

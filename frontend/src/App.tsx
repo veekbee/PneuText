@@ -3,6 +3,7 @@ import { EntitiesView } from "./entities/EntitiesView";
 import { ExportView } from "./export/ExportView";
 import { FiguresView } from "./figures/FiguresView";
 import { ImportCommentary } from "./library/ImportCommentary";
+import { UpdateText } from "./library/UpdateText";
 import { ImportCorpus } from "./library/ImportCorpus";
 import { LibraryHome } from "./library/LibraryHome";
 import { TypesView } from "./notes/TypesView";
@@ -20,6 +21,8 @@ export function App() {
       return <ImportCorpus />;
     case "import-commentary":
       return <ImportCommentary versionId={route.versionId} />;
+    case "update-text":
+      return <UpdateText versionId={route.versionId} />;
     case "view":
       switch (route.view) {
         case "review":

@@ -836,6 +836,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/versions/{version_id}/update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Update Corpus
+         * @description Bring the stored text into line with corrected page files; notes follow their words.
+         */
+        post: operations["updateCorpus"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/versions/{version_id}/update/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview Corpus Update
+         * @description Compare corrected page files with the stored text, writing nothing.
+         */
+        post: operations["previewCorpusUpdate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1078,6 +1118,50 @@ export interface components {
             pages: number;
             /** Paragraphs */
             paragraphs: number;
+        };
+        /** CorpusUpdateIn */
+        CorpusUpdateIn: {
+            /** File Pattern */
+            file_pattern?: string | null;
+            /** Folder */
+            folder: string;
+        };
+        /**
+         * CorpusUpdateOut
+         * @description What an update of the text changes. Pages and counts only, never the text.
+         */
+        CorpusUpdateOut: {
+            /** Changed Pages */
+            changed_pages: number[];
+            /** Changed Paragraphs */
+            changed_paragraphs: number;
+            /** Lost Pages */
+            lost_pages: number[];
+            /**
+             * Lost Passages
+             * @description Marked passages whose words are gone.
+             */
+            lost_passages: number;
+            /**
+             * Moved Passages
+             * @description Marked passages that shifted but read the same.
+             */
+            moved_passages: number;
+            /** New Pages */
+            new_pages: number[];
+            /** New Paragraphs */
+            new_paragraphs: number;
+            /** Problems */
+            problems: components["schemas"]["ImportProblemOut"][];
+            /** Reworded Pages */
+            reworded_pages: number[];
+            /**
+             * Reworded Passages
+             * @description Marked passages whose own words changed.
+             */
+            reworded_passages: number;
+            /** Up To Date */
+            up_to_date: boolean;
         };
         /** DivisionOut */
         DivisionOut: {
@@ -3666,6 +3750,76 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TodoListOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    updateCorpus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorpusUpdateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CorpusUpdateOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    previewCorpusUpdate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorpusUpdateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CorpusUpdateOut"];
                 };
             };
             /** @description Validation Error */

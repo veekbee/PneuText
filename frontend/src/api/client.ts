@@ -45,6 +45,8 @@ export type MonographResult = Schemas["MonographOut"];
 export type BackupResult = Schemas["BackupOut"];
 export type LegacyImportInput = Schemas["LegacyImportIn"];
 export type LegacyReport = Schemas["LegacyReportOut"];
+export type CorpusUpdateInput = Schemas["CorpusUpdateIn"];
+export type CorpusUpdateReport = Schemas["CorpusUpdateOut"];
 export type ReportItem = Schemas["ReportItemOut"];
 
 export class ApiError extends Error {
@@ -108,6 +110,10 @@ export const api = {
     post<CorpusImportPreview>("/api/imports/corpus/preview", input),
   importCorpus: (input: CorpusImportInput) =>
     post<CorpusImportResult>("/api/imports/corpus", input),
+  previewCorpusUpdate: (versionId: number, input: CorpusUpdateInput) =>
+    post<CorpusUpdateReport>(`/api/versions/${versionId}/update/preview`, input),
+  updateCorpus: (versionId: number, input: CorpusUpdateInput) =>
+    post<CorpusUpdateReport>(`/api/versions/${versionId}/update`, input),
   previewCommentaryImport: (versionId: number, input: LegacyImportInput) =>
     post<LegacyReport>(`/api/versions/${versionId}/imports/commentary/preview`, input),
   importCommentary: (versionId: number, input: LegacyImportInput) =>

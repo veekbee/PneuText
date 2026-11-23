@@ -5,8 +5,15 @@ from __future__ import annotations
 import sqlite3
 from dataclasses import dataclass
 
-from pneutext.core.corpus import POSITION_STEP, TEXT_KINDS, ParsedCorpus
-from pneutext.store.segments import insert_segment
+from pneutext.core.corpus import (
+    POSITION_STEP,
+    TEXT_KINDS,
+    ParsedCorpus,
+    ParsedDivision,
+    ParsedLine,
+    ParsedSegment,
+)
+from pneutext.store.segments import insert_segment, update_segment_text
 
 
 @dataclass(frozen=True)
@@ -91,25 +98,132 @@ def insert_corpus(conn: sqlite3.Connection, new: NewVersion, corpus: ParsedCorpu
     )
     pagination_id = cursor.lastrowid
 
+    assert pagination_id is not None
     segment_ids: list[int] = []
     for index, segment in enumerate(corpus.segments, start=1):
         segment_id = insert_segment(
             conn, version_id, index * POSITION_STEP, segment.kind, segment.text
         )
         segment_ids.append(segment_id)
-        conn.executemany(
-            "INSERT INTO line (pagination_id, segment_id, start_offset, page, line_no)"
-            " VALUES (?, ?, ?, ?, ?)",
-            [
-                (pagination_id, segment_id, line.start_offset, line.page, line.line_no)
-                for line in segment.lines
-            ],
-        )
-    conn.executemany(
-        "INSERT INTO division (version_id, kind, label, first_segment_id) VALUES (?, ?, ?, ?)",
-        [(version_id, d.kind, d.label, segment_ids[d.first_segment]) for d in corpus.divisions],
-    )
+        _insert_lines(conn, pagination_id, segment_id, segment.lines)
+    for division in corpus.divisions:
+        insert_division(conn, version_id, division, segment_ids[division.first_segment])
     return version_id
+
+
+def _insert_lines(
+    conn: sqlite3.Connection, pagination_id: int, segment_id: int, lines: list[ParsedLine]
+) -> None:
+    conn.executemany(
+        "INSERT INTO line (pagination_id, segment_id, start_offset, page, line_no)"
+        " VALUES (?, ?, ?, ?, ?)",
+        [(pagination_id, segment_id, line.start_offset, line.page, line.line_no) for line in lines],
+    )
+
+
+def insert_division(
+    conn: sqlite3.Connection, version_id: int, division: ParsedDivision, first_segment_id: int
+) -> None:
+    conn.execute(
+        "INSERT INTO division (version_id, kind, label, first_segment_id) VALUES (?, ?, ?, ?)",
+        (version_id, division.kind, division.label, first_segment_id),
+    )
+
+
+@dataclass(frozen=True)
+class StoredSegment:
+    """A segment as stored, with its print lines: what an update compares against."""
+
+    id: int
+    position: int
+    kind: str
+    text: str
+    lines: list[ParsedLine]
+
+
+@dataclass(frozen=True)
+class StoredDivision:
+    id: int
+    kind: str
+    label: str
+    first_segment_id: int
+
+
+def stored_segments(
+    conn: sqlite3.Connection, version_id: int, pagination_id: int
+) -> list[StoredSegment]:
+    """Every segment of a version in reading order, with its lines."""
+    lines: dict[int, list[ParsedLine]] = {}
+    for row in conn.execute(
+        "SELECT segment_id, start_offset, page, line_no FROM line"
+        " WHERE pagination_id = ? ORDER BY segment_id, start_offset",
+        (pagination_id,),
+    ):
+        lines.setdefault(row["segment_id"], []).append(
+            ParsedLine(row["start_offset"], row["page"], row["line_no"])
+        )
+    rows = conn.execute(
+        "SELECT id, position, kind, text FROM segment WHERE version_id = ? ORDER BY position",
+        (version_id,),
+    ).fetchall()
+    return [
+        StoredSegment(
+            row["id"], row["position"], row["kind"], row["text"], lines.get(row["id"], [])
+        )
+        for row in rows
+    ]
+
+
+def stored_divisions(conn: sqlite3.Connection, version_id: int) -> list[StoredDivision]:
+    rows = conn.execute(
+        "SELECT d.id, d.kind, d.label, d.first_segment_id FROM division d"
+        " JOIN segment s ON s.id = d.first_segment_id"
+        " WHERE d.version_id = ? ORDER BY s.position, d.id",
+        (version_id,),
+    ).fetchall()
+    return [StoredDivision(**dict(row)) for row in rows]
+
+
+def begin_edit(conn: sqlite3.Connection, version_id: int, content_hash: str) -> int:
+    """Count one more edit to a version's text and record the files it now matches."""
+    conn.execute(
+        "UPDATE version SET edit_seq = edit_seq + 1, content_hash = ? WHERE id = ?",
+        (content_hash, version_id),
+    )
+    return conn.execute("SELECT edit_seq FROM version WHERE id = ?", (version_id,)).fetchone()[0]
+
+
+def rewrite_segment(
+    conn: sqlite3.Connection,
+    pagination_id: int,
+    segment_id: int,
+    segment: ParsedSegment,
+    seq: int,
+    text_changed: bool,
+) -> None:
+    """Give a stored segment the text and print lines of a freshly parsed one."""
+    if text_changed:
+        update_segment_text(conn, segment_id, segment.text, seq)
+    conn.execute(
+        "DELETE FROM line WHERE pagination_id = ? AND segment_id = ?", (pagination_id, segment_id)
+    )
+    _insert_lines(conn, pagination_id, segment_id, segment.lines)
+
+
+def append_segment(
+    conn: sqlite3.Connection,
+    version_id: int,
+    pagination_id: int,
+    position: int,
+    segment: ParsedSegment,
+) -> int:
+    segment_id = insert_segment(conn, version_id, position, segment.kind, segment.text)
+    _insert_lines(conn, pagination_id, segment_id, segment.lines)
+    return segment_id
+
+
+def relabel_division(conn: sqlite3.Connection, division_id: int, label: str) -> None:
+    conn.execute("UPDATE division SET label = ? WHERE id = ?", (label, division_id))
 
 
 def find_version_by_hash(conn: sqlite3.Connection, content_hash: str) -> int | None:

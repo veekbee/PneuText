@@ -49,6 +49,13 @@ names carry the page number (by default `…_corp_p045.txt`); the pattern can be
 in the form. Blank lines separate paragraphs. A file that does not end with a blank line
 runs its last paragraph on to the next page.
 
+When you correct a page file, or add pages at the end, choose **Update the text** beside
+the work on the library page and give the same folder. The files are compared with the
+stored text and only what differs is changed; notes, links and mentions stay with their
+words. The check comes first and lists the pages affected. Paragraphs must stay the same
+in number and order: to add, remove, split or join paragraphs, import the folder again as
+a new text.
+
 ## Keys
 
 | Key | Action |

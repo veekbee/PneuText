@@ -138,6 +138,27 @@ class ImportProblemOut(BaseModel):
     message: str
 
 
+class CorpusUpdateIn(BaseModel):
+    folder: str
+    file_pattern: str | None = None
+
+
+class CorpusUpdateOut(BaseModel):
+    """What an update of the text changes. Pages and counts only, never the text."""
+
+    up_to_date: bool
+    changed_pages: list[int]
+    new_pages: list[int]
+    changed_paragraphs: int
+    new_paragraphs: int
+    moved_passages: int = Field(description="Marked passages that shifted but read the same.")
+    reworded_passages: int = Field(description="Marked passages whose own words changed.")
+    reworded_pages: list[int]
+    lost_passages: int = Field(description="Marked passages whose words are gone.")
+    lost_pages: list[int]
+    problems: list[ImportProblemOut]
+
+
 class CorpusSummaryOut(BaseModel):
     pages: int
     lines: int

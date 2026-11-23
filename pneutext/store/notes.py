@@ -143,6 +143,58 @@ def insert_anchor(
     return cursor.lastrowid
 
 
+@dataclass(frozen=True)
+class AnchorPlace:
+    id: int
+    start_segment_id: int
+    start_offset: int
+    end_segment_id: int
+    end_offset: int
+    exact: str
+    status: str
+    marks_words: bool  # False for a note on a whole page or chapter
+
+
+def version_anchors(conn: sqlite3.Connection, version_id: int) -> list[AnchorPlace]:
+    """Every stored span over a version's text, whatever it belongs to."""
+    rows = conn.execute(
+        "SELECT k.id, k.start_segment_id, k.start_offset, k.end_segment_id, k.end_offset,"
+        " k.exact, k.status, COALESCE(a.scope, 'span') = 'span' AS marks_words"
+        " FROM anchor k LEFT JOIN annotation a ON a.anchor_id = k.id"
+        " WHERE k.version_id = ? ORDER BY k.id",
+        (version_id,),
+    ).fetchall()
+    return [AnchorPlace(**dict(row)) for row in rows]
+
+
+def relocate_anchor(
+    conn: sqlite3.Connection,
+    anchor_id: int,
+    start_offset: int,
+    end_offset: int,
+    quote: AnchorQuote | None,
+) -> None:
+    """Put an anchor where its words went after an edit to the text.
+
+    With no ``quote`` the words are gone: the anchor is kept and marked orphaned, with
+    its old quotation, so that it can be found and placed again by hand.
+    """
+    if quote is None:
+        conn.execute(
+            "UPDATE anchor SET start_offset = ?, end_offset = ?, status = 'orphaned',"
+            " resolved_seq = (SELECT edit_seq FROM version WHERE id = anchor.version_id)"
+            " WHERE id = ?",
+            (start_offset, end_offset, anchor_id),
+        )
+        return
+    conn.execute(
+        "UPDATE anchor SET start_offset = ?, end_offset = ?, exact = ?, prefix = ?, suffix = ?,"
+        " resolved_seq = (SELECT edit_seq FROM version WHERE id = anchor.version_id)"
+        " WHERE id = ?",
+        (start_offset, end_offset, quote.exact, quote.prefix, quote.suffix, anchor_id),
+    )
+
+
 def move_anchor(
     conn: sqlite3.Connection,
     anchor_id: int,

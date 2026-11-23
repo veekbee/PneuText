@@ -87,13 +87,18 @@ def validate_span(
         raise InvalidInput("The passage reaches outside the text. Select it again.")
     if len(segments) == 1 and end_offset <= start_offset:
         raise InvalidInput("The passage is empty. Select at least one character.")
-    stored = quote(segments, start_offset, end_offset)
-    if stored != exact:
+    stored = requote(segments, start_offset, end_offset)
+    if stored.exact != exact:
         raise InvalidInput(_MISMATCH)
+    return stored
+
+
+def requote(segments: list[SegmentText], start_offset: int, end_offset: int) -> AnchorQuote:
+    """What to store with a span: its text as it stands, and the context each side."""
     return AnchorQuote(
-        exact=stored,
-        prefix=first.text[max(0, start_offset - CONTEXT) : start_offset],
-        suffix=last.text[end_offset : end_offset + CONTEXT],
+        exact=quote(segments, start_offset, end_offset),
+        prefix=segments[0].text[max(0, start_offset - CONTEXT) : start_offset],
+        suffix=segments[-1].text[end_offset : end_offset + CONTEXT],
     )
 
 
