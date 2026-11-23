@@ -14,9 +14,15 @@ const EMPTY: CorpusImportInput = {
   language: "",
   file_pattern: null,
   allow_duplicate: false,
+  source_format: "paged",
+  first_page: 1,
+  page_break: null,
+  line_width: null,
 };
 
-const DEFAULT_PATTERN = "_corp_p(?P<page>\\d+)\\.txt$";
+const DEFAULT_PATTERN = "_corp_p(?P<page>\\d+)(?:_[A-Za-z0-9]+)?\\.txt$";
+const DEFAULT_PAGE_BREAK = "\\{p\\d*\\}";
+const DEFAULT_LINE_WIDTH = 65;
 
 function Summary({ preview }: { preview: CorpusImportPreview }) {
   const { summary, problems } = preview;
@@ -69,6 +75,7 @@ export function ImportCorpus() {
   const preview = usePreviewCorpusImport();
   const commit = useImportCorpus();
   const checked = preview.data;
+  const tagged = input.source_format === "tagged";
   const error = commit.error ?? preview.error;
 
   function set<K extends keyof CorpusImportInput>(key: K, value: CorpusImportInput[K]): void {
@@ -105,20 +112,72 @@ export function ImportCorpus() {
       <main className="stage">
         <section className="panel" aria-labelledby="import-title">
           <h1 id="import-title">Import a corpus</h1>
-          <p className="quiet">
-            A corpus is a folder of text files, one per print page, with one print line per
-            line and a blank line between paragraphs. Nothing is changed in that folder.
-          </p>
           <form onSubmit={onCheck} className="form">
+            <fieldset className="choice">
+              <legend>The text is</legend>
+              <label>
+                <input
+                  type="radio"
+                  name="source-format"
+                  checked={!tagged}
+                  onChange={() => set("source_format", "paged")}
+                />
+                A folder of page files
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="source-format"
+                  checked={tagged}
+                  onChange={() => set("source_format", "tagged")}
+                />
+                One tagged file
+              </label>
+            </fieldset>
+            <p className="quiet">
+              {tagged
+                ? "One file holding the whole text, a paragraph per line, with a marker such as {p25} wherever a print page ends, and tags such as <chapter> and {section_break}. It records pages but not print lines, so lines are estimated. Nothing is changed in the file."
+                : "A folder of text files, one per print page, with one print line per line and a blank line between paragraphs. Nothing is changed in that folder."}
+            </p>
             <label>
-              Folder of page files
+              {tagged ? "Text file" : "Folder of page files"}
               <input
                 required
                 value={input.folder}
-                placeholder="/Users/you/Documents/book-pages"
+                placeholder={
+                  tagged ? "/Users/you/Documents/book.txt" : "/Users/you/Documents/book-pages"
+                }
                 onChange={(event) => set("folder", event.target.value)}
               />
             </label>
+            {tagged && (
+              <>
+                <label>
+                  Number of the first page in the file
+                  <input
+                    type="number"
+                    value={input.first_page}
+                    onChange={(event) => set("first_page", Number(event.target.value))}
+                  />
+                  <small className="quiet">
+                    Pages are counted from here, one for each page marker.
+                  </small>
+                </label>
+                <label>
+                  Characters per print line
+                  <input
+                    type="number"
+                    min={20}
+                    value={input.line_width ?? DEFAULT_LINE_WIDTH}
+                    onChange={(event) => set("line_width", Number(event.target.value))}
+                  />
+                  <small className="quiet">
+                    Used to estimate where lines break. Page numbers will match the print
+                    edition; line numbers will not.
+                  </small>
+                </label>
+              </>
+            )}
             <label>
               Title
               <input
@@ -154,20 +213,35 @@ export function ImportCorpus() {
                 onChange={(event) => set("label", event.target.value)}
               />
             </label>
-            <details>
-              <summary>File names</summary>
-              <label>
-                Pattern that finds the page number in a file name
-                <input
-                  value={input.file_pattern ?? ""}
-                  placeholder={DEFAULT_PATTERN}
-                  spellCheck={false}
-                  onChange={(event) => set("file_pattern", event.target.value || null)}
-                />
-              </label>
-            </details>
+            {tagged ? (
+              <details>
+                <summary>Page marker</summary>
+                <label>
+                  Pattern that matches the end-of-page marker
+                  <input
+                    value={input.page_break ?? ""}
+                    placeholder={DEFAULT_PAGE_BREAK}
+                    spellCheck={false}
+                    onChange={(event) => set("page_break", event.target.value || null)}
+                  />
+                </label>
+              </details>
+            ) : (
+              <details>
+                <summary>File names</summary>
+                <label>
+                  Pattern that finds the page number in a file name
+                  <input
+                    value={input.file_pattern ?? ""}
+                    placeholder={DEFAULT_PATTERN}
+                    spellCheck={false}
+                    onChange={(event) => set("file_pattern", event.target.value || null)}
+                  />
+                </label>
+              </details>
+            )}
             <button type="submit" disabled={preview.isPending}>
-              {preview.isPending ? "Checking…" : "Check the folder"}
+              {preview.isPending ? "Checking…" : tagged ? "Check the file" : "Check the folder"}
             </button>
           </form>
           {error && (

@@ -125,3 +125,52 @@ describe("Import a corpus", () => {
     expect(screen.queryByRole("heading", { name: "What was found" })).toBeNull();
   });
 });
+
+describe("Import one tagged file", () => {
+  it("asks for the file, the first page and the line width, and says lines are estimated", async () => {
+    const sent: unknown[] = [];
+    mockApi({
+      "POST /api/imports/corpus/preview": (body) => {
+        sent.push(body);
+        return {
+          body: {
+            summary: { ...SUMMARY, first_page: 0, last_page: 351, pages: 351 },
+            problems: [
+              {
+                code: "estimated_lines",
+                page: null,
+                line: null,
+                message: "This file marks pages but not print lines. Lines were filled to 66 characters.",
+              },
+            ],
+            existing_version_id: null,
+          },
+        };
+      },
+    });
+    setUrl("/import");
+    renderWithQuery(<App />);
+    // The page-file fields are shown until the other format is chosen.
+    expect(screen.getByLabelText("Folder of page files")).toBeTruthy();
+    fireEvent.click(screen.getByLabelText("One tagged file"));
+    expect(screen.queryByLabelText("Folder of page files")).toBeNull();
+    fireEvent.change(screen.getByLabelText("Text file"), { target: { value: "/books/whole.txt" } });
+    fireEvent.change(screen.getByLabelText(/Number of the first page/), { target: { value: "0" } });
+    fireEvent.change(screen.getByLabelText(/Characters per print line/), { target: { value: "66" } });
+    fireEvent.change(screen.getByLabelText("Title"), { target: { value: "The Fixture Book" } });
+    fireEvent.change(screen.getByLabelText(/^Short code/), { target: { value: "fx" } });
+    fireEvent.click(screen.getByRole("button", { name: "Check the file" }));
+
+    expect(await screen.findByText(/marks pages but not print lines/)).toBeTruthy();
+    expect(screen.getByText("(0–351)")).toBeTruthy();
+    expect(sent).toEqual([
+      expect.objectContaining({
+        folder: "/books/whole.txt",
+        source_format: "tagged",
+        first_page: 0,
+        line_width: 66,
+        page_break: null,
+      }),
+    ]);
+  });
+});

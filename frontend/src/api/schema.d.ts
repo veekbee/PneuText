@@ -1023,6 +1023,12 @@ export interface components {
             author: string;
             /** File Pattern */
             file_pattern?: string | null;
+            /**
+             * First Page
+             * @description Tagged: the page the file begins on.
+             * @default 1
+             */
+            first_page: number;
             /** Folder */
             folder: string;
             /**
@@ -1035,6 +1041,23 @@ export interface components {
              * @default
              */
             language: string;
+            /**
+             * Line Width
+             * @description Tagged: characters per estimated print line.
+             */
+            line_width?: number | null;
+            /**
+             * Page Break
+             * @description Tagged: a pattern matching the end-of-page marker.
+             */
+            page_break?: string | null;
+            /**
+             * Source Format
+             * @description A folder of page files, or the whole text in one tagged file.
+             * @default paged
+             * @enum {string}
+             */
+            source_format: "paged" | "tagged";
             /** Title */
             title: string;
             /** Work Code */

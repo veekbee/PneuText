@@ -11,8 +11,9 @@ from pneutext.core import shape
 from pneutext.core.corpus import TEXT_KINDS, CorpusSummary, ImportProblem
 from pneutext.core.errors import Conflict, InvalidInput, NotFound
 from pneutext.core.shape import ShapeHighlight, ShapeLine
-from pneutext.importers import paged_corpus
+from pneutext.importers import paged_corpus, tagged_text
 from pneutext.importers.paged_corpus import CorpusFormat
+from pneutext.importers.tagged_text import TaggedFormat
 from pneutext.services import entities as entities_service
 from pneutext.services import notes as notes_service
 from pneutext.services.entities import MentionMark
@@ -34,6 +35,12 @@ class CorpusImportRequest:
     label: str = ""
     language: str = ""
     file_pattern: str | None = None
+    # "paged": a folder of page files. "tagged": the whole text in one tagged file, in
+    # which case ``folder`` is that file and the three settings below apply.
+    source_format: str = "paged"
+    first_page: int = 1
+    page_break: str | None = None
+    line_width: int | None = None
 
 
 @dataclass(frozen=True)
@@ -81,7 +88,11 @@ class PageShape:
 
 
 def _validated(request: CorpusImportRequest) -> CorpusImportRequest:
+    if request.source_format not in ("paged", "tagged"):
+        raise InvalidInput("A corpus is a folder of page files, or one tagged file.")
     if not request.folder.strip():
+        if request.source_format == "tagged":
+            raise InvalidInput("Give the file that holds the text.")
         raise InvalidInput("Give the folder that holds the page files.")
     if not _WORK_CODE.fullmatch(request.work_code):
         raise InvalidInput(
@@ -94,6 +105,14 @@ def _validated(request: CorpusImportRequest) -> CorpusImportRequest:
 
 
 def _parse(request: CorpusImportRequest) -> tuple[paged_corpus.ParsedCorpus, str]:
+    if request.source_format == "tagged":
+        source = tagged_text.read_file(Path(request.folder.strip()).expanduser())
+        tagged = TaggedFormat(
+            page_break=request.page_break or tagged_text.DEFAULT_PAGE_BREAK,
+            first_page=request.first_page,
+            line_width=request.line_width or tagged_text.DEFAULT_LINE_WIDTH,
+        )
+        return tagged_text.parse_text(source, tagged), tagged_text.file_hash(source)
     fmt = CorpusFormat(file_pattern=request.file_pattern or paged_corpus.DEFAULT_FILE_PATTERN)
     folder = Path(request.folder.strip()).expanduser()
     sources = paged_corpus.read_folder(folder, fmt.file_pattern)
@@ -129,7 +148,11 @@ def commit_import(
                 author=request.author.strip(),
                 label=request.label.strip() or "First import",
                 language=request.language.strip(),
-                source_format=paged_corpus.SOURCE_FORMAT,
+                source_format=(
+                    tagged_text.SOURCE_FORMAT
+                    if request.source_format == "tagged"
+                    else paged_corpus.SOURCE_FORMAT
+                ),
                 content_hash=content_hash,
             ),
             corpus,

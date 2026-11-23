@@ -129,6 +129,17 @@ class CorpusImportIn(BaseModel):
     language: str = ""
     file_pattern: str | None = None
     allow_duplicate: bool = False
+    source_format: Literal["paged", "tagged"] = Field(
+        default="paged",
+        description="A folder of page files, or the whole text in one tagged file.",
+    )
+    first_page: int = Field(default=1, description="Tagged: the page the file begins on.")
+    page_break: str | None = Field(
+        default=None, description="Tagged: a pattern matching the end-of-page marker."
+    )
+    line_width: int | None = Field(
+        default=None, description="Tagged: characters per estimated print line."
+    )
 
 
 class ImportProblemOut(BaseModel):
