@@ -10,7 +10,7 @@ test("import the fixture book and turn its pages", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "This library is empty" })).toBeVisible();
 
   await page.getByRole("link", { name: "Import a corpus" }).click();
-  await page.getByLabel("Folder of page files").fill(BOOK);
+  await page.getByRole("textbox", { name: "Folder of page files" }).fill(BOOK);
   await page.getByLabel("Title").fill("The Fixture Book");
   await page.getByLabel("Author").fill("Nobody");
   await page.getByLabel("Short code").fill("fx");
